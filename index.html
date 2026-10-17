@@ -345,7 +345,66 @@ input,select{background:#221e29;color:#f2edf3;border:1px solid #42394a}footer{co
 /* Mobile compact navigation and batch controls */
 header{padding:7px 10px;gap:6px;min-height:48px}header h1{font-size:16px;letter-spacing:-.4px}header .pbl{width:21px;height:21px;margin-right:5px}header button{padding:6px 8px;font-size:12px}header .coins{padding:5px 7px;font-size:11px}header #gs{padding:6px 8px;min-width:90px;font-size:12px}body:has(#stage:not(.hidden)) header{transform:translateY(-110%);pointer-events:none}body:has(#stage:not(.hidden)) main{opacity:.45}header{transition:transform .22s ease} .qty-line{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:8px;margin:8px 0}.qty-line button{min-width:38px}.qty-line strong{min-width:25px;text-align:center}.ky-extra{display:grid;gap:5px;margin-top:10px}.batch-progress{font-weight:800;color:var(--ac)}
 @media(max-width:640px){header{gap:4px;padding:5px 7px}header h1{font-size:14px}header .coins{font-size:10px;max-width:45vw;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}header #gs{order:5;width:100%;flex-basis:100%;font-size:12px}header .ky-notif{font-size:0;padding:5px}header .ky-notif:before{content:'🔔';font-size:15px}#stage .sbox{max-width:100vw;padding:10px}#stage{padding:env(safe-area-inset-top) 4px env(safe-area-inset-bottom)}}
-#n-ach{position:relative;white-space:nowrap}#ach-count{display:inline-flex;align-items:center;justify-content:center;min-width:17px;height:17px;padding:0 4px;background:#e10600;color:white;border-radius:12px;font-size:10px;font-weight:800;margin-left:4px}#ach-count:empty{display:none}</style></head><body class="dos">
+#n-ach{position:relative;white-space:nowrap}#ach-count{display:inline-flex;align-items:center;justify-content:center;min-width:17px;height:17px;padding:0 4px;background:#e10600;color:white;border-radius:12px;font-size:10px;font-weight:800;margin-left:4px}#ach-count:empty{display:none}</style>
+<style>
+.pm-new-badge{position:absolute;top:5px;left:5px;z-index:4;background:#df252d;color:white;font-size:9px;font-weight:900;letter-spacing:.4px;border-radius:6px;padding:4px 5px;box-shadow:0 2px 9px #0009;pointer-events:none}
+.pm-master{width:100%;margin-top:8px;font-size:11px;color:#bbb}.pm-master-track{height:6px;background:#383838;border-radius:8px;overflow:hidden;margin-top:5px}.pm-master-track i{display:block;height:100%;background:#d82c36;border-radius:8px}.pm-master-label{white-space:nowrap;font-size:12px}
+.pm-last-suspense{animation:pmSuspense 1.6s ease-in-out infinite;isolation:isolate}.pm-last-suspense .stack-front{transition:filter .4s}
+.pm-hit-glow::after{content:'';position:absolute;inset:-8px;border-radius:15px;pointer-events:none;z-index:5;box-shadow:0 0 20px 6px #f8d75b,0 0 42px 10px #ffd44b77;animation:pmGlow 1.1s ease-in-out infinite alternate}
+.pm-hit-glow .stack-front{filter:brightness(1.15) saturate(1.18)}
+@keyframes pmSuspense{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-5px) scale(1.025)}}
+@keyframes pmGlow{from{opacity:.5;box-shadow:0 0 10px 3px #ffe36c}to{opacity:1;box-shadow:0 0 25px 8px #ffe36c,0 0 55px 15px #ffcf4977}}
+@media(prefers-reduced-motion:reduce){.pm-last-suspense,.pm-hit-glow::after{animation:none}}
+</style>
+<style>
+/* Le reflet apparaît sur le petit bord de la carte arrière dès l'ouverture. */
+.real-stack.pm-rainbow-peek .stack-back{
+  background:linear-gradient(145deg,#203a86 8%,#8354ce 29%,#38c8e9 48%,#f6d96d 66%,#d36bd5 83%,#304b8a);
+  background-size:220% 220%;
+  animation:pmRainbowEdge 3s linear infinite;
+  box-shadow:0 0 8px 2px #8ce6ff77,0 9px 22px #0008;
+}
+@keyframes pmRainbowEdge{0%{background-position:0% 50%}100%{background-position:100% 50%}}
+.real-stack.pm-last-hidden .stack-front{opacity:0!important;transform:translateY(12px) scale(.96)}
+.real-stack.pm-last-hidden::before{
+  content:'?';position:absolute;inset:0;z-index:3;display:grid;place-items:center;
+  color:#f8f8ff;font-size:65px;font-weight:900;border-radius:12px;
+  background:linear-gradient(135deg,#101b3e,#344b86,#17203e);
+  box-shadow:0 8px 28px #0009;animation:pmLastPulse .7s ease-in-out infinite alternate;
+}
+.real-stack.pm-last-revealed .stack-front{animation:pmFinalReveal .65s cubic-bezier(.2,.8,.2,1) both}
+@keyframes pmLastPulse{from{transform:scale(.97);filter:brightness(.85)}to{transform:scale(1.02);filter:brightness(1.2)}}
+@keyframes pmFinalReveal{from{opacity:0;transform:translateY(25px) scale(.92)}to{opacity:1;transform:translateY(0) scale(1)}}
+@media(prefers-reduced-motion:reduce){.real-stack.pm-rainbow-peek .stack-back,.real-stack.pm-last-hidden::before,.real-stack.pm-last-revealed .stack-front{animation:none}}
+</style>
+<style>
+/* Révélations graduées : effets limités à la dernière carte */
+.pm-reveal-stage{position:relative;isolation:isolate}.pm-reveal-stage::after{content:"";position:absolute;inset:-13px;border-radius:18px;pointer-events:none;z-index:6;opacity:0}
+.pm-reveal-stage.pm-fx-rare::after,.pm-reveal-stage.pm-fx-holo::after{background:linear-gradient(120deg,transparent 30%,#fff9 48%,transparent 62%);background-size:250% 100%;animation:pmSweep .9s ease-out both;opacity:1}
+.pm-reveal-stage.pm-fx-double::after{box-shadow:0 0 23px 5px #83bfff;animation:pmHalo 1.3s ease-out both}
+.pm-reveal-stage.pm-fx-AR::after{background:linear-gradient(110deg,transparent 24%,#f48bff88 40%,#8bf7ff99 50%,#ffda8a88 60%,transparent 76%);background-size:240% 100%;animation:pmSweep 1.7s ease-out both;opacity:1}
+.pm-reveal-stage.pm-fx-SAR::after{box-shadow:0 0 32px 9px #d49bff;animation:pmHalo 2.2s ease-out both}
+.pm-reveal-stage.pm-fx-secret::after{box-shadow:0 0 34px 10px #ffda69;animation:pmHalo 2.7s ease-out both}
+.pm-reveal-stage.pm-fx-double .stack-front{animation:pmPop 1.3s ease-out both}
+.pm-reveal-stage.pm-fx-SAR .stack-front,.pm-reveal-stage.pm-fx-secret .stack-front{animation:pmPop 2.1s ease-out both}
+.pm-particle{position:absolute;top:50%;left:50%;width:6px;height:6px;border-radius:50%;z-index:8;pointer-events:none;animation:pmParticle var(--dur,1.2s) ease-out forwards;background:var(--particle,#fff)}
+@keyframes pmSweep{from{background-position:100% 0}to{background-position:-100% 0}}
+@keyframes pmHalo{0%{opacity:0;transform:scale(.93)}30%{opacity:1}100%{opacity:0;transform:scale(1.13)}}
+@keyframes pmPop{0%{transform:scale(.94);filter:brightness(.65)}40%{transform:scale(1.045);filter:brightness(1.45)}100%{transform:scale(1);filter:brightness(1)}}
+@keyframes pmParticle{0%{opacity:1;transform:translate(-50%,-50%) scale(.3)}100%{opacity:0;transform:translate(calc(-50% + var(--dx)),calc(-50% + var(--dy))) scale(1.1)}}
+@media(prefers-reduced-motion:reduce){.pm-reveal-stage::after,.pm-reveal-stage .stack-front,.pm-particle{animation:none!important}}
+</style><style>
+/* Toutes les cartes : masque noir épuré avant révélation, sans point d’interrogation. */
+.real-stack.pm-minimal-common.pm-last-hidden::before{
+ content:""!important;background:#080808!important;border:1px solid #252525;
+ box-shadow:0 8px 24px #0008;animation:pmMinimalBlack 1.3s ease-in-out infinite alternate;
+}
+.real-stack.pm-minimal-common.pm-last-suspense{animation:none}
+@keyframes pmMinimalBlack{from{opacity:.96;filter:brightness(.9)}to{opacity:1;filter:brightness(1.1)}}
+@media(prefers-reduced-motion:reduce){.real-stack.pm-minimal-common.pm-last-hidden::before{animation:none}}
+.real-stack.pm-no-fx .stack-front,.real-stack.pm-no-fx .stack-back{animation:none!important;transition:none!important}
+.real-stack.pm-no-fx::before,.real-stack.pm-no-fx::after{animation:none!important;transition:none!important}
+</style></head><body class="dos">
 <header>
 <h1><i class="pbl"></i>PokéMaster Set</h1>
 <button id="menu-toggle" class="g" type="button" aria-label="Ouvrir le menu" aria-expanded="false" onclick="toggleMenu()"><span></span><span></span><span></span></button><nav id="main-nav"><button class="g" id="n-home" onclick="show('home')">Accueil</button><button class="g" id="n-shop" onclick="show('shop')">Boutique</button><button class="g" id="n-coll" onclick="show('coll')">Collection</button><button class="g" id="n-ach" onclick="show('ach')">Succès <span id="ach-count" class="badge" aria-label="Récompenses de succès à récupérer"></span></button><button class="g" id="n-profile" onclick="show('profile')">Mon profil</button></nav>
@@ -390,9 +449,9 @@ function tierOf(r){r=(r||'').toLowerCase();
 const API='https://api.tcgdex.net/v2/fr',$=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const j=async u=>{const r=await fetch(u);if(!r.ok)throw Error(r.status);return r.json()};
-let S=JSON.parse(localStorage.getItem('wmp')||'null')||{coins:CONFIG.start,daily:'',owned:{}};S.meta??={};S.chase??={};S.mine??=[];S.stock??={};S.st??={open:0,sold:0,trades:0,godp:0};S.cl??={};S.nt??={};S.notif??=[];S.myTr??=[];S.salon??=[];S.free??=0;
-let save=()=>{checkAch();localStorage.setItem('wmp',JSON.stringify(S));head()};
-const head=()=>{$('#coins').textContent=S.coins;$('#uniq').textContent=Object.keys(S.owned).length;$('#val').textContent=Object.entries(S.owned).reduce((a,[id,n])=>S.meta[id]?a+n*value(cm(id,S.meta[id])):a,0);(()=>{const b=$('#ach-count');if(b){const n=ACH().filter(a=>a.cur>=a.goal&&!S.cl[a.id]).length;b.textContent=n||'';b.title=n?n+' récompense(s) à récupérer':'Aucune récompense à récupérer';}})()};
+let S=JSON.parse(localStorage.getItem('wmp')||'null')||{coins:CONFIG.start,daily:'',owned:{}};S.meta??={};S.chase??={};S.mine??=[];S.stock??={};S.st??={open:0,sold:0,trades:0,godp:0};S.cl??={};S.nt??={};S.notif??=[];S.myTr??=[];S.salon??=[];S.free??=0;if(!Number.isFinite(S.coins)||S.coins<0)S.coins=0;
+let save=()=>{if(!Number.isFinite(S.coins)||S.coins<0)S.coins=0;checkAch();localStorage.setItem('wmp',JSON.stringify(S));head()};
+const head=()=>{if(!Number.isFinite(S.coins)||S.coins<0)S.coins=0;$('#coins').textContent=S.coins;$('#uniq').textContent=Object.keys(S.owned).length;$('#val').textContent=Object.entries(S.owned).reduce((a,[id,n])=>S.meta[id]?a+n*value(cm(id,S.meta[id])):a,0);(()=>{const b=$('#ach-count');if(b){const n=ACH().filter(a=>a.cur>=a.goal&&!S.cl[a.id]).length;b.textContent=n||'';b.title=n?n+' récompense(s) à récupérer':'Aucune récompense à récupérer';}})()};
 function toast(m){let t=$('#toast');t&&t.remove();t=document.createElement('div');t.id='toast';t.textContent=m;document.body.appendChild(t);setTimeout(()=>t.remove(),3500)}
 const cimg=(c,q='low')=>(c.image?`<img loading="lazy" decoding="async" alt="${esc(c.name)}" src="${c.image}/${q}.webp" onerror="this.style.display='none';this.nextSibling.style.display='flex'">`:'')+`<div class="ph" style="display:${c.image?'none':'flex'}">${esc(c.name)}<small>Image indisponible</small></div>`;
 const logo=s=>s.logo?`<img loading="lazy" alt="" src="${s.logo}.png" onerror="this.style.display='none'">`:'';
@@ -512,11 +571,11 @@ async function gsearch(q){q=q.trim();if(!q)return;vw='search';['home','shop','co
   $('#app').innerHTML=`<div class="crumb">Résultats pour « ${esc(q)} »</div><div class="cards">${r.map(c=>`<div class="tc ${S.owned[c.id]?'':'off'}" onclick="detail('${c.id}')">${cimg(c)}<div>${esc(c.name)}<br><small>${esc(c.id)}${S.owned[c.id]?' · ×'+S.owned[c.id]:''}</small></div></div>`).join('')||'<p class="note">Aucune carte trouvée dans les extensions du jeu.</p>'}</div>`}catch(e){$('#app').innerHTML=errBox()}}
 /* ===== BOOSTER ===== */
 let cur=null,rv=null;
-const boxPrice=(id,n)=>Math.round(price(id)*n*({1:1,9:.88,36:.78}[n]));
+const boxPrice=(id,n)=>Number.isInteger(n)&&n>=1&&n<=99?Math.round(price(id)*n):NaN;
 const limitOf=id=>{const p=price(id);return p>=400?2:p>=200?3:p>=90?5:Infinity};
 function sold(id){const d=new Date().toDateString();if(!S.day||S.day.d!=d)S.day={d,b:{}};return S.day.b[id]||0}
 const left=id=>limitOf(id)-sold(id);
-function buy(id,n){if(locked(SETS.find(s=>s.id===id)||BASE))return toast('Extension verrouillée : termine des Master Sets.');const p=boxPrice(id,n);if(n>left(id))return toast(`Stock limité : il reste ${left(id)} booster(s) aujourd’hui pour cette extension.`);if(S.coins<p)return toast(`Il te manque ${p-S.coins} PokéCoins.`);S.coins-=p;S.day.b[id]=sold(id)+n;S.stock[id]=(S.stock[id]||0)+n;save();refresh();toast(`+${n} booster(s) ajouté(s) à ton stock`)}
+function buy(id,n){if(locked(SETS.find(s=>s.id===id)||BASE))return toast('Extension verrouillée : termine des Master Sets.');const p=boxPrice(id,n);if(!Number.isFinite(p)||p<=0)return toast('Quantité ou prix invalide.');if(!Number.isFinite(S.coins)||S.coins<0)return toast('Solde invalide : recharge ton profil.');if(n>left(id))return toast(`Stock limité : il reste ${left(id)} booster(s) aujourd’hui pour cette extension.`);if(S.coins<p)return toast(`Il te manque ${p-S.coins} PokéCoins.`);S.coins-=p;S.day.b[id]=sold(id)+n;S.stock[id]=(S.stock[id]||0)+n;save();refresh();toast(`+${n} booster(s) ajouté(s) à ton stock`)}
 async function openBooster(id){
  if(locked(SETS.find(s=>s.id===id)||BASE))return toast('Extension verrouillée : termine des Master Sets.');
  if(!S.stock[id])return toast('Aucun booster en stock : achète un booster, un ETB ou un display.');
@@ -684,7 +743,7 @@ function writeAccounts(a){localStorage.setItem(ACCOUNT_KEY,JSON.stringify(a))}
 function snapshot(){if(!currentUser)return;const a=accounts();if(!a[currentUser])return;a[currentUser].game=JSON.parse(JSON.stringify(S));a[currentUser].market=JSON.parse(JSON.stringify(MK));writeAccounts(a)}
 function accountView(message=''){$('#app').innerHTML=`<section class="auth-panel"><div class="ky-kicker">POKÉMASTER SET</div><h2>Bienvenue</h2><p>Crée un profil ou connecte-toi pour retrouver ta collection sur cet appareil.</p>${message?`<p class="auth-error">${esc(message)}</p>`:''}<form onsubmit="event.preventDefault();accountSubmit()"><label>Pseudo<input id="auth-name" required maxlength="22" autocomplete="username" placeholder="Ton pseudo"></label><label>Mot de passe<input id="auth-pass" type="password" required minlength="6" autocomplete="current-password" placeholder="6 caractères minimum"></label><div class="ky-actions"><button type="submit" onclick="window.authMode='login'">Se connecter</button><button type="submit" class="g" onclick="window.authMode='register'">Créer un compte</button></div></form><small>Important : comptes enregistrés uniquement dans ce navigateur. Pour retrouver ton profil sur plusieurs appareils et jouer avec des amis à distance, il faudra ajouter un serveur d'authentification et une base de données.</small></section>`}
 async function digest(t){if(typeof crypto!=='undefined'&&crypto.subtle){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(t));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')}let h=2166136261;for(const c of t){h^=c.charCodeAt(0);h=Math.imul(h,16777619)}return 'local-'+(h>>>0).toString(16)}
-async function accountSubmit(){const name=$('#auth-name').value.trim().toLowerCase(),pass=$('#auth-pass').value,a=accounts();if(!/^[a-z0-9_-]{3,22}$/.test(name))return accountView('Pseudo : 3 à 22 caractères, lettres sans accent, chiffres, _ ou -.');if(pass.length<6)return accountView('Mot de passe trop court.');const hash=await digest(name+':'+pass);if(window.authMode==='register'){if(a[name])return accountView('Ce pseudo existe déjà sur cet appareil.');a[name]={hash,game:{coins:CONFIG.start,daily:'',owned:{},stock:{ALL:10},free:Date.now(),starterGranted:true},market:{buy:[],auc:[],trd:[]},friends:[],showcase:[]};writeAccounts(a)}else if(!a[name]||a[name].hash!==hash)return accountView('Pseudo ou mot de passe incorrect.');currentUser=name;localStorage.setItem(SESSION_KEY,name);S=a[name].game||{coins:CONFIG.start,daily:'',owned:{}};S.meta??={};S.mine??=[];S.stock??={};S.st??={open:0,sold:0,trades:0,godp:0};S.cl??={};S.nt??={};S.notif??=[];S.myTr??=[];S.salon??=[];S.free??=0;MK=a[name].market||{buy:[],auc:[],trd:[]};init();}
+async function accountSubmit(){const name=$('#auth-name').value.trim().toLowerCase(),pass=$('#auth-pass').value,a=accounts();if(!/^[a-z0-9_-]{3,22}$/.test(name))return accountView('Pseudo : 3 à 22 caractères, lettres sans accent, chiffres, _ ou -.');if(pass.length<6)return accountView('Mot de passe trop court.');const hash=await digest(name+':'+pass);if(window.authMode==='register'){if(a[name])return accountView('Ce pseudo existe déjà sur cet appareil.');a[name]={hash,game:{coins:CONFIG.start,daily:'',owned:{},stock:{ALL:10},free:Date.now(),starterGranted:true},market:{buy:[],auc:[],trd:[]},friends:[],showcase:[]};writeAccounts(a)}else if(!a[name]||a[name].hash!==hash)return accountView('Pseudo ou mot de passe incorrect.');currentUser=name;localStorage.setItem(SESSION_KEY,name);S=a[name].game||{coins:CONFIG.start,daily:'',owned:{}};if(!Number.isFinite(S.coins)||S.coins<0)S.coins=0;S.meta??={};S.mine??=[];S.stock??={};S.st??={open:0,sold:0,trades:0,godp:0};S.cl??={};S.nt??={};S.notif??=[];S.myTr??=[];S.salon??=[];S.free??=0;MK=a[name].market||{buy:[],auc:[],trd:[]};init();}
 function signout(){snapshot();currentUser=null;localStorage.removeItem(SESSION_KEY);accountView()}
 function profile(){const a=accounts()[currentUser]||{},ids=a.showcase||[];$('#app').innerHTML=`<section class="profile-hero"><div class="profile-avatar">${esc(currentUser?.[0]?.toUpperCase()||'P')}</div><div><div class="ky-kicker">PROFIL JOUEUR</div><h2>${esc(currentUser)}</h2><p>${Object.keys(S.owned).length} cartes différentes · ${completedMasters()} Master Sets · ${S.coins} PC</p></div></section><section class="ky-showcase"><h2>Ma vitrine</h2><p>Choisis jusqu'à trois cartes de ta collection à exposer sur ton profil.</p><div class="profile-cards">${ids.map(id=>{const c=S.meta[id];return c?`<div class="profile-card"><img src="${esc(c.image||`https://assets.tcgdex.net/fr/${id.replace(/-([^-]+)$/,'/$1')}/high.webp`)}" alt="${esc(c.name||id)}"><button class="g" onclick="showcaseRemove('${esc(id)}')">Retirer</button></div>`:''}).join('')||'<p>Aucune carte exposée.</p>'}</div><label>Ajouter une carte possédée<select id="showcase-pick"><option value="">Choisir une carte</option>${Object.keys(S.owned).filter(id=>S.owned[id]>0&&!ids.includes(id)).map(id=>`<option value="${esc(id)}">${esc(S.meta[id]?.name||id)}</option>`).join('')}</select></label><button onclick="showcaseAdd()">Ajouter à ma vitrine</button></section><section class="ky-showcase"><h2>Mon compte</h2><button class="g" onclick="signout()">Se déconnecter</button></section>`}
 function showcaseAdd(){const id=$('#showcase-pick').value;if(!id)return;const a=accounts();const list=a[currentUser].showcase||[];if(list.length>=3)return toast('Maximum trois cartes dans la vitrine.');list.push(id);a[currentUser].showcase=list;writeAccounts(a);profile()}
@@ -805,7 +864,7 @@ $('#main-nav').insertAdjacentHTML('beforeend','<button class="g" id="n-level" on
 const pmsOldHome=home;
 home=function(){pmsOldHome();$('#app').insertAdjacentHTML('beforeend',`<section class="ky-showcase"><h2>Progression du joueur</h2><p>Niveau ${pmsLevel(pmsProgress().xp)} · ${pmsProgress().xp} XP · ${pmsProgress().charmRemaining} boosters sous Luck Charm</p><button onclick="show('level')">Niveaux, badges et récompenses</button></section>`)};
 
-const session=localStorage.getItem(SESSION_KEY);if(session&&accounts()[session]){currentUser=session;const a=accounts()[session];S=a.game||S;MK=a.market||MK;init()}else accountView();
+const session=localStorage.getItem(SESSION_KEY);if(session&&accounts()[session]){currentUser=session;const a=accounts()[session];S=a.game||S;if(!Number.isFinite(S.coins)||S.coins<0)S.coins=0;MK=a.market||MK;init()}else accountView();
 
 /* vNext: pas de zoom au double toucher, ni de scroll derrière la scène */
 let pmLastTouch=0;
@@ -820,4 +879,91 @@ flipIt=function(){if(!rv||rv.busy)return;next()};
 function pmEmptyPack(){if(!rv)return;rv.i=rv.cards.length-1;reveal()}
 /* Taux de drop accessibles également depuis la liste des cartes d'un set. */
 const pmOldDrops=drops;drops=async function(id,tf=''){await pmOldDrops(id,tf);const d=$('#dr');if(d&&!d.querySelector('.pm-rate'))d.insertAdjacentHTML('afterbegin','<p class="note pm-rate">Les taux dépendent des raretés disponibles dans l’extension. Consulte « Voir les taux de drop » pendant une ouverture.</p>')};
+
+/* ===== Mise à jour : nouveautés, Master Sets et suspense ===== */
+const pmPreviousLevelOf=levelOf;
+levelOf=function(set){
+ if(set.id==='ALL')return 0;
+ // Toujours au moins trois extensions accessibles au niveau 1.
+ const ranked=[...SETS].sort((a,b)=>price(a.id)-price(b.id)||a.id.localeCompare(b.id));
+ if(ranked.slice(0,3).some(x=>x.id===set.id))return 0;
+ return Math.max(1,pmPreviousLevelOf(set));
+};
+function pmNewCards(){if(!S.newCards||typeof S.newCards!=='object'||Array.isArray(S.newCards))S.newCards={};return S.newCards}
+const pmOldTear=tear;
+tear=function(){
+ const previous={...S.owned};
+ pmOldTear();
+ // Les cartes tirées sont ajoutées immédiatement par tear(), avant l'animation.
+ if(tearing){const seen=pmNewCards();for(const [id,n] of Object.entries(S.owned)){if(n>0&&!(previous[id]>0))seen[id]=true}save()}
+};
+const pmOldDetail=detail;
+detail=async function(id){if(pmNewCards()[id]){delete S.newCards[id];save()}return pmOldDetail(id)};
+function pmMasterPercent(setId){const set=SETS.find(s=>s.id===setId),total=set?.cardCount?.total||0;if(!total)return 0;let count=0;for(const [id,n] of Object.entries(S.owned))if(n>0&&id.startsWith(setId+'-'))count++;return Math.min(100,Math.round(count/total*100))}
+const pmOldColl=coll;
+coll=function(){pmOldColl();document.querySelectorAll('.binder').forEach(el=>{const name=el.querySelector('b')?.textContent;const set=SETS.find(s=>s.name===name);if(set){const pct=pmMasterPercent(set.id);el.insertAdjacentHTML('beforeend',`<div class="pm-master"><span>Master Set : ${pct}%</span><div class="pm-master-track"><i style="width:${pct}%"></i></div></div>`)}})};
+const pmOldCollRender=collRender;
+collRender=function(){pmOldCollRender();const bar=$('#app .bar');if(bar&&cs){const pct=pmMasterPercent(cs);bar.insertAdjacentHTML('beforeend',`<span class="pm-master-label">Master Set : <b>${pct}%</b></span>`)}document.querySelectorAll('.page .pocket').forEach((el,i)=>{const card=cache[cs]?.cards[bp*9+i];if(card&&pmNewCards()[card.id])el.insertAdjacentHTML('beforeend','<span class="pm-new-badge">NOUVEAU</span>')})};
+/* Suspense réel sur la dernière carte + reflet discret dès la première carte. */
+const pmOldRevealNew=reveal;
+let pmSuspenseTimer=null;
+let pmRevealSerial=0;
+const pmIsHit=c=>!!c&&(['rare','holo','double','AR','SAR','secret'].includes(c.tier)||rv.god);
+reveal=function(){
+  clearTimeout(pmSuspenseTimer);
+  const serial=++pmRevealSerial;
+  pmOldRevealNew();
+  if(!rv||!rv.cards||!rv.cards.length)return;
+  const last=rv.i===rv.cards.length-1;
+  const finalHit=pmIsHit(rv.cards[rv.cards.length-1]);
+  const stack=$('#stage .real-stack');
+  if(!stack)return;
+  // Le petit bord bleu déjà visible prend un reflet arc-en-ciel dès le début.
+  if(finalHit)stack.classList.add('pm-rainbow-peek');
+  if(!last)return;
+  const front=stack.querySelector('.stack-front');
+  const info=$('#stage .info');
+  const controls=$('#stage .real-controls');
+  const label=$('#stage .sbox > p');
+  stack.classList.add('pm-last-suspense','pm-last-hidden');
+  if(finalHit)stack.classList.add('pm-hit-glow');
+  if(info)info.style.visibility='hidden';
+  if(controls)controls.style.visibility='hidden';
+  if(label)label.textContent='Dernière carte…';
+  rv.busy=true;
+  // La carte reste cachée un court instant, puis apparaît avec un mouvement.
+  pmSuspenseTimer=setTimeout(()=>{
+    if(serial!==pmRevealSerial||!rv||rv.i!==rv.cards.length-1)return;
+    stack.classList.remove('pm-last-hidden');
+    stack.classList.add('pm-last-revealed');
+    if(info)info.style.visibility='visible';
+    if(controls)controls.style.visibility='visible';
+    if(label)label.textContent='Dernière carte !';
+    rv.busy=false;
+  },1400);
+};
+
+</script><script>
+/* Options locales : aucune modification du tirage, des prix ou de la sauvegarde du jeu. */
+const pmAnimationMode='normal';
+const pmDurations={common:500,uncommon:500,rare:900,holo:900,double:1300,AR:1700,SAR:2200,secret:2700};
+let pmFxTimer=null,pmFxSerial=0;
+function pmParticleBurst(stack,tier,mode){if(mode==='discret'||!stack)return;const colors={double:'#8ad7ff',AR:'#c6a4ff',SAR:'#e6b2ff',secret:'#ffd86a'};const color=colors[tier];if(!color)return;const n=mode==='cinema'?26:12;for(let i=0;i<n;i++){const p=document.createElement('i'),angle=(Math.PI*2*i/n)+Math.random()*.25,d=55+Math.random()*80;p.className='pm-particle';p.style.setProperty('--dx',Math.round(Math.cos(angle)*d)+'px');p.style.setProperty('--dy',Math.round(Math.sin(angle)*d)+'px');p.style.setProperty('--dur',(mode==='cinema'?1.7:1.2)+'s');p.style.setProperty('--particle',color);stack.appendChild(p);p.addEventListener('animationend',()=>p.remove(),{once:true})}}
+function pmFinishLastReveal(serial,stack,info,controls,label,tier){if(serial!==pmFxSerial||!rv||rv.i!==rv.cards.length-1)return;clearTimeout(pmFxTimer);stack.classList.remove('pm-last-hidden','pm-last-suspense');stack.classList.add('pm-last-revealed');const mode=pmAnimationMode;if(mode!=='discret'&&!['rare','holo'].includes(tier)){stack.classList.add('pm-reveal-stage','pm-fx-'+tier);pmParticleBurst(stack,tier,mode)}if(info)info.style.visibility='visible';if(controls)controls.style.visibility='visible';if(label)label.textContent='Dernière carte !';rv.busy=false;}
+function pmSkipLastAnimation(){if(!rv||rv.i!==rv.cards.length-1)return;pmFxSerial++;clearTimeout(pmFxTimer);const stack=document.querySelector('#stage .real-stack');if(!stack)return;stack.classList.remove('pm-last-hidden','pm-last-suspense');stack.classList.add('pm-last-revealed');const info=document.querySelector('#stage .info'),controls=document.querySelector('#stage .real-controls');if(info)info.style.visibility='visible';if(controls)controls.style.visibility='visible';const label=document.querySelector('#stage .sbox > p');if(label)label.textContent='Dernière carte !';rv.busy=false;}
+/* Remplace uniquement l'étape de révélation finale ; le reflet arc-en-ciel de la pile reste intact. */
+reveal=function(){
+ clearTimeout(pmSuspenseTimer);clearTimeout(pmFxTimer);const serial=++pmFxSerial;pmRevealSerial++;
+ pmOldRevealNew();if(!rv?.cards?.length)return;
+ const last=rv.i===rv.cards.length-1,final=rv.cards[rv.cards.length-1],stack=document.querySelector('#stage .real-stack');if(!stack)return;
+ if(pmIsHit(final)&&!['rare','holo'].includes(final.tier))stack.classList.add('pm-rainbow-peek');
+ if(!last)return;
+ const tier=final.tier||'common',info=document.querySelector('#stage .info'),controls=document.querySelector('#stage .real-controls'),label=document.querySelector('#stage .sbox > p');
+ if(['rare','holo'].includes(tier)){stack.classList.add('pm-no-fx');return;}
+ stack.classList.add('pm-minimal-common');
+ stack.classList.add('pm-last-suspense','pm-last-hidden');if(info)info.style.visibility='hidden';if(controls)controls.style.visibility='hidden';if(label)label.textContent='Dernière carte…';rv.busy=true;
+ const factor=pmAnimationMode==='discret'?.35:pmAnimationMode==='cinema'?1.2:1;
+ const duration=Math.round((pmDurations[tier]||500)*factor);
+ pmFxTimer=setTimeout(()=>pmFinishLastReveal(serial,stack,info,controls,label,tier),duration);
+};
 </script></body></html>
