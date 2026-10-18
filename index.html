@@ -422,14 +422,14 @@ const CONFIG={
  godPack:.003,       // chance d'un God Pack (0,3 %)
  godSlot:{double:35,AR:35,SAR:20,secret:10}, // tirage de chaque carte d'un God pack
  start:60,          // PokéCoins de départ
- daily:12,           // récompense quotidienne (PokéCoins)
+ daily:300,           // récompense quotidienne (PokéCoins)
  // Valeur de base d'une carte selon sa rareté (chaque carte varie ensuite de -25% à +35%, de façon stable)
  val:{common:4,uncommon:8,rare:20,holo:40,double:100,AR:250,SAR:600,secret:1000},
  // Prix des boosters (PokéCoins) : reflète la rareté réelle des extensions (anciennes et recherchées = plus chères)
  priceById:{base1:600,base2:260,base3:240,base5:300,neo1:320,xy12:90,'sm3.5':70,'sm11.5':80,sm12:60,swsh3:40,'swsh4.5':70,swsh7:150,swsh8:35,swsh9:40,'swsh10.5':45,swsh11:40,swsh12:40,'swsh12.5':90,sv01:25,sv02:25,sv03:30,'sv03.5':90,sv04:30,'sv04.5':80,sv05:25,sv06:30,sv07:35,sv08:35,'sv08.5':220,sv09:30,sv10:35,'sv10.5b':45,'sv10.5w':45,me01:40,me02:35,ALL:15},
  // Probabilités (en poids) pour chacune des 6 cartes. Les raretés absentes de l'extension sont ignorées.
- slots:[{common:100},{common:100},{common:70,uncommon:30},{uncommon:100},{uncommon:72,rare:20,holo:7,AR:1},
-        {common:48,uncommon:31,rare:12,holo:5,double:2.5,AR:1,SAR:.4,secret:.1}]
+ slots:[{common:100},{common:100},{common:70,uncommon:30},{uncommon:100},{uncommon:70.5,rare:20.5,holo:7.5,AR:1.5},
+        {common:45,uncommon:30,rare:12.5,holo:5.5,double:3,AR:1.5,SAR:.9,secret:.5}]
 };
 const FAMOUS=['base1','base2','base3','base5','neo1','xy12','sm3.5','sm11.5','sm12','swsh3','swsh4.5','swsh7','swsh8','swsh9','swsh10.5','swsh11','swsh12','swsh12.5','sv01','sv02','sv03','sv03.5','sv04','sv04.5','sv05','sv06','sv07','sv08','sv08.5','sv09','sv10','sv10.5b','sv10.5w','me01','me02','bw1','bw2','bw4','bw5','bw6','bw7','bw8','bw9','bw10','bw11','hgss1','hgss2','hgss3','hgss4','pl1','pl2','pl3','pl4','dp1','dp2','dp4','dp5','dp6','dp7','ex1','ex2','ex3','ex5','ex6','ex7','ex8','ex9','ex12','ex14','ex15','ex16'];
 const price=id=>Math.ceil((CONFIG.priceById[id]??(/^(base|gym|neo|ecard)/.test(id)?120:/^(ex|pop)/.test(id)?60:/^(dp|pl|hgss|col)/.test(id)?40:/^(bw|xy|sm|swsh)/.test(id)?28:22))*2.775); // prix augmentés de 50 % par rapport à la version précédente (x1,85 × 1,5)
@@ -732,7 +732,7 @@ function checkAch(){ACH().forEach(a=>{if(a.cur>=a.goal&&!S.nt[a.id]){S.nt[a.id]=
 function ach(){head();$('#app').innerHTML=`<div class="crumb">Succès et récompenses</div><div class="sets">${ACH().map(a=>{const ok=a.cur>=a.goal,d=S.cl[a.id];return `<div class="set"><h3>${esc(a.n)}</h3><div class="pb" style="margin:4px 0"><i style="width:${Math.min(100,a.cur/a.goal*100)}%"></i></div><small>${Math.min(a.cur,a.goal)}/${a.goal} · récompense ${a.rw} PC</small><button ${ok&&!d?'':'disabled'} onclick="claim('${a.id}')">${d?'Récupérée ':ok?'Récupérer':'En cours'}</button></div>`}).join('')}</div>`}
 function claim(id){const a=ACH().find(x=>x.id==id);if(!a||a.cur<a.goal||S.cl[id])return;S.cl[id]=1;S.coins+=a.rw;save();ach()}
 /* horloge du jeu */
-function gtick(){if(!S.fn&&Date.now()-S.free>=600000){S.fn=1;notify('Ton booster gratuit est prêt !');save()}fbUpdate();const el=$('#wheel-countdown');if(el)el.textContent=wheelWait()}
+function gtick(){if(!S.fn&&Date.now()-S.free>=360000){S.fn=1;notify('Ton booster gratuit est prêt !');save()}fbUpdate();const el=$('#wheel-countdown');if(el)el.textContent=wheelWait()}
 document.addEventListener('pointermove',e=>{const f=$('#flip');if(!f||!f.classList.contains('flipped'))return;const b=f.getBoundingClientRect(),x=(e.clientX-b.left)/b.width,y=(e.clientY-b.top)/b.height;
  f.style.setProperty('--ry',(x-.5)*26+'deg');f.style.setProperty('--rx',(.5-y)*26+'deg');const fr=f.querySelector('.front');fr.style.setProperty('--mx',x*100+'%');fr.style.setProperty('--my',y*100+'%')});
 /* Comptes locaux : stockage par navigateur, pas un serveur partagé. */
@@ -785,7 +785,7 @@ function resaleValue(c,qty=1){return Math.max(1,Math.floor(value(c)*qty*.3))}
 function soloSale(id,all=false){soloInit();const n=S.owned[id]||0;if(n<=1)return toast('Dernier exemplaire protégé.');const c=cm(id,S.meta[id]);const qty=all?n-1:1;const money=resaleValue(c,qty);S.owned[id]-=qty;S.coins+=money;S.st.sold+=qty;soloStat('sold',qty);save();solo();toast(`+${money} PC · ${qty} doublon(s) vendu(s)`)}
 function soloAll(){let qty=0,money=0;const ids=Object.keys(S.owned).filter(id=>S.owned[id]>1&&S.meta[id]);for(const id of ids){const n=S.owned[id]-1;qty+=n;money+=resaleValue(cm(id,S.meta[id]),n)}if(!qty)return toast('Aucun doublon à vendre.');if(!confirm(`Vendre ${qty} doublons pour ${money} PC ? Tu gardes un exemplaire de chaque carte.`))return;for(const id of ids)S.owned[id]=1;S.coins+=money;S.st.sold+=qty;soloStat('sold',qty);save();solo();toast(`+${money} PC`)}
 function solo(){soloInit();const cards=Object.keys(S.owned).filter(id=>S.meta[id]&&S.owned[id]>1).sort((a,b)=>value(cm(b,S.meta[b]))-value(cm(a,S.meta[a])));const all=cards.reduce((t,id)=>t+(S.owned[id]-1)*value(cm(id,S.meta[id])),0);$('#app').innerHTML=`<div class="crumb">Revente de doublons</div><section class="ky-showcase"><h2>Ton inventaire</h2><p>La rareté et l’ancienneté de l’extension influencent la valeur. Ton dernier exemplaire est toujours protégé.</p><h3>${cards.reduce((t,id)=>t+S.owned[id]-1,0)} doublons · ${all} PC</h3><button onclick="soloAll()" ${cards.length?'':'disabled'}>Tout vendre · ${all} PC</button></section><div class="cards">${cards.map(id=>{const c=cm(id,S.meta[id]);return `<div class="tc">${cimg(c)}<strong>${esc(c.name)}</strong><p class="note">${esc(TIERS[c.tier]||'Carte')} · ×${S.owned[id]} · ${resaleValue(c)} PC / doublon à la revente</p><button onclick="soloSale('${esc(id)}')">Vendre 1</button><button class="g" onclick="soloSale('${esc(id)}',true)">Vendre les ${S.owned[id]-1}</button></div>`}).join('')||'<p class="note">Aucun doublon pour le moment. Continue à ouvrir des boosters !</p>'}</div>`}
-const WHEEL_REWARDS=[{name:'50 PC',p:36,coins:50},{name:'100 PC',p:27,coins:100},{name:'Booster de base',p:20,pack:'ALL'},{name:'35 PC',p:10,coins:35},{name:'Booster surprise (extension débloquée)',p:5,pack:'RANDOM'},{name:'500 PC',p:1.7,coins:500},{name:'1 500 PC',p:.3,coins:1500}];
+const WHEEL_REWARDS=[{name:'50 PC',p:36,coins:50},{name:'100 PC',p:27,coins:100},{name:'Booster de base',p:20,pack:'ALL'},{name:'35 PC',p:10,coins:35},{name:'500 PC',p:1.7,coins:500},{name:'1 500 PC',p:.3,coins:1500}];
 function wheelWait(){const left=Math.max(0,86400000-(Date.now()-(soloInit().spun||0)));if(!left)return 'Tirage gratuit disponible';const h=Math.floor(left/3600000),m=Math.floor(left%3600000/60000);return `Gratuit dans ${h} h ${String(m).padStart(2,'0')} min`}
 function wheel(){soloInit();$('#app').innerHTML=`<div class="crumb">Roulette de récompenses</div><section class="ky-showcase" style="text-align:center"><div class="ky-kicker">TIRAGE SOLO</div><h2>Tente ta chance</h2><div id="wheel-disc" style="margin:22px auto;width:min(280px,75vw);aspect-ratio:1;border:10px solid #ff533d;border-radius:50%;display:grid;place-items:center;background:conic-gradient(#ff533d 0 36%,#27202e 36% 63%,#ad3565 63% 83%,#444 83% 100%);box-shadow:0 10px 32px #000a;transition:transform 2.5s cubic-bezier(.15,.7,.1,1)"><span style="font-size:42px;text-shadow:0 3px 10px #000">◆</span></div><p id="wheel-countdown">${wheelWait()}</p><div class="ky-actions" style="justify-content:center"><button onclick="spinWheel(false)" ${Date.now()-S.solo.spun<86400000?'disabled':''}>Tirage gratuit</button><button class="g" onclick="spinWheel(true)">Tirer · 120 PC</button></div><p id="wheel-result" role="status"></p><h3>Probabilités des récompenses</h3><div style="text-align:left;max-width:350px;margin:auto">${WHEEL_REWARDS.map(r=>`<p>${r.name} <b style="float:right">${r.p}%</b></p>`).join('')}</div><small class="note">Monnaie fictive uniquement, aucun paiement ni gain réel.</small></section>`}
 let spinning=false;
@@ -805,7 +805,7 @@ sellDup=function(){const old=S.st.sold;oldSellDup();if(S.st.sold>old){soloStat('
 const oldHome=home;
 home=function(){oldHome();const el=$('#app');if(el)el.insertAdjacentHTML('beforeend',`<section class="ky-showcase"><h2>Ton aventure solo</h2><p>Des défis chaque jour, une roulette gratuite et des PokéCoins à gagner en vendant tes doublons.</p><div class="ky-actions"><button onclick="show('ach')">Voir les missions</button><button class="g" onclick="show('wheel')">Roulette</button><button class="g" onclick="show('solo')">Vendre mes doublons</button></div></section>`)};
 const oldShop=shop;
-shop=function(){oldShop();const el=$('#app');if(el)el.insertAdjacentHTML('afterbegin',`<section class="ky-showcase"><h2>Offre du jour</h2><p>Un booster surprise exclusivement parmi tes extensions débloquées, limité à un achat quotidien.</p><button onclick="dailyOffer()" ${S.soloOffer===new Date().toDateString()?'disabled':''}>Booster du jour · 65 PC</button></section>`)};
+shop=function(){oldShop()};
 function dailyOffer(){const d=new Date().toDateString();if(S.soloOffer===d)return toast('Offre déjà achetée.');if(S.coins<65)return toast('Il te manque des PokéCoins.');const pool=SETS.filter(s=>!locked(s));if(!pool.length)return toast('Aucune extension disponible.');const chosen=pool[Math.floor(Math.random()*pool.length)];S.coins-=65;S.stock[chosen.id]=(S.stock[chosen.id]||0)+1;S.soloOffer=d;save();toast(`Booster ${chosen.name} ajouté au stock !`);shop()}
 // Sauvegarde exportable (le fichier ne contient aucun mot de passe).
 function exportSolo(){snapshot();const payload={format:'pokemaster-solo',version:1,profile:currentUser,game:S,showcase:accounts()[currentUser]?.showcase||[]};const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='pokemaster-sauvegarde-'+new Date().toISOString().slice(0,10)+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)}
@@ -830,17 +830,38 @@ function pmsSync(){if(!currentUser)return;const x=pmsProgress(),seen=x.xpSeen;co
  for(const set of SETS){const n=set.cardCount?.total||0;if(!n||x.masterRewards[set.id])continue;let owned=0;for(const id in S.owned)if(S.owned[id]>0&&id.startsWith(set.id+'-'))owned++;if(owned>=n){x.masterRewards[set.id]=1;S.coins+=Math.max(120,Math.round(price(set.id)*2));x.charms[15]=(x.charms[15]||0)+1;notify('Master Set terminé : récompense en PC et Luck Charm III (15 boosters) !')}}
 }
 // Empilement hors ligne : un booster toutes les 10 minutes, jusqu'à dix.
-function pmsAccrue(){if(!currentUser)return;const now=Date.now(),limit=10,period=600000;S.stock??={};let count=Math.min(limit,Math.max(0,S.stock.ALL||0));if(count>=limit){S.free=now;return}if(!Number.isFinite(S.free)||S.free<=0)S.free=now;const ticks=Math.max(0,Math.floor((now-S.free)/period));if(ticks){const added=Math.min(ticks,limit-count);S.stock.ALL=count+added;S.free+=ticks*period;if(S.stock.ALL>=limit)S.free=now}}
+function pmsAccrue(){if(!currentUser)return;const now=Date.now(),limit=10,period=360000;S.stock??={};let count=Math.min(limit,Math.max(0,S.stock.ALL||0));if(count>=limit){S.free=now;return}if(!Number.isFinite(S.free)||S.free<=0)S.free=now;const ticks=Math.max(0,Math.floor((now-S.free)/period));if(ticks){const added=Math.min(ticks,limit-count);S.stock.ALL=count+added;S.free+=ticks*period;if(S.stock.ALL>=limit)S.free=now}}
 const pmsOldSave=save;
 save=()=>{pmsSync();pmsOldSave()};
 const pmsOldInit=init;
 init=async function(){pmsProgress();pmsAccrue();pmsOldSave();return pmsOldInit()};
-freeBoost=function(){pmsAccrue();if((S.stock.ALL||0)>=10)return toast('Réserve pleine (10/10).');const t=Math.max(0,600000-(Date.now()-S.free));return toast('Le prochain booster arrive dans '+Math.ceil(t/60000)+' min. Ils s’accumulent automatiquement !')};
-fbUpdate=function(){pmsAccrue();const b=$('#fb');if(!b)return;const count=Math.min(10,S.stock.ALL||0),t=Math.max(0,600000-(Date.now()-S.free)),counter=$('#free-count'),timer=$('#free-timer'),op=$('#free-open');if(counter)counter.textContent=count+'/10 boosters';if(timer)timer.textContent=count>=10?'Réserve pleine (10/10)':`Prochain booster automatique : ${Math.floor(t/60000)}:${String(Math.floor(t/1000)%60).padStart(2,'0')}`;b.textContent='Accumulation automatique';b.disabled=true;if(op)op.disabled=count===0};
+freeBoost=function(){pmsAccrue();if((S.stock.ALL||0)>=10)return toast('Réserve pleine (10/10).');const t=Math.max(0,360000-(Date.now()-S.free));return toast('Le prochain booster arrive dans '+Math.ceil(t/60000)+' min. Ils s’accumulent automatiquement !')};
+fbUpdate=function(){pmsAccrue();const b=$('#fb');if(!b)return;const count=Math.min(10,S.stock.ALL||0),t=Math.max(0,360000-(Date.now()-S.free)),counter=$('#free-count'),timer=$('#free-timer'),op=$('#free-open');if(counter)counter.textContent=count+'/10 boosters';if(timer)timer.textContent=count>=10?'Réserve pleine (10/10)':`Prochain booster automatique : ${Math.floor(t/60000)}:${String(Math.floor(t/1000)%60).padStart(2,'0')}`;b.textContent='Accumulation automatique';b.disabled=true;if(op)op.disabled=count===0};
 // Un charme augmente les poids des cartes rares sans garantir de tirage.
 const pmsPick=pick;
-pick=function(cards,slots){const x=pmsProgress();if(!x.charmRemaining)return pmsPick(cards,slots);const base=slots||CONFIG.slots;const boosted=base.map(row=>{const r={...row};for(const tier of ['rare','holo','double','AR','SAR','secret'])if(r[tier])r[tier]*=1.75;return r});return pmsPick(cards,boosted)};
-function pmsUseCharm(n){const x=pmsProgress();if(x.charmRemaining)return toast('Un Luck Charm est déjà actif.');if(!(x.charms[n]>0))return toast('Tu ne possèdes pas ce Luck Charm.');x.charms[n]--;x.activeCharm=n;x.charmRemaining=n;save();pmsLevelPage();toast('Luck Charm activé pour '+n+' boosters !')}
+pick=function(cards,slots){
+ const x=pmsProgress();const base=slots||CONFIG.slots;
+ const boosted=x.charmRemaining?base.map(row=>{
+   const r={...row},boost=x.activeCharm===15?2.5:x.activeCharm===10?2:0;
+   for(const tier of ['rare','holo','double','AR','SAR','secret'])if(r[tier])r[tier]=boost?r[tier]+boost:r[tier]*1.75;
+   return r;
+ }):base;
+ const by={};cards.forEach(c=>{if(c.tier!=='unknown')(by[c.tier]??=[]).push(c)});
+ if(!Object.keys(by).length)throw Error('Aucune carte disponible');
+ const out=[],chase=S.chase||{};
+ for(const row of boosted){
+   let tiers=Object.keys(row).filter(t=>by[t]?.length);if(!tiers.length)tiers=Object.keys(by);
+   const sum=tiers.reduce((a,t)=>a+(row[t]||1),0);let roll=Math.random()*sum,tier=tiers[0];
+   for(const t of tiers){roll-=row[t]||1;if(roll<=0){tier=t;break}}
+   const pool=by[tier],weights=pool.map(c=>chase[c.id]?1.5:1);
+   let r=Math.random()*weights.reduce((a,b)=>a+b,0),card=pool[0];
+   for(let i=0;i<pool.length;i++){r-=weights[i];if(r<=0){card=pool[i];break}}
+   if(out.includes(card)&&pool.length>1){const others=pool.filter(c=>!out.includes(c));if(others.length)card=others[Math.floor(Math.random()*others.length)]}
+   out.push(card);
+ }
+ return out;
+};
+function pmsUseCharm(n){const x=pmsProgress();if(x.charmRemaining)return toast('Un Luck Charm est déjà actif.');if(!(x.charms[n]>0))return toast('Tu ne possèdes pas ce Luck Charm.');x.charms[n]--;x.activeCharm=n;x.charmRemaining=n+5;save();pmsLevelPage();toast('Luck Charm activé pour '+n+' boosters !')}
 function pmsConsumeCharm(n){const x=pmsProgress();if(!x.charmRemaining||n<=0)return;x.charmRemaining=Math.max(0,x.charmRemaining-n);if(!x.charmRemaining)x.activeCharm=0}
 const pmsTear=tear;
 tear=function(){const before=S.st.open||0;pmsTear();const n=(S.st.open||0)-before;if(n){pmsConsumeCharm(n);save()}};
@@ -848,16 +869,31 @@ const pmsMany=openMany;
 openMany=async function(id,n){const before=S.st.open||0;await pmsMany(id,n);const actual=(S.st.open||0)-before;if(actual){pmsConsumeCharm(actual);soloStat('open',actual);save()}};
 // Tirage roulette : 3 Luck Charms, probabilité totale = 100%.
 WHEEL_REWARDS.splice(0,WHEEL_REWARDS.length,
- {name:'10 PC',p:34,coins:10},{name:'20 PC',p:26,coins:20},{name:'Booster de base',p:18,pack:'ALL'},{name:'35 PC',p:10,coins:35},{name:'Booster surprise (extension débloquée)',p:5,pack:'RANDOM'},{name:'Luck Charm I · 5 boosters',p:3,charm:5},{name:'Luck Charm II · 10 boosters',p:2,charm:10},{name:'100 PC',p:1,coins:100},{name:'Luck Charm III · 15 boosters',p:.8,charm:15},{name:'300 PC',p:.2,coins:300});
+ {name:'10 PC',p:34,coins:10},{name:'20 PC',p:26,coins:20},{name:'Booster de base',p:23,pack:'ALL'},{name:'35 PC',p:10,coins:35},{name:'Luck Charm I · 5 boosters',p:3,charm:5},{name:'Luck Charm II · 10 boosters',p:2,charm:10},{name:'100 PC',p:1,coins:100},{name:'Luck Charm III · 15 boosters',p:.8,charm:15},{name:'300 PC',p:.2,coins:300});
 spinWheel=function(paid){soloInit();if(spinning)return;if(paid){if(S.coins<180)return toast('Il faut 180 PC.')}else if(Date.now()-S.solo.spun<86400000)return toast('Tirage gratuit pas encore prêt.');spinning=true;if(paid)S.coins-=180;else S.solo.spun=Date.now();soloStat('spins');let r=Math.random()*100,reward=WHEEL_REWARDS[WHEEL_REWARDS.length-1];for(const item of WHEEL_REWARDS){r-=item.p;if(r<0){reward=item;break}}const disk=$('#wheel-disc');document.querySelectorAll('#app button').forEach(b=>b.disabled=true);if(disk)disk.style.transform='rotate('+(1440+Math.floor(Math.random()*360))+'deg)';save();setTimeout(()=>{if(reward.coins)S.coins+=reward.coins;else if(reward.charm){const x=pmsProgress();x.charms[reward.charm]=(x.charms[reward.charm]||0)+1}else{let id=reward.pack;if(id==='RANDOM'){const available=SETS.filter(s=>!locked(s));id=available.length?available[Math.floor(Math.random()*available.length)].id:'ALL'}S.stock[id]=(S.stock[id]||0)+1}save();spinning=false;if(vw==='wheel'){wheel();const out=$('#wheel-result');if(out)out.textContent='Bravo ! Tu gagnes : '+reward.name}toast('Roulette : '+reward.name)},2600)};
 // Revente filtrable par recherche, extension, rareté et ordre.
 solo=function(){soloInit();const cards=Object.keys(S.owned).filter(id=>S.meta[id]&&S.owned[id]>1),total=cards.reduce((sum,id)=>sum+resaleValue(cm(id,S.meta[id]),S.owned[id]-1),0);const ext=[...new Set(cards.map(id=>id.slice(0,id.lastIndexOf('-'))))].sort();$('#app').innerHTML=`<div class="crumb">Revente de doublons</div><section class="ky-showcase"><h2>Ton inventaire</h2><p>Rareté et ancienneté influencent les prix. Dernier exemplaire toujours protégé.</p><h3>${cards.reduce((t,id)=>t+S.owned[id]-1,0)} doublons · ${total} PC</h3><button onclick="soloAll()" ${cards.length?'':'disabled'}>Tout vendre · ${total} PC</button><div class="bar" style="margin-top:18px"><input id="sale-search" type="text" placeholder="Chercher un Pokémon…" oninput="pmsRenderSales()"><select id="sale-set" onchange="pmsRenderSales()"><option value="">Toutes les extensions</option>${ext.map(id=>`<option value="${esc(id)}">${esc(SETS.find(s=>s.id===id)?.name||id)}</option>`).join('')}</select><select id="sale-tier" onchange="pmsRenderSales()"><option value="">Toutes les raretés</option>${Object.keys(TIERS).map(k=>`<option value="${k}">${esc(TIERS[k])}</option>`).join('')}</select><select id="sale-order" onchange="pmsRenderSales()"><option value="value">Valeur décroissante</option><option value="name">Nom A-Z</option><option value="quantity">Nombre de doublons</option><option value="low">Valeur croissante</option></select></div></section><p id="sale-count" class="note"></p><div id="sale-results" class="cards"></div>`;pmsRenderSales()};
 function pmsRenderSales(){const q=($('#sale-search')?.value||'').toLocaleLowerCase('fr'),set=$('#sale-set')?.value||'',tier=$('#sale-tier')?.value||'',order=$('#sale-order')?.value||'value';const cards=Object.keys(S.owned).filter(id=>S.meta[id]&&S.owned[id]>1).filter(id=>{const c=cm(id,S.meta[id]);return (!q||c.name.toLocaleLowerCase('fr').includes(q)||id.toLowerCase().includes(q))&&(!set||id.startsWith(set+'-'))&&(!tier||c.tier===tier)});cards.sort((a,b)=>{const ca=cm(a,S.meta[a]),cb=cm(b,S.meta[b]);return order==='name'?ca.name.localeCompare(cb.name,'fr'):order==='quantity'?(S.owned[b]-S.owned[a]):order==='low'?value(ca)-value(cb):value(cb)-value(ca)});$('#sale-count').textContent=cards.length+' références trouvées';$('#sale-results').innerHTML=cards.map(id=>{const c=cm(id,S.meta[id]);return `<div class="tc">${cimg(c)}<strong>${esc(c.name)}</strong><p class="note">${esc(TIERS[c.tier]||'Carte')} · ×${S.owned[id]} · ${resaleValue(c)} PC / doublon à la revente</p><button onclick="soloSale('${esc(id)}')">Vendre 1</button><button class="g" onclick="soloSale('${esc(id)}',true)">Vendre les ${S.owned[id]-1}</button></div>`}).join('')||'<p class="note">Aucun doublon correspondant.</p>'}
 // Succès spécifiques calculés sur les cartes distinctes possédées, pas sur les doublons.
 const pmsOldACH=ACH;
-ACH=function(){const a=pmsOldACH(),ids=Object.keys(S.owned).filter(id=>S.owned[id]>0&&S.meta[id]);const count=(name)=>ids.filter(id=>new RegExp('(?:^|[^a-z])'+name+'(?:$|[^a-z])','i').test(String(S.meta[id].name||''))).length;const add=(id,n,cur,goal,rw)=>a.push({id,n,cur,goal,rw});add('zekrom5','Collectionner 5 cartes Zekrom différentes',count('zekrom'),5,300);add('pikachu10','Collectionner 10 Pikachu différents',count('pikachu'),10,500);add('pikachu30','Collectionner 30 Pikachu différents',count('pikachu'),30,2200);add('dracaufeu5','Collectionner 5 Dracaufeu différents',count('dracaufeu'),5,400);add('mewtwo5','Collectionner 5 Mewtwo différents',count('mewtwo'),5,380);add('evoli10','Collectionner 10 Évoli différents',count('évoli'),10,550);add('uniq250','Posséder 250 cartes différentes',ids.length,250,1200);add('uniq500','Posséder 500 cartes différentes',ids.length,500,3000);add('master3','Terminer 3 Master Sets',completedMasters(),3,1000);return a};
-function pmsClaimLevel(level){const x=pmsProgress();if(level%5||level>50||level>pmsLevel(x.xp)||x.levelClaims[level])return;x.levelClaims[level]=1;const pc=Math.round(35*Math.pow(1.30,level/5-1));S.coins+=pc;if(level>=40)x.charms[15]=(x.charms[15]||0)+1;else if(level>=20)x.charms[10]=(x.charms[10]||0)+1;else x.charms[5]=(x.charms[5]||0)+1;save();pmsLevelPage();toast('Niveau '+level+' : '+pc+' PC et Luck Charm !')}
-function pmsLevelPage(){const x=pmsProgress(),lv=pmsLevel(x.xp),min=pmsXpFloor(lv),max=pmsXpFloor(lv+1),pct=Math.min(100,100*(x.xp-min)/(max-min));const ranks=['Débutant','Collectionneur','Expert','Maître','Légende'];const badge=ranks[Math.min(ranks.length-1,Math.floor((lv-1)/10))];$('#app').innerHTML=`<div class="crumb">Progression du joueur</div><section class="ky-showcase"><div class="ky-kicker">${esc(currentUser||'Dresseur')} · ${badge}</div><h2>Niveau ${lv}</h2><p>${x.xp} XP au total · ${max-x.xp} XP jusqu’au niveau ${lv+1}</p><div class="pb" style="width:100%"><i style="width:${pct}%"></i></div><p class="note">+7 XP par booster ouvert · +12 XP par nouvelle carte · +1 XP par doublon vendu · +5 XP par roulette.</p><h3>Luck Charms</h3><p>${x.charmRemaining?`Charm actif : encore ${x.charmRemaining} booster(s) amélioré(s)`:'Aucun charme actif'}</p><div class="sets">${[5,10,15].map((n,i)=>`<article class="set"><h3>Luck Charm ${['I','II','III'][i]}</h3><p>${n} boosters · chances des raretés élevées ×1,75</p><p>En stock : ${x.charms[n]||0}</p><button onclick="pmsUseCharm(${n})" ${x.charms[n]&&!x.charmRemaining?'':'disabled'}>Activer</button></article>`).join('')}</div></section><section class="ky-showcase"><h2>Badges et récompenses de niveaux</h2><div class="sets">${Array.from({length:Math.max(10,Math.ceil(lv/5)*5)},(_,i)=>i+1).filter(n=>n%5===0).map(n=>{const claimed=x.levelClaims[n],unlocked=lv>=n,pc=Math.round(35*Math.pow(1.30,n/5-1));return `<article class="set"><h3>${unlocked?'🏅':'🔒'} Niveau ${n}</h3><p>${pc} PC + Luck Charm ${n%10===0?'II':'I'}</p><button ${unlocked&&!claimed?'':'disabled'} onclick="pmsClaimLevel(${n})">${claimed?'Récupéré':unlocked?'Récupérer':'Verrouillé'}</button></article>`}).join('')}</div></section>`}
+ACH=function(){const a=pmsOldACH(),ids=Object.keys(S.owned).filter(id=>S.owned[id]>0&&S.meta[id]);const count=(name)=>ids.filter(id=>new RegExp('(?:^|[^a-z])'+name+'(?:$|[^a-z])','i').test(String(S.meta[id].name||''))).length;const add=(id,n,cur,goal,rw)=>a.push({id,n,cur,goal,rw});add('zekrom5','Collectionner 5 cartes Zekrom différentes',count('zekrom'),5,300);add('pikachu10','Collectionner 10 Pikachu différents',count('pikachu'),10,500);add('pikachu30','Collectionner 30 Pikachu différents',count('pikachu'),30,2200);add('dracaufeu5','Collectionner 5 Dracaufeu différents',count('dracaufeu'),5,400);add('mewtwo5','Collectionner 5 Mewtwo différents',count('mewtwo'),5,380);add('evoli10','Collectionner 10 Évoli différents',count('évoli'),10,550);add('uniq250','Posséder 250 cartes différentes',ids.length,250,1200);add('uniq500','Posséder 500 cartes différentes',ids.length,500,3000);add('master3','Terminer 3 Master Sets',completedMasters(),3,1000);
+ const uniqueNames=ids.map(id=>String(S.meta[id].name||S.meta[id].n||'').toLocaleLowerCase('fr'));
+ const species=(name)=>ids.filter(id=>String(S.meta[id].name||S.meta[id].n||'').toLocaleLowerCase('fr').includes(name)).length;
+ add('darkrai5','Collectionner 5 cartes Darkrai différentes',species('darkrai'),5,450);
+ add('darkrai12','Collectionner 12 cartes Darkrai différentes',species('darkrai'),12,1400);
+ add('lucario8','Collectionner 8 cartes Lucario différentes',species('lucario'),8,650);
+ add('gardevoir10','Collectionner 10 cartes Gardevoir différentes',species('gardevoir'),10,950);
+ add('rayquaza8','Collectionner 8 cartes Rayquaza différentes',species('rayquaza'),8,900);
+ add('mew8','Collectionner 8 cartes Mew différentes',species('mew'),8,700);
+ add('evolutions8','Réunir les 8 évolutions d’Évoli', ['aquali','voltali','pyroli','mentali','noctali','phyllali','givrali','nymphali'].filter(n=>uniqueNames.some(x=>x.includes(n))).length,8,1800);
+ add('evolutions3','Réunir 3 évolutions différentes d’Évoli', ['aquali','voltali','pyroli','mentali','noctali','phyllali','givrali','nymphali'].filter(n=>uniqueNames.some(x=>x.includes(n))).length,3,220);
+ add('darkraiAR','Trouver une illustration rare de Darkrai',ids.filter(id=>String(S.meta[id].name||S.meta[id].n||'').toLocaleLowerCase('fr').includes('darkrai')&&['AR','SAR'].includes(cm(id,S.meta[id]).tier)).length,1,800);
+ add('master5','Terminer 5 Master Sets',completedMasters(),5,2600);
+ add('master10','Terminer 10 Master Sets',completedMasters(),10,7000);
+ add('uniq1000','Posséder 1 000 cartes différentes',ids.length,1000,8000);
+ return a};
+function pmsClaimLevel(level){const x=pmsProgress();if(level%5||level>100||level>pmsLevel(x.xp)||x.levelClaims[level])return;x.levelClaims[level]=1;const pc=Math.round(80*Math.pow(1.25,level/5-1));S.coins+=pc;if(level>=40)x.charms[15]=(x.charms[15]||0)+1;else if(level>=20)x.charms[10]=(x.charms[10]||0)+1;else x.charms[5]=(x.charms[5]||0)+1;save();pmsLevelPage();toast('Niveau '+level+' : '+pc+' PC et Luck Charm !')}
+function pmsLevelPage(){const x=pmsProgress(),lv=pmsLevel(x.xp),min=pmsXpFloor(lv),max=pmsXpFloor(lv+1),pct=Math.min(100,100*(x.xp-min)/(max-min));const ranks=['Débutant','Collectionneur','Expert','Maître','Légende'];const badge=ranks[Math.min(ranks.length-1,Math.floor((lv-1)/10))];$('#app').innerHTML=`<div class="crumb">Progression du joueur</div><section class="ky-showcase"><div class="ky-kicker">${esc(currentUser||'Dresseur')} · ${badge}</div><h2>Niveau ${lv}</h2><p>${x.xp} XP au total · ${max-x.xp} XP jusqu’au niveau ${lv+1}</p><div class="pb" style="width:100%"><i style="width:${pct}%"></i></div><p class="note">+7 XP par booster ouvert · +12 XP par nouvelle carte · +1 XP par doublon vendu · +5 XP par roulette.</p><h3>Luck Charms</h3><p>${x.charmRemaining?`Charm actif : encore ${x.charmRemaining} booster(s) amélioré(s)`:'Aucun charme actif'}</p><div class="sets">${[5,10,15].map((n,i)=>`<article class="set"><h3>Luck Charm ${['I','II','III'][i]}</h3><p>${n+5} boosters · bonus I : ×1,75 · II : +2 points · III : +2,5 points</p><p>En stock : ${x.charms[n]||0}</p><button onclick="pmsUseCharm(${n})" ${x.charms[n]&&!x.charmRemaining?'':'disabled'}>Activer</button></article>`).join('')}</div></section><section class="ky-showcase"><h2>Badges et récompenses de niveaux</h2><div class="sets">${Array.from({length:100},(_,i)=>i+1).filter(n=>n%5===0).map(n=>{const claimed=x.levelClaims[n],unlocked=lv>=n,pc=Math.round(80*Math.pow(1.25,n/5-1));return `<article class="set"><h3>${unlocked?'🏅':'🔒'} Niveau ${n}</h3><p>${pc} PC + Luck Charm ${n>=40?'III':n>=20?'II':'I'}</p><button ${unlocked&&!claimed?'':'disabled'} onclick="pmsClaimLevel(${n})">${claimed?'Récupéré':unlocked?'Récupérer':'Verrouillé'}</button></article>`}).join('')}</div></section>`}
 const pmsOldShow=show;
 show=function(v){if(v==='level'){vw='level';$('#main-nav').classList.remove('expanded');pmsLevelPage();document.querySelectorAll('#main-nav button').forEach(b=>b.classList.toggle('on',b.id==='n-level'));return}pmsOldShow(v)};
 $('#main-nav').insertAdjacentHTML('beforeend','<button class="g" id="n-level" onclick="show(\'level\')">Niveaux & badges</button>');
@@ -955,6 +991,10 @@ function pmSkipLastAnimation(){if(!rv||rv.i!==rv.cards.length-1)return;pmFxSeria
 reveal=function(){
  clearTimeout(pmSuspenseTimer);clearTimeout(pmFxTimer);const serial=++pmFxSerial;pmRevealSerial++;
  pmOldRevealNew();if(!rv?.cards?.length)return;
+ const shown=rv.cards[rv.i];if(shown&&pmNewCards()[shown.id]){
+   const face=document.querySelector('#stage .real-stack .stack-front');
+   if(face&&!face.querySelector('.pm-opening-new'))face.insertAdjacentHTML('beforeend','<span class="pm-opening-new">NEW</span>');
+ }
  const last=rv.i===rv.cards.length-1,final=rv.cards[rv.cards.length-1],stack=document.querySelector('#stage .real-stack');if(!stack)return;
  if(pmIsHit(final)&&!['rare','holo'].includes(final.tier))stack.classList.add('pm-rainbow-peek');
  if(!last)return;
@@ -966,4 +1006,43 @@ reveal=function(){
  const duration=Math.round((pmDurations[tier]||500)*factor);
  pmFxTimer=setTimeout(()=>pmFinishLastReveal(serial,stack,info,controls,label,tier),duration);
 };
-</script></body></html>
+</script>
+<style>
+.pm-opening-new{position:absolute;top:9px;left:9px;z-index:12;background:#e52637;color:#fff;border:2px solid #fff;border-radius:20px;padding:5px 10px;font-size:12px;font-weight:900;letter-spacing:.8px;box-shadow:0 3px 12px #000a}
+.pm-chase-hint{font-size:12px;color:#ddd;margin:9px 0}
+.pm-chase-lock{opacity:.65}
+</style>
+<script>
+/* Extensions du jeu : sélection Chase limitée et modifiable toutes les 24 h. */
+const PMS_CHASE_MAX=5,PMS_CHASE_COOLDOWN=86400000;
+function pmsChaseCooldown(){return Math.max(0,PMS_CHASE_COOLDOWN-(Date.now()-(S.chaseChangedAt||0)))}
+function pmsChaseTime(){const t=pmsChaseCooldown();return Math.ceil(t/3600000)+' h '+String(Math.ceil(t%3600000/60000)).padStart(2,'0')+' min'}
+chaseToggle=function(id){
+ S.chase??={};const count=Object.keys(S.chase).length;
+ if(pmsChaseCooldown()&&(S.chase[id]||count>=PMS_CHASE_MAX))return toast('Tu peux changer tes Chase Cards dans '+pmsChaseTime());
+ if(!S.chase[id]&&count>=PMS_CHASE_MAX)return toast('Maximum 5 Chase Cards. Retire une carte après le délai de 24 h.');
+ if(S.chase[id])delete S.chase[id];else S.chase[id]=1;
+ if(Object.keys(S.chase).length>=PMS_CHASE_MAX||S.chaseChangedAt)S.chaseChangedAt=Date.now();save();
+ document.querySelectorAll('[data-chase]').forEach(btn=>{const active=!!S.chase[btn.dataset.chase];btn.textContent=active?'★ Chase suivie':'☆ Chase card';btn.classList.toggle('chase-on',active)});
+ toast('Chase Cards : '+Object.keys(S.chase).length+'/5. Bonus ×1,5 pour les cartes ciblées. Une fois les 5 choisies, changement après 24 h.');
+};
+const pmsOldChaseSection=chaseSection;
+chaseSection=function(){return pmsOldChaseSection()+`<p class="pm-chase-hint">${Object.keys(S.chase||{}).length}/5 Chase Cards · Tirage individuel ×1,5 · ${pmsChaseCooldown()?'Modification dans '+pmsChaseTime():'Modifiables maintenant'} (24 h après chaque changement).</p>`};
+const pmsOldSearch=gsearch;
+gsearch=async function(q){await pmsOldSearch(q);if(vw!=='search')return;
+ const cards=document.querySelectorAll('#app .cards .tc');cards.forEach(el=>{
+  const action=el.getAttribute('onclick')||'',match=action.match(/detail\('([^']+)'\)/);if(!match)return;
+  const id=match[1];if(el.querySelector('[data-chase]'))return;
+  const b=document.createElement('button');b.className='chase-btn'+(S.chase?.[id]?' chase-on':'');b.dataset.chase=id;b.textContent=S.chase?.[id]?'★ Chase suivie':'☆ Chase card';
+  b.addEventListener('click',e=>{e.stopPropagation();chaseToggle(id)});el.appendChild(b);
+ });
+ const box=document.querySelector('#app .crumb');if(box)box.insertAdjacentHTML('afterend',`<p class="pm-chase-hint">${Object.keys(S.chase||{}).length}/5 Chase Cards · Cibles ×1,5 au tirage · ${pmsChaseCooldown()?'Prochain changement dans '+pmsChaseTime():'Sélection disponible'}</p>`);
+};
+/* Conserver l'ancien délai pour les sauvegardes existantes ; seule la génération future passe à 6 minutes. */
+const pmsOldTick=gtick;
+gtick=function(){pmsAccrue();pmsOldTick()};
+/* Limiter le niveau affiché à 100, tout en conservant les XP supplémentaires en sauvegarde. */
+const pmsPreviousLevel=pmsLevel;
+pmsLevel=function(xp){return Math.min(100,pmsPreviousLevel(xp))};
+</script>
+</body></html>
