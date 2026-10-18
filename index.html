@@ -420,7 +420,7 @@ header{padding:7px 10px;gap:6px;min-height:48px}header h1{font-size:16px;letter-
 /* ===== RÉGLAGES (modifiables) ===== */
 const CONFIG={
  godPack:.003,       // chance d'un God Pack (0,3 %)
- godSlot:{double:35,AR:35,SAR:20,secret:10}, // tirage de chaque carte d'un God pack
+ godSlot:{double:50,AR:35,SAR:12,secret:3}, // tirage de chaque carte d'un God pack
  start:60,          // PokéCoins de départ
  daily:300,           // récompense quotidienne (PokéCoins)
  // Valeur de base d'une carte selon sa rareté (chaque carte varie ensuite de -25% à +35%, de façon stable)
@@ -429,7 +429,7 @@ const CONFIG={
  priceById:{base1:600,base2:260,base3:240,base5:300,neo1:320,xy12:90,'sm3.5':70,'sm11.5':80,sm12:60,swsh3:40,'swsh4.5':70,swsh7:150,swsh8:35,swsh9:40,'swsh10.5':45,swsh11:40,swsh12:40,'swsh12.5':90,sv01:25,sv02:25,sv03:30,'sv03.5':90,sv04:30,'sv04.5':80,sv05:25,sv06:30,sv07:35,sv08:35,'sv08.5':220,sv09:30,sv10:35,'sv10.5b':45,'sv10.5w':45,me01:40,me02:35,ALL:15},
  // Probabilités (en poids) pour chacune des 6 cartes. Les raretés absentes de l'extension sont ignorées.
  slots:[{common:100},{common:100},{common:70,uncommon:30},{uncommon:100},{uncommon:70.5,rare:20.5,holo:7.5,AR:1.5},
-        {common:45,uncommon:30,rare:12.5,holo:5.5,double:3,AR:1.5,SAR:.9,secret:.5}]
+        {common:45,uncommon:30,rare:12.5,holo:5.5,double:5,AR:1.5,SAR:.45,secret:.2}]
 };
 const FAMOUS=['base1','base2','base3','base5','neo1','xy12','sm3.5','sm11.5','sm12','swsh3','swsh4.5','swsh7','swsh8','swsh9','swsh10.5','swsh11','swsh12','swsh12.5','sv01','sv02','sv03','sv03.5','sv04','sv04.5','sv05','sv06','sv07','sv08','sv08.5','sv09','sv10','sv10.5b','sv10.5w','me01','me02','bw1','bw2','bw4','bw5','bw6','bw7','bw8','bw9','bw10','bw11','hgss1','hgss2','hgss3','hgss4','pl1','pl2','pl3','pl4','dp1','dp2','dp4','dp5','dp6','dp7','ex1','ex2','ex3','ex5','ex6','ex7','ex8','ex9','ex12','ex14','ex15','ex16'];
 const price=id=>Math.ceil((CONFIG.priceById[id]??(/^(base|gym|neo|ecard)/.test(id)?120:/^(ex|pop)/.test(id)?60:/^(dp|pl|hgss|col)/.test(id)?40:/^(bw|xy|sm|swsh)/.test(id)?28:22))*2.775); // prix augmentés de 50 % par rapport à la version précédente (x1,85 × 1,5)
@@ -538,7 +538,7 @@ function movePack(delta){selectedPack=Math.max(0,Math.min(showcaseSets.length-1,
 function kyGallery(items){showcaseSets=items;selectedPack=Math.min(selectedPack,Math.max(0,items.length-1));return `<div class="ky-gallery"><div class="ky-gallery-head"><h2>Choisir un booster</h2><span id="ky-position"></span></div><div class="ky-carousel-row"><button class="ky-arrow" id="ky-prev" onclick="movePack(-1)" aria-label="Booster précédent">‹</button><div id="ky-carousel" class="ky-carousel"></div><button class="ky-arrow" id="ky-next" onclick="movePack(1)" aria-label="Booster suivant">›</button></div><div id="ky-selected"></div></div>`}
 function levelShow(items){return LEVELS.map((l,i)=>{const arr=items.filter(s=>levelOf(s)===i);return arr.length?`<section class="level-section"><div class="level-heading"><h2>${l.name}</h2><span>${i<=unlockedLevel()?'Débloqué':`${completedMasters()}/${l.need} Master Sets`}</span></div><div class="rail">${arr.map(setCard).join('')}</div></section>`:''}).join('')}
 
-function home(){const vit=[...SETS].sort((a,b)=>levelOf(a)-levelOf(b)||price(a.id)-price(b.id)).slice(0,22);$('#app').innerHTML=`<section class="ky-welcome"><div class="ky-kicker">POKÉMASTER SET</div><h2>Ouvre. Collectionne. Complète.</h2><p>Un booster gratuit toutes les 10 minutes. Complète des Master Sets pour débloquer de nouvelles extensions.</p></section><section class="ky-free"><div><span class="ky-kicker">BOOSTER GRATUIT</span><h2>Booster de base</h2><p>Ta réserve se remplit toutes les 10 minutes, jusqu'à 10 boosters.</p><div id="free-count" class="free-counter">0/10 boosters</div><div id="free-timer" class="free-timer">Prochain booster dans 10:00</div><div class="ky-actions"><button id="fb" onclick="freeBoost()">Récupérer</button><button id="free-open" class="g" onclick="openFreeOwned()">Ouvrir un booster</button></div></div><div class="ky-free-pack" onclick="openFreeOwned()"><div class="ky-pack"><span class="ky-crimp"></span><span class="ky-pack-head">POKÉMASTER SET</span>${freeFeatured()}<span class="ky-pack-name">BOOSTER DE BASE</span><span class="ky-pack-bottom">6 CARTES</span></div></div></section><div class="ky-progress"><b>Progression Master Sets</b><span>${completedMasters()} terminé(s) · Niveau ${unlockedLevel()+1}/4</span></div>${kyGallery(vit)}${chaseSection()}<section class="ky-bonus"><button class="g" onclick="randBoost()">Booster surprise · ${RAND} PC</button><button class="g" onclick="daily()">Récompense du jour · ${CONFIG.daily} PC</button></section>`;renderShowcase();fbUpdate();hydrateFeatured()}
+function home(){const vit=[...SETS].sort((a,b)=>levelOf(a)-levelOf(b)||price(a.id)-price(b.id)).slice(0,22);$('#app').innerHTML=`<section class="ky-welcome"><div class="ky-kicker">POKÉMASTER SET</div><h2>Ouvre. Collectionne. Complète.</h2><p>Un booster gratuit toutes les 10 minutes. Complète des Master Sets pour débloquer de nouvelles extensions.</p></section><section class="ky-free"><div><span class="ky-kicker">BOOSTER GRATUIT</span><h2>Booster de base</h2><p>Ta réserve se remplit toutes les 10 minutes, jusqu'à 10 boosters.</p><div id="free-count" class="free-counter">0/10 boosters</div><div id="free-timer" class="free-timer">Prochain booster dans 10:00</div><div class="ky-actions"><button id="fb" onclick="freeBoost()">Récupérer</button><button id="free-open" class="g" onclick="openFreeOwned()">Ouvrir un booster</button></div></div><div class="ky-free-pack" onclick="openFreeOwned()"><div class="ky-pack"><span class="ky-crimp"></span><span class="ky-pack-head">POKÉMASTER SET</span>${freeFeatured()}<span class="ky-pack-name">BOOSTER DE BASE</span><span class="ky-pack-bottom">6 CARTES</span></div></div></section><div class="ky-progress"><b>Progression Master Sets</b><span>${completedMasters()} terminé(s) · Niveau ${unlockedLevel()+1}/4</span></div>${kyGallery(vit)}${chaseSection()}<section class="ky-bonus"><button class="g" onclick="daily()">Récompense du jour · ${CONFIG.daily} PC</button></section>`;renderShowcase();fbUpdate();hydrateFeatured()}
 function openFreeOwned(){if(!(S.stock.ALL||0))return toast('Tu n’as pas encore de booster de base.');openBooster('ALL')}
 function fbUpdate(){const b=$('#fb');if(!b)return;const count=Math.min(10,S.stock.ALL||0),t=Math.max(0,6e5-(Date.now()-S.free));const ready=t===0;const timer=$('#free-timer'),counter=$('#free-count'),op=$('#free-open');
  if(counter)counter.textContent=`${count}/10 boosters`;
@@ -601,7 +601,7 @@ function pick(cards,sl=CONFIG.slots){
 let tearing=false;
 function tear(){
  if(tearing)return;let out;
- let god=Math.random()<CONFIG.godPack&&cur.cards.some(c=>['double','AR','SAR','secret'].includes(c.tier));try{out=pick(cur.cards,god?Array(6).fill(CONFIG.godSlot):undefined)}catch(e){return toast('Les raretés de cette extension sont indisponibles. Réessaie plus tard.')}
+ let god=Math.random()<CONFIG.godPack&&new Set(cur.cards.filter(c=>['double','AR','SAR','secret'].includes(c.tier)).map(c=>c.id)).size>=6;try{out=pick(cur.cards,god?Array(6).fill(CONFIG.godSlot):undefined)}catch(e){return toast('Les raretés de cette extension sont indisponibles. Réessaie plus tard.')}
  tearing=true;S.stock[cur.s.id]--;S.st.open++;if(god)S.st.godp++;out.forEach(c=>{S.owned[c.id]=(S.owned[c.id]||0)+1;S.meta[c.id]=mc(c)});save();
  $('#pack').classList.add('tear');
  setTimeout(()=>{tearing=false;rv={cards:out,i:0,flipped:false,busy:false,god};if(batchState){batchState.results.push({cards:out,god});batchState.done++;}god?godIntro():reveal()},350)}
@@ -869,10 +869,10 @@ pick=function(cards,slots){
    let tiers=Object.keys(row).filter(t=>by[t]?.length);if(!tiers.length)tiers=Object.keys(by);
    const sum=tiers.reduce((a,t)=>a+(row[t]||1),0);let roll=Math.random()*sum,tier=tiers[0];
    for(const t of tiers){roll-=row[t]||1;if(roll<=0){tier=t;break}}
-   const pool=by[tier],weights=pool.map(c=>chase[c.id]?1.5:1);
+   let pool=by[tier];if(slots&&slots.length===6&&slots.every(w=>w===CONFIG.godSlot)){const fresh=pool.filter(c=>!out.some(o=>o.id===c.id));if(fresh.length)pool=fresh;else {const allFresh=cards.filter(c=>['double','AR','SAR','secret'].includes(c.tier)&&!out.some(o=>o.id===c.id));if(allFresh.length)pool=allFresh;}}const weights=pool.map(c=>chase[c.id]?1.5:1);
    let r=Math.random()*weights.reduce((a,b)=>a+b,0),card=pool[0];
    for(let i=0;i<pool.length;i++){r-=weights[i];if(r<=0){card=pool[i];break}}
-   if(out.includes(card)&&pool.length>1){const others=pool.filter(c=>!out.includes(c));if(others.length)card=others[Math.floor(Math.random()*others.length)]}
+   if(out.some(c=>c.id===card.id)&&pool.length>1){const others=pool.filter(c=>!out.some(o=>o.id===c.id));if(others.length)card=others[Math.floor(Math.random()*others.length)]}
    out.push(card);
  }
  return out;
