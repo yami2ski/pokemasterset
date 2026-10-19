@@ -407,7 +407,100 @@ header{padding:7px 10px;gap:6px;min-height:48px}header h1{font-size:16px;letter-
 </style><style>
 .pm30-free-hero{display:flex!important;align-items:center;justify-content:space-between;gap:22px;padding:28px 32px!important;background:linear-gradient(105deg,#201923,#4a202f)!important;border-radius:26px!important;min-height:330px}
 .pm30-free-info{flex:1;min-width:0}.pm30-free-info h2{margin:14px 0;font-size:clamp(23px,3vw,38px)}.pm30-free-info p{color:#c9c0c8}.pm30-free-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:20px}.pm30-free-actions button{flex:1;min-width:145px;padding:13px!important}.pm30-hero-art{width:240px;flex-shrink:0;display:flex;justify-content:center}.pm30-hero-pack{width:205px;height:282px;border:2px solid #897b93;border-radius:18px;background:repeating-linear-gradient(90deg,#262137,#262137 9px,#373049 11px,#373049 14px);display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:18px 8px;box-shadow:0 10px 28px #0008}.pm30-hero-pack>b{font-size:15px;letter-spacing:1.3px;color:#ffce70}.pm30-hero-pack>span{font-weight:900;font-size:13px;text-align:center}.pm30-hero-pack>small{background:#17111f;padding:7px 17px;border-radius:30px}.pm30-hero-stack{position:relative;width:168px;height:160px}.pm30-hero-card{position:absolute;top:9px;left:34px;width:95px;height:133px;object-fit:cover;border-radius:7px;border:2px solid #ddd;box-shadow:0 7px 12px #0009}.pm30-hero-0{transform:translateX(-25px) rotate(-15deg)}.pm30-hero-1{transform:translateX(3px) rotate(3deg)}.pm30-hero-2{transform:translateX(31px) rotate(13deg)}.chase-item img{display:block;width:100%;height:180px;object-fit:contain;margin-bottom:8px}.chase-fallback{min-height:140px;text-align:center;padding-top:50px;color:#aaa}@media(max-width:650px){.pm30-free-hero{padding:20px!important;gap:10px}.pm30-hero-art{width:105px}.pm30-hero-pack{transform:scale(.54);transform-origin:center;flex-shrink:0}.pm30-free-info h2{font-size:21px}.pm30-free-actions button{min-width:100%;}.chase-item img{height:145px}}
-</style></head><body class="dos">
+</style><style id="pm-refonte-legere">
+:root{--bg:#0b1634!important;--pn:#122650!important;--ac:#ffcc00!important;--tx:#f6f9ff!important;--mu:#aabbd8!important;--bl:#315dbe!important}
+html{scroll-behavior:smooth}
+body{background:radial-gradient(ellipse at 10% -10%,#254a94 0,transparent 35%),radial-gradient(ellipse at 90% 5%,#51265f 0,transparent 28%),#0b1634!important;color:#f6f9ff!important;font-family:system-ui,-apple-system,"Avenir Next",sans-serif!important}
+header{background:#09132ef0!important;border-bottom:1px solid #426cb2!important;box-shadow:0 8px 32px #03081870!important}
+header h1{color:#ffcc00!important}header h1 .pbl{border-color:#fff!important;box-shadow:0 0 0 2px #0b1833}
+#main-nav button{color:#d5e3ff!important}#main-nav button.on{color:#ffda2a!important;background:#243e77!important;border-color:#ffcc00!important}
+button{min-height:42px;border-radius:12px!important;background:#ffcc00!important;color:#172c5a!important;transition:filter .14s,transform .14s,box-shadow .14s}
+button.g{background:#1b3770!important;border:1px solid #466bb0!important;color:#eff5ff!important}
+button:hover:not(:disabled){filter:brightness(1.12);transform:translateY(-1px)}button:active:not(:disabled){transform:scale(.98)}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #ffda4a!important;outline-offset:2px}
+input,select{background:#0c214e!important;border-color:#4769a0!important;color:white!important}
+.coins{background:#18305c!important;border:1px solid #436bb3!important;color:#ffda51!important;border-radius:13px!important}
+main{max-width:1160px!important;padding:20px 16px 70px!important}
+.ky-welcome{padding:6px 0 0}.ky-welcome h2{font-size:clamp(30px,5vw,48px)!important;letter-spacing:-1.8px!important;line-height:1.07}.ky-welcome p{color:#baccec!important}
+.ky-kicker{color:#ffcc00!important}.ky-free,.pm30-free-hero{background:linear-gradient(113deg,#183777,#22295b 60%,#43296c)!important;border:1px solid #547ac2!important;border-radius:24px!important;box-shadow:0 20px 55px #03091c65!important}
+.pm30-free-info p{color:#c4d6f8!important}.pm30-hero-pack{border-color:#b8a5f9!important;box-shadow:0 14px 32px #040918aa!important}
+.ky-progress,.ky-showcase,.chase-panel,.ky-set,.set,.binder,.profile-hero,.mb{background:#112552!important;border:1px solid #355b9a!important;color:#f6f9ff!important;box-shadow:0 8px 25px #02081945}
+.ky-progress{border-radius:16px!important}.ky-showcase{border-radius:22px!important}.ky-showcase p,.chase-panel p{color:#bed0ef!important}
+.ky-gallery-head h2,.ky-section-title,.level-heading h2,.chase-panel h2{color:#f8fbff!important}
+.ky-carousel{scroll-behavior:smooth}.ky-slide .ky-pack{background:linear-gradient(145deg,#1b4086,#2359ba 36%,#432c87 65%,#bc364b)!important;border:2px solid #b7d4ff!important;border-radius:18px!important;box-shadow:0 15px 32px #030918b5!important}
+.ky-slide .ky-pack-head{color:#ffdf44!important}.ky-slide .ky-pack-name,.ky-pack-name{color:#fff!important;text-shadow:0 2px 8px #020817!important}
+.ky-slide.active{filter:drop-shadow(0 0 13px #ffdf4166)!important}
+.ky-slide .pack-art{opacity:.16!important}.ky-slide .featured-three{z-index:12!important;top:22%!important;left:2%!important;width:96%!important;height:54%!important}
+.ky-slide .featured-three img{position:absolute!important;top:7%!important;left:25%!important;width:50%!important;height:86%!important;max-height:none!important;max-width:none!important;object-fit:contain!important;filter:drop-shadow(0 8px 8px #000b)!important}
+.ky-slide .featured-three img.featured-0{transform:translateX(-49%) rotate(-13deg)!important}.ky-slide .featured-three img.featured-1{transform:translateY(-6%)!important}.ky-slide .featured-three img.featured-2{transform:translateX(49%) rotate(13deg)!important}
+.ky-slide .featured-loading{color:#d6dfff;font-size:11px}
+.simple-set.ky-set{padding:16px 12px!important;border-radius:18px!important;gap:10px!important}
+.simple-set .booster-choice{background:linear-gradient(160deg,#193979,#325cba 45%,#4b2b83 83%)!important;border:1px solid #789ee2!important;border-radius:14px!important;clip-path:none!important;box-shadow:0 10px 20px #0108176e!important;position:relative;overflow:hidden!important}
+.simple-set .booster-choice .pack-art{opacity:.28!important}.simple-set .booster-choice .featured-three{position:absolute!important;top:20%!important;left:4%!important;width:92%!important;height:56%!important;z-index:4!important}
+.simple-set .featured-three img{position:absolute!important;top:2%!important;left:27%!important;width:46%!important;height:94%!important;max-height:none!important;object-fit:contain!important}
+.simple-set .featured-three .featured-0{transform:translateX(-40%) rotate(-12deg)!important}.simple-set .featured-three .featured-1{transform:translateY(-5%)!important;z-index:5}.simple-set .featured-three .featured-2{transform:translateX(40%) rotate(12deg)!important}
+.simple-set .booster-choice strong{color:#fff!important;z-index:6!important;text-shadow:0 2px 9px #07152e!important}.simple-set .pack-meta{color:#ffda52!important}
+.pm-quick{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:20px 0}
+.pm-quick button{display:flex;align-items:center;text-align:left;gap:10px;flex-wrap:wrap;padding:15px 16px;background:linear-gradient(135deg,#1d4489,#163263)!important;color:white!important;border:1px solid #4c7dc9!important;border-radius:17px!important}
+.pm-quick button>span{font-size:25px;color:#ffdc49}.pm-quick button>b{font-size:15px}.pm-quick button>small{display:block;flex-basis:100%;margin-left:36px;color:#bad3ff;font-size:12px}
+.pm-mission-preview{margin:22px 0;padding:20px;background:#122654;border:1px solid #3e68aa;border-radius:22px}
+.pm-section-heading{display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap}.pm-section-heading h2{margin:5px 0 12px;font-size:22px}
+.pm-mission-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.pm-mission-grid article{background:#0b1c3f;border:1px solid #395e9d;border-radius:14px;padding:14px}
+.pm-mission-name{font-weight:750;min-height:45px}.pm-mission-progress{display:flex;justify-content:space-between;color:#bad0f1;font-size:12px;margin:8px 0}.pm-mission-progress b{color:#ffdc4e}
+.pm-progress{height:7px;border-radius:50px;background:#233b64;overflow:hidden}.pm-progress i{display:block;height:100%;background:linear-gradient(90deg,#ffd13c,#ff884a);border-radius:50px}
+#stage{background:#050d24ee!important;backdrop-filter:blur(10px)!important}#stage .sbox{max-width:95vw}#stage .deck{animation:fl 3s ease-in-out infinite!important}#stage .deck.tear{animation:none!important}
+#stage .deck.tear .cb{animation-duration:.55s!important;animation-delay:calc(var(--i)*.06s)!important}
+#stage .inner{transition-duration:.45s!important}.flipped.big-AR .inner,.flipped.big-SAR .inner,.flipped.big-secret .inner{transition-duration:.72s!important}
+#stage .x{position:fixed!important;top:max(12px,env(safe-area-inset-top))!important;right:12px!important;z-index:30!important}
+.ky-bonus button{width:100%}.pb i{background:#ffcc00!important}
+@media(max-width:700px){main{padding:13px 12px 56px!important}.pm-quick{gap:7px}.pm-quick button{padding:11px 8px;justify-content:center;text-align:center;flex-direction:column;gap:2px}.pm-quick button>span{font-size:23px}.pm-quick button>b{font-size:12px}.pm-quick button>small{display:none}.pm-mission-grid{grid-template-columns:1fr}.pm-mission-name{min-height:0}.pm30-free-hero{padding:16px!important}.ky-gallery{margin-top:16px}.simple-set .booster-choice{max-width:100%}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto!important}#stage .deck,#stage .deck.tear .cb{animation:none!important}}
+</style>
+<style id="pm-noir-nacre-rouge">
+/* DA noire nacrée, blanc et rouge. Surcharge purement visuelle. */
+:root{--bg:#08090d!important;--pn:#15171c!important;--ac:#e83645!important;--rd:#ed3545!important;--bl:#353a4e!important;--tx:#f7f7f9!important;--mu:#aaacb6!important}
+html{color-scheme:dark}
+body{color:#f7f7f9!important;background:radial-gradient(ellipse 90% 60% at -15% -15%,#44445270 0%,transparent 58%),radial-gradient(ellipse 70% 65% at 105% 18%,#39232c70 0%,transparent 55%),radial-gradient(ellipse 75% 55% at 50% 110%,#1f242f 0%,transparent 72%),linear-gradient(135deg,#08090c 0%,#15161d 46%,#090a0e 100%) fixed!important}
+header{background:linear-gradient(105deg,#101116f7,#19151af5 65%,#090a0ef5)!important;border-bottom:1px solid #484148!important;box-shadow:0 12px 36px #0008!important;backdrop-filter:blur(14px)!important}
+header h1{color:#fff!important;letter-spacing:-.55px}
+header h1 .pbl{border-color:#f5f5f6!important;box-shadow:0 0 0 2px #292a2d,0 0 20px #ed354522}
+#main-nav button{color:#c4c5cc!important;background:transparent!important;border-color:transparent!important}
+#main-nav button.on{color:#fff!important;background:#3c1e28!important;border-color:#e83645!important;box-shadow:inset 3px 0 #e83645!important}
+button{background:linear-gradient(180deg,#ed4654,#c81b31)!important;color:#fff!important;border-radius:12px!important;box-shadow:0 3px 14px #e8364523!important}
+button.g{background:linear-gradient(155deg,#292a32,#1b1c23)!important;border:1px solid #50505b!important;color:#f7f7f8!important;box-shadow:none!important}
+button.on{background:#f6f6f8!important;color:#17171b!important}
+button:hover:not(:disabled){filter:brightness(1.09);box-shadow:0 5px 22px #ed354530!important}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid #f14d5c!important;outline-offset:3px!important}
+input,select,textarea{background:#16171f!important;border-color:#484951!important;color:#f9f9fc!important}
+.coins{background:linear-gradient(140deg,#292a30,#16161d)!important;border:1px solid #50505c!important;color:#fff!important;box-shadow:inset 0 1px 0 #ffffff11}
+.ky-welcome h2{color:#fff!important;text-shadow:0 2px 18px #ffffff0a}
+.ky-welcome p,.ky-showcase p,.chase-panel p,.pm30-free-info p{color:#b8b7c0!important}
+.ky-kicker{color:#fd5a67!important}
+.ky-free,.pm30-free-hero{background:radial-gradient(ellipse at 85% 25%,#66323d55,transparent 48%),linear-gradient(115deg,#22232d,#121318 48%,#2a1b23)!important;border:1px solid #625158!important;box-shadow:0 18px 48px #0007,inset 0 1px 0 #ffffff12!important}
+.pm30-hero-pack{border-color:#958f9e!important;background:repeating-linear-gradient(90deg,#23222e 0 10px,#34313e 10px 13px)!important;box-shadow:0 15px 38px #000a!important}
+.ky-progress,.ky-showcase,.chase-panel,.ky-set,.set,.binder,.profile-hero,.mb,.pm-mission-preview{background:linear-gradient(135deg,#212129,#111217 72%,#201a20)!important;border:1px solid #44434d!important;color:#f7f7fa!important;box-shadow:0 12px 26px #0005,inset 0 1px 0 #ffffff08!important}
+.ky-progress span{color:#aaaab2!important}
+.ky-gallery-head h2,.ky-section-title,.level-heading h2,.chase-panel h2{color:#f7f7fa!important}
+.ky-slide .ky-pack{background:linear-gradient(145deg,#2c2d36,#12151f 42%,#532632 83%,#20171d)!important;border:1px solid #a5a0ab!important;box-shadow:0 16px 34px #000b,inset 0 1px 0 #ffffff23!important}
+.ky-slide .ky-pack-head{color:#fff!important}.ky-slide .ky-pack-name,.ky-pack-name{color:#fff!important}
+.ky-slide.active{filter:drop-shadow(0 0 15px #e8364545)!important}
+.ky-slide .featured-loading{color:#d6d4d7!important}
+.simple-set .booster-choice{background:linear-gradient(155deg,#36343e,#13141b 42%,#5a2734 100%)!important;border:1px solid #77707c!important;box-shadow:0 12px 26px #0009!important}
+.simple-set .booster-choice .pack-art{opacity:.32!important}
+.simple-set .booster-choice strong{color:#fff!important;text-shadow:0 2px 8px #000e!important}
+.simple-set .pack-meta{color:#fa5b65!important}
+.pm-quick button{background:linear-gradient(140deg,#292932,#17181e)!important;border:1px solid #50505a!important;color:#fff!important}
+.pm-quick button>span{color:#fd515f!important}.pm-quick button>small{color:#b4b1ba!important}
+.pm-mission-grid article{background:linear-gradient(150deg,#2a282f,#14151b)!important;border-color:#48444c!important}
+.pm-mission-progress{color:#b4b1bb!important}.pm-mission-progress b{color:#fff!important}
+.pm-progress{background:#3a3037!important}.pm-progress i,.pb i{background:linear-gradient(90deg,#f56a72,#cd1730)!important}
+#stage{background:#090a0eeF!important;backdrop-filter:blur(11px)!important}
+#stage .back,#stage .cb{filter:saturate(.85)}
+.tc img,.pocket img,.profile-card img{object-fit:contain!important}
+@media(max-width:700px){#main-nav.expanded{background:#14141b!important;border-color:#47424b!important}.ky-showcase,.pm-mission-preview{padding:16px!important}}
+@media(prefers-reduced-motion:reduce){button{transition:none!important}}
+</style>
+</head><body class="dos">
 <header>
 <h1><i class="pbl"></i>PokéMaster Set</h1>
 <button id="menu-toggle" class="g" type="button" aria-label="Ouvrir le menu" aria-expanded="false" onclick="toggleMenu()"><span></span><span></span><span></span></button><nav id="main-nav"><button class="g" id="n-home" onclick="show('home')">Accueil</button><button class="g" id="n-shop" onclick="show('shop')">Boutique</button><button class="g" id="n-coll" onclick="show('coll')">Collection</button><button class="g" id="n-ach" onclick="show('ach')">Succès <span id="ach-count" class="badge" aria-label="Récompenses de succès à récupérer"></span></button><button class="g" id="n-profile" onclick="show('profile')">Mon profil</button></nav>
@@ -440,16 +533,31 @@ const price=id=>Math.ceil(((id==='30th'?45:CONFIG.priceById[id])??(/^(base|gym|n
 /* Cotation fictive: millésime du set + époque + mécaniques emblématiques. */
 const PM_SET_YEARS={};
 const pmEraYear=id=>{id=String(id||'').toLowerCase();if(/^base|^gym|^neo/.test(id))return 2000;if(/^ecard|^ex/.test(id))return 2004;if(/^dp/.test(id))return 2007;if(/^pl/.test(id))return 2009;if(/^hgss|^col/.test(id))return 2010;if(/^bw/.test(id))return 2012;if(/^xy/.test(id))return 2015;if(/^sm/.test(id))return 2018;if(/^swsh/.test(id))return 2021;if(/^sv/.test(id))return 2024;if(/^me/.test(id))return 2026;return 2026};
+/* Cotation interne : même rareté, valeur différente selon la difficulté du set.
+   Prix d'un booster (pondéré), âge du set et léger prestige de séries.
+   Les taux de tirage et les cartes obtenues ne sont pas modifiés. */
+function cardSetPremium(sid){
+ const booster=Math.max(15,Number(price(sid))||50);
+ // Influence progressive du prix du booster, sans écraser l'écart entre raretés.
+ const boosterFactor=Math.min(2.9,Math.max(.78,Math.pow(booster/65,.32)));
+ const year=PM_SET_YEARS[sid]||pmEraYear(sid);
+ const age=Math.max(0,2026-year);
+ const vintageFactor=1+Math.min(.28,age*.009);
+ // Les extensions Plasma originales bénéficient d'une faible prime de collection.
+ const plasmaFactor=/^bw(?:8|9|10)$/.test(sid)?1.08:1;
+ return boosterFactor*vintageFactor*plasmaFactor;
+}
 function value(c){
  const id=String(c.id||''),sid=String(c.sid||id.slice(0,id.lastIndexOf('-')));
  let h=0;for(const ch of id)h=(h*31+ch.charCodeAt(0))>>>0;
- const year=PM_SET_YEARS[sid]||pmEraYear(sid),age=Math.max(0,2026-year);
- const ageBonus=Math.min(4.8,1+Math.pow(age/11,1.38)*.95);
- const eraBonus=/^(bw|xy)/i.test(sid)?1.65:/^(dp|pl|hgss|col)/i.test(sid)?1.85:/^(ex|neo|gym|base|ecard)/i.test(sid)?1.5:1;
- const rarity=String(c.rar||c.r||'')+' '+String(c.name||c.n||'');
- const special=/\b(?:lv\.?\s*x|level\s*x)\b/i.test(rarity)?2.8:/\blegend(?:e|ary)?\b/i.test(rarity)&&/^(hgss|col)/i.test(sid)?3.2:/team plasma|plasma|équipe plasma/i.test(rarity)?2.25:1;
- const f=Math.min(12,Math.max(.8,Math.pow(price(sid)/25,.8)));
- return Math.max(1,Math.round((CONFIG.val[c.tier||c.t]||1)*(.75+h%60/100)*f*ageBonus*eraBonus*special*(pm30Classic(c)?3:1)*(c.pmRGB?25:1)*(pm30Futur(c)&&/mewtwo|mew/i.test(c.name||'')?3.5:1)));
+ const variation=.95+(h%11)/100; // +/- 5 % pour des cartes de même rareté.
+ const tier=c.tier||c.t||'common';
+ const base=CONFIG.val[tier]||CONFIG.val.common;
+ const rarText=[c.rar,c.r,c.name,c.n].filter(Boolean).join(' ');
+ // Bonus modestes propres à certaines mécaniques/éditions ; ne se cumulent pas.
+ const special=/\blv\.?\s*x\b/i.test(rarText)?1.18:/\blegend(?:e|ary)?\b/i.test(rarText)&&/^(hgss|col)/i.test(sid)?1.22:1;
+ const collector=pm30Classic(c)?1.5:c.pmRGB?4:pm30Futur(c)&&/mewtwo|mew/i.test(c.name||'')?1.6:1;
+ return Math.max(1,Math.round(base*cardSetPremium(sid)*variation*special*collector));
 }
 const TIERS={common:'Commune',uncommon:'Peu commune',rare:'Rare',holo:'Rare holo',double:'Double rare et plus',AR:'Illustration rare',SAR:'Illustration spéciale rare',secret:'Secrète / Dorée',unknown:'Inconnue'};
 function tierOf(r){r=(r||'').toLowerCase();
@@ -553,25 +661,32 @@ function levelOf(s){if(s.id==='ALL'||s.id==='30th')return 0;const p=price(s.id)/
 function completedMasters(){return SETS.filter(s=>{const n=s.cardCount?.total||0;return n>0&&Object.keys(S.owned).filter(id=>id.startsWith(s.id+'-')&&S.owned[id]>0).length>=n}).length}
 function unlockedLevel(){const n=completedMasters();return n>=5?3:n>=4?2:n>=2?1:0}
 function locked(s){return s.id!=='ALL'&&levelOf(s)>unlockedLevel()}
-function packVisual(s){if(s.id==='ALL'||s.id==='30th')return `<div class="pack-art">${cimg(PM30_USER_CARDS[0])}</div>`;const art=`https://assets.tcgdex.net/fr/${encodeURIComponent(s.id)}/1/high.webp`;return `<div class="pack-art"><img loading="lazy" src="${art}" alt="Illustration de ${esc(s.name)}" onerror="this.style.display='none'">${logo(s)}</div>`}
+function packVisual(s){
+ if(s.id==='ALL'||s.id==='30th'){const c=pm30HeroCard('lugia')||PM30_USER_CARDS[0];return `<div class="pack-art"><img loading="lazy" src="${esc(c.image)}" alt="Pokémon ${esc(c.name)}"></div>`}
+ const id=encodeURIComponent(s.id),art=`https://assets.tcgdex.net/fr/${id}/1/high.webp`;
+ return `<div class="pack-art"><img loading="lazy" src="${art}" alt="Carte de ${esc(s.name)}" onerror="this.style.display='none'">${logo(s)}</div>`
+}
 // Les cartes phares proviennent de la liste réelle des cartes de chaque extension.
 // Les illustrations sont récupérées depuis TCGdex, puis injectées après chargement.
 const featuredCache={};
 function featuredMarkup(key){return `<span class="featured-three" data-featured="${esc(key)}"><span class="featured-loading">3 CARTES PHARES</span></span>`}
-function featuredThree(s){return s.id==='ALL'?'':featuredMarkup(s.id)}
+function featuredThree(s){return featuredMarkup(s.id==='ALL'?'30th':s.id)}
 function freeFeatured(){return featuredMarkup('FREE')}
 async function featuredCards(s){
  if(featuredCache[s.id])return featuredCache[s.id];
- if(s.id==='30th')return featuredCache[s.id]=[PM30_INDEX['30th-157'],PM30_INDEX['30th-149'],PM30_INDEX['30th-156']];
+ if(s.id==='30th')return featuredCache[s.id]=[pm30HeroCard('lugia'),pm30HeroCard('rgb'),pm30HeroCard('mewtwo')].filter(Boolean);
  const data=await j(`${API}/sets/${encodeURIComponent(s.id)}`);
- const cards=(data.cards||[]).filter(c=>c.image||c.id);
- if(!cards.length)return [];
- // Cartes vers la fin de l'extension : illustrations rares / secrètes souvent numérotées en fin de set.
- const picks=[cards[Math.max(0,Math.floor(cards.length*.82))],cards[Math.max(0,Math.floor(cards.length*.92))],cards[cards.length-1]];
- return featuredCache[s.id]=picks.map(c=>({name:c.name||'Carte Pokémon',image:c.image||`https://assets.tcgdex.net/fr/${s.id}/${c.localId||c.id.split('-').pop()}`}));
+ const entries=(data.cards||[]).filter(c=>c.image||c.id);
+ const isPokemon=c=>!(/trainer|supporter|item|outil|object|objet|stadium|stade|energy|énergie|dresseur|fossile/i.test(String(c.category||'')+' '+String(c.name||'')))&&
+ (c.category==='Pokemon'||c.category==='Pokémon'||/pokemon/i.test(c.category||'')||!!c.hp||!!c.types||/ex|gx|vstar|vmax|break|niv\.?x|mega|méga|radiant/i.test(c.name||''));
+ const pokemon=entries.filter(isPokemon);
+ const eligible=pokemon.length>=3?pokemon:entries.filter(c=>!/trainer|item|outil|stadium|energy|énergie|dresseur/i.test(c.category||''));
+ const sorted=eligible.length?eligible:entries;
+ const picks=[sorted[Math.floor(sorted.length*.42)],sorted[Math.floor(sorted.length*.72)],sorted[sorted.length-1]];
+ return featuredCache[s.id]=[...new Map(picks.filter(Boolean).map(c=>[c.id||c.localId,{name:c.name||'Pokémon',image:c.image||`https://assets.tcgdex.net/fr/${s.id}/${c.localId||c.id.split('-').pop()}`}])).values()];
 }
 async function hydrateFeatured(){
- const targets=[...document.querySelectorAll('.ky-slide.active [data-featured], .ky-free-pack [data-featured]')];
+ const targets=[...document.querySelectorAll('.ky-slide.active [data-featured], .simple-set [data-featured], .ky-free-pack [data-featured]')];
  const ids=[...new Set(targets.map(e=>e.dataset.featured))];
  await Promise.all(ids.map(async id=>{
   try{
@@ -593,7 +708,7 @@ function pm30ChaseCard(id){return [...PM30_USER_CARDS,...pm30RGB(),...PM30_CLASS
 function pm30ImageUrl(c){if(!c)return '';const img=c.image||c.i||'';if(img.startsWith('data:')||img.startsWith('https://')||img.startsWith('http://'))return img;return img?img+'/high.webp':''}
 function chaseSection(){const ids=Object.keys(S.chase||{});return `<section class="chase-panel"><h2>Mes chase cards <small>(${ids.length})</small></h2><p>Les cartes que tu recherches en priorité. Ajoute-les depuis « Voir toutes les cartes ».</p><div class="chase-grid">${ids.length?ids.map(id=>{const m=S.meta[id],c=pm30ChaseCard(id)||Object.values(cache).flatMap(d=>d.cards||[]).find(x=>x.id===id);const img=pm30ImageUrl(c)||pm30ImageUrl({image:m?.i});return `<div class="chase-item">${img?`<img loading="lazy" src="${img}" alt="${esc(c?.name||m?.n||id)}" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">`:''}<span class="chase-fallback" style="display:${img?'none':'block'}">Image indisponible</span><small>${esc(c?.name||m?.n||id)}</small><button class="g" data-chase="${id}" onclick="chaseToggle('${id}')">Retirer</button></div>`}).join(''):'<p>Aucune chase card sélectionnée.</p>'}</div></section>`}
 
-function setCard(s){const id=s.id,st=S.stock[id]||0,lk=locked(s),lv=levelOf(s),need=LEVELS[lv].need;return `<article class="set simple-set ky-set ${lk?'locked-pack':''}"><div class="booster-choice" role="button" tabindex="0" onclick="selectPack('${id}')" onkeydown="if(event.key==='Enter')this.click()"><span class="pack-edition">${s.id==='ALL'?'BASE':`NIVEAU ${lv+1}`}</span>${packVisual(s)}<strong>${esc(s.name)}</strong></div><h3>${esc(s.name)}</h3><div class="pack-meta">${price(id)} PC · ${st} en stock${id===BASE_30_SET?` · ${Math.max(0,left(id))}/10 achats restants`:''}</div>${lk?`<div class="lock-explain">Débloqué après ${need} Master Set${need>1?'s':''} (${completedMasters()}/${need})</div>`:''}<button class="g" onclick="${id==='ALL'?'toast(\'Le booster de base contient uniquement des cartes du 30ᵉ Anniversaire.\')':`drops('${id}')`}">Voir les cartes</button>${lk?'<button disabled>Verrouillé</button>':`<button onclick="${st?`openBooster('${id}')`:`buy('${id}',1)`}">${st?'Ouvrir':'Acheter'}</button>`}</article>`}
+function setCard(s){const id=s.id,st=S.stock[id]||0,lk=locked(s),lv=levelOf(s),need=LEVELS[lv].need;return `<article class="set simple-set ky-set ${lk?'locked-pack':''}"><div class="booster-choice" role="button" tabindex="0" onclick="selectPack('${id}')" onkeydown="if(event.key==='Enter')this.click()"><span class="pack-edition">${s.id==='ALL'?'BASE':`NIVEAU ${lv+1}`}</span>${packVisual(s)}${featuredThree(s)}<strong>${esc(s.name)}</strong></div><h3>${esc(s.name)}</h3><div class="pack-meta">${price(id)} PC · ${st} en stock${id===BASE_30_SET?` · ${Math.max(0,left(id))}/10 achats restants`:''}</div>${lk?`<div class="lock-explain">Débloqué après ${need} Master Set${need>1?'s':''} (${completedMasters()}/${need})</div>`:''}<button class="g" onclick="${id==='ALL'?'toast(\'Le booster de base contient uniquement des cartes du 30ᵉ Anniversaire.\')':`drops('${id}')`}">Voir les cartes</button>${lk?'<button disabled>Verrouillé</button>':`<button onclick="${st?`openBooster('${id}')`:`buy('${id}',1)`}">${st?'Ouvrir':'Acheter'}</button>`}</article>`}
 const qtyBuy={},qtyOpen={};
 function qtyControl(id,mode){const st=S.stock[id]||0,max=mode==='buy'?Math.min(99,Math.max(0,left(id))):st,defaultQty=mode==='buy'?1:Math.min(st,1);const obj=mode==='buy'?qtyBuy:qtyOpen;const n=Math.max(1,Math.min(max||1,obj[id]||defaultQty));obj[id]=n;return `<div class="qty-line"><button class="g" onclick="adjustQty('${id}','${mode}',-1)">−</button><strong id="qty-${mode}-${id}">${n}</strong><button class="g" onclick="adjustQty('${id}','${mode}',1)">+</button><button onclick="${mode==='buy'?`buy('${id}',qtyBuy['${id}'])`:`openMany('${id}',qtyOpen['${id}'])`}" ${max<1?'disabled':''}>${mode==='buy'?'Acheter':'Ouvrir'} × <span id="qty-btn-${mode}-${id}">${n}</span></button></div>`}
 function adjustQty(id,mode,delta){const o=mode==='buy'?qtyBuy:qtyOpen,max=mode==='buy'?Math.min(99,Math.max(0,left(id))):(S.stock[id]||0);o[id]=Math.max(1,Math.min(max||1,(o[id]||1)+delta));const a=document.getElementById(`qty-${mode}-${id}`),b=document.getElementById(`qty-btn-${mode}-${id}`);if(a)a.textContent=o[id];if(b)b.textContent=o[id]}
@@ -613,7 +728,9 @@ function pm30HeroCard(kind){
  return pool.find(c=>/mewtwo/i.test(c.name)&&/futur/i.test(c.rar||''))||pool.find(c=>/mewtwo/i.test(c.name)&&/pm30-futur/i.test(c.id))||pool.find(c=>/mewtwo/i.test(c.name));
 }
 function pm30HeroImages(){return ['lugia','rgb','mewtwo'].map((kind,i)=>{const c=pm30HeroCard(kind);return c?`<img class="pm30-hero-card pm30-hero-${i}" src="${c.image}" alt="${esc(c.name)}" loading="lazy">`:''}).join('')}
-function home(){const vit=[...SETS].sort((a,b)=>levelOf(a)-levelOf(b)||price(a.id)-price(b.id)).slice(0,22);$('#app').innerHTML=`<section class="ky-welcome"><div class="ky-kicker">POKÉMASTER SET</div><h2>Ouvre. Collectionne. Complète.</h2><p>Un booster gratuit toutes les 10 minutes. Complète des Master Sets pour débloquer de nouvelles extensions.</p></section><section class="ky-free pm30-free-hero"><div class="pm30-free-info"><span class="ky-kicker">BOOSTER GRATUIT</span><h2>Booster de base · 30ᵉ Anniversaire</h2><p>Ta réserve se remplit toutes les 10 minutes, jusqu'à 10 boosters.</p><h2 id="free-count">${Math.min(10,S.stock.ALL||0)}/10 boosters</h2><p id="free-timer">Accumulation automatique</p><div class="pm30-free-actions"><button class="g" onclick="freeBoost()">Récupérer un booster</button><button class="g" id="free-open" onclick="openFreeOwned()">Ouvrir un booster</button></div></div><div class="pm30-hero-art"><div class="pm30-hero-pack"><b>POKÉMASTER SET</b><div class="pm30-hero-stack">${pm30HeroImages()}</div><span>30ᵉ ANNIVERSAIRE</span><small>6 CARTES</small></div></div></section><div class="ky-progress"><b>Progression Master Sets</b><span>${completedMasters()} terminé(s) · Niveau ${unlockedLevel()+1}/4</span></div>${kyGallery(vit)}${chaseSection()}<section class="ky-bonus"><button class="g" onclick="daily()">Récompense du jour · ${CONFIG.daily} PC</button></section>`;renderShowcase();fbUpdate();hydrateFeatured()}
+function pmQuickActions(){return `<section class="pm-quick" aria-label="Raccourcis"><button onclick="show('shop')"><span>✦</span><b>Boosters</b><small>Choisir une extension</small></button><button onclick="show('coll')"><span>▣</span><b>Collection</b><small>Voir mes cartes</small></button><button onclick="show('ach')"><span>★</span><b>Missions</b><small>Récupérer mes PC</small></button></section>`}
+function pmMissionPreview(){const list=ACH().filter(a=>!S.cl[a.id]).slice(0,3);return `<section class="pm-mission-preview"><div class="pm-section-heading"><div><span class="ky-kicker">OBJECTIFS</span><h2>Missions et récompenses</h2></div><button class="g" onclick="show('ach')">Toutes les missions →</button></div><div class="pm-mission-grid">${list.map(a=>`<article><div class="pm-mission-name">${esc(a.n)}</div><div class="pm-mission-progress">${Math.min(a.cur,a.goal)} / ${a.goal} · <b>+${a.rw} PC</b></div><div class="pm-progress"><i style="width:${Math.min(100,a.cur/a.goal*100)}%"></i></div></article>`).join('')}</div></section>`}
+function home(){const vit=[...SETS].sort((a,b)=>levelOf(a)-levelOf(b)||price(a.id)-price(b.id)).slice(0,22);$('#app').innerHTML=`<section class="ky-welcome"><div class="ky-kicker">POKÉMASTER SET</div><h2>Ouvre. Collectionne. Complète.</h2><p>Un booster gratuit toutes les 10 minutes. Complète des Master Sets pour débloquer de nouvelles extensions.</p></section>${pmQuickActions()}<section class="ky-free pm30-free-hero"><div class="pm30-free-info"><span class="ky-kicker">BOOSTER GRATUIT</span><h2>Booster de base · 30ᵉ Anniversaire</h2><p>Ta réserve se remplit toutes les 10 minutes, jusqu'à 10 boosters.</p><h2 id="free-count">${Math.min(10,S.stock.ALL||0)}/10 boosters</h2><p id="free-timer">Accumulation automatique</p><div class="pm30-free-actions"><button class="g" onclick="freeBoost()">Récupérer un booster</button><button class="g" id="free-open" onclick="openFreeOwned()">Ouvrir un booster</button></div></div><div class="pm30-hero-art"><div class="pm30-hero-pack"><b>POKÉMASTER SET</b><div class="pm30-hero-stack">${pm30HeroImages()}</div><span>30ᵉ ANNIVERSAIRE</span><small>6 CARTES</small></div></div></section><div class="ky-progress"><b>Progression Master Sets</b><span>${completedMasters()} terminé(s) · Niveau ${unlockedLevel()+1}/4</span></div>${kyGallery(vit)}${pmMissionPreview()}${chaseSection()}<section class="ky-bonus"><button class="g" onclick="daily()">Récompense du jour · 1 000 PC</button></section>`;renderShowcase();fbUpdate();hydrateFeatured()}
 
 function openFreeOwned(){
 if(!(S.stock.ALL||0))return toast('Tu n’as pas encore de booster de base.');openBooster('ALL')}
@@ -973,7 +1090,7 @@ const PMS_XP_STEP=320;
 function pmsProgress(){const x=soloInit();x.xp??=0;x.xpSeen??={open:S.st.open||0,sold:S.st.sold||0,spins:x.stats.spins||0,unique:Object.keys(S.owned).filter(k=>S.owned[k]>0).length};x.levelClaims??={};x.masterRewards??={};x.charms??={5:0,10:0,15:0};x.activeCharm??=0;x.charmRemaining??=0;return x}
 function pmsLevel(xp){return 1+Math.floor((Math.sqrt(1+8*xp/PMS_XP_STEP)-1)/2)}
 function pmsXpFloor(level){return PMS_XP_STEP*(level-1)*level/2}
-function pmsSync(){if(!currentUser)return;const x=pmsProgress(),seen=x.xpSeen;const now={open:S.st.open||0,sold:S.st.sold||0,spins:x.stats.spins||0,unique:Object.keys(S.owned).filter(k=>S.owned[k]>0).length};const earned=Math.max(0,now.open-seen.open)*7+Math.max(0,now.sold-seen.sold)*1+Math.max(0,now.spins-seen.spins)*5+Math.max(0,now.unique-seen.unique)*12;if(earned)x.xp+=earned;x.xpSeen=now;
+function pmsSync(){if(!currentUser)return;const x=pmsProgress(),seen=x.xpSeen;const now={open:S.st.open||0,sold:S.st.sold||0,spins:x.stats.spins||0,unique:Object.keys(S.owned).filter(k=>S.owned[k]>0).length};const earned=Math.max(0,now.open-seen.open)*20+Math.max(0,now.sold-seen.sold)*5+Math.max(0,now.spins-seen.spins)*15+Math.max(0,now.unique-seen.unique)*30;if(earned)x.xp+=earned;x.xpSeen=now;
  // Récompense unique par extension complétée, jamais accordée deux fois.
  for(const set of SETS){const n=set.cardCount?.total||0;if(!n||x.masterRewards[set.id])continue;let owned=0;for(const id in S.owned)if(S.owned[id]>0&&id.startsWith(set.id+'-'))owned++;if(owned>=n){x.masterRewards[set.id]=1;S.coins+=Math.max(2500,Math.round(price(set.id)*12));x.charms[15]=(x.charms[15]||0)+1;notify('Master Set terminé : récompense en PC et Luck Charm III (15 boosters) !')}}
 }
@@ -1049,8 +1166,8 @@ ACH=function(){const a=pmsOldACH(),ids=Object.keys(S.owned).filter(id=>S.owned[i
  add('anniv30future2','30 ans : obtenir Mew et Mewtwo futuristes rares',new Set(futur.map(id=>/mewtwo/i.test(S.meta[id].n)?'mewtwo':'mew')).size,2,4800);
  add('uniq1000','Posséder 1 000 cartes différentes',ids.length,1000,8000);
  return a};
-function pmsClaimLevel(level){const x=pmsProgress();if(level%5||level>100||level>pmsLevel(x.xp)||x.levelClaims[level])return;x.levelClaims[level]=1;const pc=Math.round(600*Math.pow(1.24,level/5-1));S.coins+=pc;if(level>=40)x.charms[15]=(x.charms[15]||0)+1;else if(level>=20)x.charms[10]=(x.charms[10]||0)+1;else x.charms[5]=(x.charms[5]||0)+1;save();pmsLevelPage();toast('Niveau '+level+' : '+pc+' PC et Luck Charm !')}
-function pmsLevelPage(){const x=pmsProgress(),lv=pmsLevel(x.xp),min=pmsXpFloor(lv),max=pmsXpFloor(lv+1),pct=Math.min(100,100*(x.xp-min)/(max-min));const ranks=['Débutant','Collectionneur','Expert','Maître','Légende'];const badge=ranks[Math.min(ranks.length-1,Math.floor((lv-1)/10))];$('#app').innerHTML=`<div class="crumb">Progression du joueur</div><section class="ky-showcase"><div class="ky-kicker">${esc(currentUser||'Dresseur')} · ${badge}</div><h2>Niveau ${lv}</h2><p>${x.xp} XP au total · ${max-x.xp} XP jusqu’au niveau ${lv+1}</p><div class="pb" style="width:100%"><i style="width:${pct}%"></i></div><p class="note">+7 XP par booster ouvert · +12 XP par nouvelle carte · +1 XP par doublon vendu · +5 XP par roulette.</p><h3>Luck Charms</h3><p>${x.charmRemaining?`Charm actif : encore ${x.charmRemaining} booster(s) amélioré(s)`:'Aucun charme actif'}</p><div class="sets">${[5,10,15].map((n,i)=>`<article class="set"><h3>Luck Charm ${['I','II','III'][i]}</h3><p>${n+5} boosters · bonus I : ×1,75 · II : +2 points · III : +2,5 points</p><p>En stock : ${x.charms[n]||0}</p><button onclick="pmsUseCharm(${n})" ${x.charms[n]&&!x.charmRemaining?'':'disabled'}>Activer</button></article>`).join('')}</div></section><section class="ky-showcase"><h2>Badges et récompenses de niveaux</h2><div class="sets">${Array.from({length:100},(_,i)=>i+1).filter(n=>n%5===0).map(n=>{const claimed=x.levelClaims[n],unlocked=lv>=n,pc=Math.round(80*Math.pow(1.25,n/5-1));return `<article class="set"><h3>${unlocked?'🏅':'🔒'} Niveau ${n}</h3><p>${pc} PC + Luck Charm ${n>=40?'III':n>=20?'II':'I'}</p><button ${unlocked&&!claimed?'':'disabled'} onclick="pmsClaimLevel(${n})">${claimed?'Récupéré':unlocked?'Récupérer':'Verrouillé'}</button></article>`}).join('')}</div></section>`}
+function pmsClaimLevel(level){const x=pmsProgress();if(level%5||level>100||level>pmsLevel(x.xp)||x.levelClaims[level])return;x.levelClaims[level]=1;const pc=Math.round(1500*Math.pow(1.22,level/5-1));S.coins+=pc;if(level>=40)x.charms[15]=(x.charms[15]||0)+1;else if(level>=20)x.charms[10]=(x.charms[10]||0)+1;else x.charms[5]=(x.charms[5]||0)+1;save();pmsLevelPage();toast('Niveau '+level+' : '+pc+' PC et Luck Charm !')}
+function pmsLevelPage(){const x=pmsProgress(),lv=pmsLevel(x.xp),min=pmsXpFloor(lv),max=pmsXpFloor(lv+1),pct=Math.min(100,100*(x.xp-min)/(max-min));const ranks=['Débutant','Collectionneur','Expert','Maître','Légende'];const badge=ranks[Math.min(ranks.length-1,Math.floor((lv-1)/10))];$('#app').innerHTML=`<div class="crumb">Progression du joueur</div><section class="ky-showcase"><div class="ky-kicker">${esc(currentUser||'Dresseur')} · ${badge}</div><h2>Niveau ${lv}</h2><p>${x.xp} XP au total · ${max-x.xp} XP jusqu’au niveau ${lv+1}</p><div class="pb" style="width:100%"><i style="width:${pct}%"></i></div><p class="note">+20 XP par booster ouvert · +30 XP par nouvelle carte · +5 XP par doublon vendu · +15 XP par roulette.</p><h3>Luck Charms</h3><p>${x.charmRemaining?`Charm actif : encore ${x.charmRemaining} booster(s) amélioré(s)`:'Aucun charme actif'}</p><div class="sets">${[5,10,15].map((n,i)=>`<article class="set"><h3>Luck Charm ${['I','II','III'][i]}</h3><p>${n+5} boosters · bonus I : ×1,75 · II : +2 points · III : +2,5 points</p><p>En stock : ${x.charms[n]||0}</p><button onclick="pmsUseCharm(${n})" ${x.charms[n]&&!x.charmRemaining?'':'disabled'}>Activer</button></article>`).join('')}</div></section><section class="ky-showcase"><h2>Badges et récompenses de niveaux</h2><div class="sets">${Array.from({length:100},(_,i)=>i+1).filter(n=>n%5===0).map(n=>{const claimed=x.levelClaims[n],unlocked=lv>=n,pc=Math.round(1500*Math.pow(1.22,n/5-1));return `<article class="set"><h3>${unlocked?'🏅':'🔒'} Niveau ${n}</h3><p>${pc} PC + Luck Charm ${n>=40?'III':n>=20?'II':'I'}</p><button ${unlocked&&!claimed?'':'disabled'} onclick="pmsClaimLevel(${n})">${claimed?'Récupéré':unlocked?'Récupérer':'Verrouillé'}</button></article>`}).join('')}</div></section>`}
 const pmsOldShow=show;
 show=function(v){if(v==='level'){vw='level';$('#main-nav').classList.remove('expanded');pmsLevelPage();document.querySelectorAll('#main-nav button').forEach(b=>b.classList.toggle('on',b.id==='n-level'));return}pmsOldShow(v)};
 $('#main-nav').insertAdjacentHTML('beforeend','<button class="g" id="n-level" onclick="show(\'level\')">Niveaux & badges</button>');
@@ -1321,8 +1438,8 @@ ACH=function(){const a=pmMoreACH(),unique=Object.keys(S.owned).filter(id=>S.owne
  ])if(!a.some(t=>t.id===id))a.push({id,n,cur,goal,rw});return a};
 /* Pity : au plus 20 boosters sans EX / double rare ou mieux, par profil. Le 30 ans garde un seul hit. */
 const PM_PITY_LIMIT=20;
-function pmIsHit(c){return !!c&&(c.pmRGB||c.pmFutur||c.pmReprint||['double','AR','SAR','secret'].includes(c.tier))}
-function pmPityAfter(out){const hit=out.some(pmIsHit);S.pmPity=hit?0:(S.pmPity||0)+1;}
+function pmIsPityHit(c){return !!c&&(c.pmRGB||c.pmFutur||c.pmReprint||['double','AR','SAR','secret'].includes(c.tier))}
+function pmPityAfter(out){const hit=out.some(pmIsPityHit);S.pmPity=hit?0:(S.pmPity||0)+1;}
 const pmDrawBeforePity=pm30Draw;
 pm30Draw=function(cards){let out=pmDrawBeforePity(cards);if((S.pmPity||0)>=PM_PITY_LIMIT-1&&!out.some(pmIsHit)){
  const pool=pm30UniqueCards(cards).filter(c=>c.tier==='double'&&!c.pmPikachu&&!c.pmEnergy&&!out.some(o=>o.id===c.id));
