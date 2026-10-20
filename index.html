@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>PokéMaster Set</title>
 <style>
 :root{--bg:#12163a;--pn:#1c2255;--ac:#ffcb05;--rd:#e63946;--bl:#3b5ba7;--tx:#f1f3ff;--mu:#9aa5d6}
@@ -921,7 +921,7 @@ function tear(){
  }catch(e){return toast('Tirage impossible : '+e.message)}
 pmPityAfter(out);tearing=true;S.stock[cur.s.id]--;S.st.open++;if(anniversary)S.st.pm30open=(S.st.pm30open||0)+1;if(god)S.st.godp++;out.filter(c=>!c.pmEnergy).forEach(c=>{S.owned[c.id]=(S.owned[c.id]||0)+1;S.meta[c.id]=mc(c)});save();
  $('#pack').classList.add('tear');
- setTimeout(()=>{tearing=false;rv={cards:out,i:0,flipped:false,busy:false,god};if(batchState){batchState.results.push({cards:out,god});batchState.done++;}god?godIntro():reveal()},350)}
+ const pmPackStage=$('#stage'),pmPackSerial=window.pmActivePackSerial;setTimeout(()=>{if(window.pmActivePackSerial!==pmPackSerial||pmPackStage.classList.contains('hidden')){tearing=false;return;}tearing=false;rv={cards:out,i:0,flipped:false,busy:false,god};if(batchState){batchState.results.push({cards:out,god});batchState.done++;}god?godIntro():reveal()},350)}
 function reveal(){if(batchState&&batchState.skip&&batchState.total>=5)rv.i=rv.cards.length-1;const {cards,i}=rv,c=cards[i],last=i===cards.length-1;
  $('#stage').className='';
  $('#stage').innerHTML=`<button class="g x" onclick="summary()">Passer </button><div class="rrow"><div class="pile">${cards.slice(0,i).map((x,k)=>`<div class="pc" style="--k:${k}">${cimg(x)}</div>`).join('')}</div><div class="sbox"><div class="cw ${last?'last':''}" id="cw"><div class="flip" id="flip" onclick="flipIt()"><div class="inner"><div class="face back"></div><div class="face front fx-${c.tier}">${cimg(c,'high')}<span class="shine"></span></div></div></div></div><div class="info" id="info">${last?' Dernière carte… clique pour la révéler':`Carte ${i+1}/5 · clique pour la retourner`}</div></div></div>`}
@@ -933,7 +933,7 @@ function flipIt(){
    $('#info').innerHTML=`<b style="font-size:18px">${esc(c.name)}</b><br><span class="tag t-${t}">${TIERS[t]}</span> <small>${esc(c.rar||'')}</small><br> ${value(c)} PC<br><button onclick="event.stopPropagation();flipIt()">${last?'Voir le résumé':'Carte suivante Suivant'}</button>`},sp?1200:450)};
  if(sp){$('#stage').classList.add('dim');$('#cw').classList.add('shake');$('#info').textContent='…';setTimeout(go,500)}else go()}
 function sparkle(el,col){for(let k=0;k<30;k++){const s=document.createElement('i'),a=Math.random()*6.28,d=90+Math.random()*160;s.className='sp';s.style.cssText=`--x:${Math.cos(a)*d}px;--y:${Math.sin(a)*d}px;background:${col};animation-delay:${Math.random()*.6}s`;el.appendChild(s);setTimeout(()=>s.remove(),2400)}}
-function godIntro(){$('#stage').className='';$('#stage').innerHTML='<div class="godb"> GOD PACK <small>6 cartes ultra rares dans ce booster !</small></div>';setTimeout(reveal,1500)}
+function godIntro(){const serial=window.pmActivePackSerial;$('#stage').className='';$('#stage').innerHTML='<div class="godb"> GOD PACK <small>6 cartes ultra rares dans ce booster !</small><button onclick="reveal()">Révéler les cartes →</button></div>';}
 function next(){rv.i++;rv.flipped=false;rv.i>=rv.cards.length?summary():reveal()}
 function summary(){
  if(batchState){batchNext();return}
@@ -2201,5 +2201,232 @@ const oldHero=pm30HeroCard; pm30HeroCard=function(kind){const c=oldHero(kind); i
 const originalPack=packShowcase; packShowcase=function(s){const html=originalPack(s); if(s?.id!=='30th')return html; return html.replace('</section>',`<div id="pm30-source-status" class="pm30-status">Images 30 ans : chargement…</div></section>`)};
 window.pm30ImageReport=function(){const resolved=stats.fr+stats.en+stats.ja; return {coverage:stats.total?resolved/stats.total:0,stats,images:Object.fromEntries([...cacheLookup.entries()].map(([id,list])=>[id,list]))}};
 })();
+</script>
+
+<style id="pm-shop-rework">
+/* Boutique : lecture claire, espacement, onglets par niveau */
+.pm-shop-top{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;flex-wrap:wrap;margin-bottom:16px}
+.pm-shop-top h2{margin:4px 0 10px}
+.pm-shop-tabs{display:flex;gap:10px;overflow-x:auto;padding:8px 0 16px;scrollbar-width:thin;scroll-snap-type:x proximity}
+.pm-shop-tabs button{flex:0 0 auto;min-width:140px;padding:12px 18px!important;border-radius:16px!important;background:#19191f!important;border:1px solid #ffffff24!important;color:#d8d6db!important;white-space:nowrap;scroll-snap-align:start}
+.pm-shop-tabs button.active{background:linear-gradient(135deg,#c32f45,#e34354)!important;border-color:#f06c7a!important;color:white!important;box-shadow:0 9px 23px #ad203333!important}
+.pm-shop-tabs small{display:block;opacity:.8;font-size:11px;margin-top:5px}
+.pm-shop-search{width:100%;max-width:440px;margin-top:8px;padding:13px 16px!important;border-radius:14px!important}
+.pm-shop-feature{padding:20px 22px;margin:12px 0 24px;background:linear-gradient(115deg,#191c21,#2e171e);border:1px solid #77313c;border-radius:21px}
+.pm-shop-feature b{display:block;font-size:17px;margin:4px 0}.pm-shop-feature small{color:#b8b6c0}
+#grid .ky-gallery{display:block;margin:0 auto;max-width:1180px}
+#grid .ky-gallery-head{margin:12px 0 18px}
+#grid .ky-carousel-row{display:grid!important;grid-template-columns:46px minmax(0,1fr) 46px;gap:14px;align-items:center;min-width:0}
+#grid .ky-carousel{display:flex!important;align-items:center!important;gap:24px!important;justify-content:flex-start!important;overflow-x:auto!important;overflow-y:hidden!important;scroll-snap-type:x mandatory!important;scroll-padding:15px!important;padding:28px max(22px,calc((100% - 240px)/2)) 34px!important;transform:none!important;perspective:none!important;min-width:0!important;scrollbar-width:thin!important}
+#grid .ky-carousel .ky-slide{flex:0 0 220px!important;min-width:220px!important;max-width:220px!important;width:220px!important;position:relative!important;transform:none!important;left:auto!important;right:auto!important;margin:0!important;opacity:1!important;z-index:auto!important;scroll-snap-align:center!important;isolation:isolate!important;transition:border-color .2s,box-shadow .2s,background .2s!important;border-radius:20px!important;overflow:hidden!important}
+#grid .ky-carousel .ky-slide.active{transform:none!important;box-shadow:0 0 0 2px #e34354,0 14px 26px #0007!important;z-index:1!important}
+#grid .ky-carousel .ky-slide .ky-pack{transform:none!important;margin:0 auto!important;max-width:100%!important}
+#grid .ky-carousel .ky-slide .featured-three{display:none!important}
+#grid .ky-carousel .ky-slide .ky-pack-name{white-space:normal!important;overflow-wrap:anywhere!important}
+#grid #ky-selected{margin-top:24px!important}
+#grid .ky-showcase{padding:clamp(20px,3vw,36px)!important;border-radius:22px!important;max-width:none!important}
+#grid .ky-showcase .ky-stats{gap:14px!important}
+#grid .ky-showcase .ky-actions,#grid .ky-showcase .ky-extra{gap:14px!important}
+.pm-vitrine{margin-top:20px;padding-top:20px;border-top:1px solid #ffffff20}
+.pm-vitrine h3{font-size:16px;margin:0 0 7px}.pm-vitrine>p{font-size:12px;color:#aaa;margin:0 0 14px}
+.pm-vitrine-cards{display:flex;gap:16px;justify-content:flex-start;flex-wrap:wrap;min-height:130px}
+.pm-vitrine-cards img{width:clamp(95px,13vw,145px);aspect-ratio:63/88;object-fit:contain;border-radius:9px;box-shadow:0 10px 24px #0009}
+.pm-vitrine-cards .pm-vitrine-empty{font-size:13px;color:#aaa;padding:22px;background:#111;border-radius:13px;border:1px dashed #444}
+.pm-batch-progress-only{text-align:center;padding:14px 8px;border-bottom:1px solid #ffffff1c;margin-bottom:14px;font-weight:700;color:#ddd}
+@media(max-width:640px){#grid .ky-carousel-row{grid-template-columns:32px minmax(0,1fr) 32px;gap:4px}#grid .ky-carousel{gap:14px!important;padding-left:max(12px,calc((100% - 190px)/2))!important;padding-right:max(12px,calc((100% - 190px)/2))!important}#grid .ky-carousel .ky-slide{flex-basis:190px!important;min-width:190px!important;max-width:190px!important;width:190px!important}#grid .ky-showcase{padding:18px!important}.pm-shop-tabs button{min-width:120px}}
+</style>
+
+<script id="pm-shop-rework-js">
+/* Keep one shop tab/selection and never replace stage during UI purchases */
+let pmShopTab=0,pmShopQuery='',pmShopChosen='',pmShopRefreshToken=0;
+window.pmActivePackSerial=0;
+function pmShopDisplayTab(i){pmShopTab=i;pmShopChosen='';pmShopRenderTabs();pmShopRenderList()}
+function pmShopRenderTabs(){const el=document.getElementById('pm-shop-tabs');if(!el)return;el.innerHTML=LEVELS.map((l,i)=>`<button type="button" class="${i===pmShopTab?'active':''}" onclick="pmShopDisplayTab(${i})">Niveau ${i+1}<small>${esc(l.name.split('·').pop().trim())}</small></button>`).join('')}
+function pmShopQueryChange(v){pmShopQuery=v;pmShopRenderList()}
+shop=function(){
+ const stage=document.getElementById('stage');
+ // Shopping never closes an active pack scene.
+ $('#app').innerHTML=`<section class="ky-welcome pm-shop-top"><div><div class="ky-kicker">BOUTIQUE • SÉRIE À LA UNE</div><h2>Choisis ton extension</h2><p>Parcours les boosters par niveau. Tes achats restent ici, sans fermeture de la boutique.</p></div></section><div class="pm-shop-feature"><small>EN VEDETTE</small><b>Nuit Noire</b><small>La série principale du moment · cartes vitrines officielles</small></div><div class="pm-shop-tabs" id="pm-shop-tabs" role="tablist" aria-label="Niveaux de la boutique"></div><div class="bar"><input class="pm-shop-search" type="search" placeholder="Rechercher dans ce niveau…" value="${esc(pmShopQuery)}" oninput="pmShopQueryChange(this.value)"></div><div id="grid"></div>`;
+ pmShopRenderTabs();pmShopRenderList();
+};
+shopList=function(q){pmShopQuery=q||'';pmShopRenderList()};
+function pmShopRenderList(){
+ const g=document.getElementById('grid');if(!g)return;
+ const q=(pmShopQuery||'').toLowerCase();const items=SETS.filter(s=>(!s.pmPending||s.id===window.PM_FEATURED_ID)&&levelOf(s)===pmShopTab&&(s.name.toLowerCase().includes(q)||s.id.toLowerCase().includes(q))).sort((a,b)=>a.id===window.PM_FEATURED_ID?-1:b.id===window.PM_FEATURED_ID?1:a.name.localeCompare(b.name,'fr'));
+ if(!items.length){g.innerHTML='<p class="note" style="padding:22px">Aucune extension dans ce niveau avec cette recherche.</p>';return}
+ showcaseSets=items;const found=items.findIndex(x=>x.id===pmShopChosen);selectedPack=found>=0?found:0;
+ g.innerHTML=kyGallery(items);
+ // kyGallery resets showcaseSets and may preserve selectedPack; restore selection for each tab.
+ showcaseSets=items;selectedPack=found>=0?found:0;
+ renderShowcase();
+}
+const pmOldRenderShowcase=renderShowcase;
+renderShowcase=function(){
+ pmOldRenderShowcase();
+ const set=showcaseSets?.[selectedPack];if(!set)return;
+ pmShopChosen=set.id;
+ const box=document.querySelector('#ky-selected .ky-showcase');
+ if(box&&!box.querySelector('.pm-vitrine'))box.insertAdjacentHTML('beforeend',`<div class="pm-vitrine"><h3>Trois cartes vitrines de ${esc(set.name)}</h3><p>Illustrations issues du catalogue de cette extension</p><div class="pm-vitrine-cards" id="pm-vitrine-cards"><span class="pm-vitrine-empty">Chargement des cartes…</span></div></div>`);
+ const token=++pmShopRefreshToken;
+ (async()=>{try{
+  const cards=await featuredCards(set);
+  if(token!==pmShopRefreshToken||showcaseSets?.[selectedPack]?.id!==set.id)return;
+  const target=document.getElementById('pm-vitrine-cards');if(!target)return;
+  target.innerHTML=cards.length?cards.slice(0,3).map(c=>{const base=String(c.image||'');const url=base.startsWith('data:')||/\.(webp|png|jpe?g)(\?|$)/i.test(base)?base:base+'/high.webp';return `<img loading="lazy" src="${esc(url)}" alt="${esc(c.name)}" onerror="if(!this.dataset.low&&this.src.includes('/high.webp')){this.dataset.low='1';this.src=this.src.replace('/high.webp','/low.webp')}else this.style.display='none'">`}).join(''):'<span class="pm-vitrine-empty">Cartes non disponibles pour ce set.</span>';
+ }catch(e){const target=document.getElementById('pm-vitrine-cards');if(target&&token===pmShopRefreshToken)target.innerHTML='<span class="pm-vitrine-empty">Catalogue momentanément inaccessible.</span>'}})();
+};
+// Retain the current tab and selected booster after buying.
+buy=function(id,n){
+ n=Math.max(1,Math.floor(Number(n)||1));
+ if(locked(SETS.find(s=>s.id===id)||BASE))return toast('Extension verrouillée : termine des Master Sets.');
+ const p=boxPrice(id,n);if(!Number.isFinite(p)||p<=0)return toast('Quantité ou prix invalide.');
+ if(!Number.isFinite(S.coins)||S.coins<0)return toast('Solde invalide : recharge ton profil.');
+ if(n>left(id))return toast(`Stock limité : il reste ${left(id)} booster(s) aujourd’hui pour cette extension.`);
+ if(S.coins<p)return toast(`Il te manque ${p-S.coins} PokéCoins.`);
+ S.coins-=p;S.day.b[id]=sold(id)+n;S.stock[id]=(S.stock[id]||0)+n;
+ save();
+ if(vw==='shop'){
+  const details=document.getElementById('ky-selected');
+  const set=showcaseSets.find(s=>s.id===id);
+  if(details&&set&&showcaseSets[selectedPack]?.id===id){details.innerHTML=packShowcase(set);renderShowcase()}
+ }else if(vw==='home')refresh();
+ toast(`+${n} booster(s) ajouté(s) au stock · la boutique reste ouverte`);
+};
+// Opening state cannot be discarded by an old delayed callback.
+const pmOldPackView=packView;
+packView=function(){window.pmActivePackSerial++;pmOldPackView();if(batchState){
+ const counter=document.querySelector('#stage .sbox');
+ if(counter){const b=batchState;counter.insertAdjacentHTML('afterbegin',`<div class="pm-batch-progress-only">Lot en cours : booster ${b.done+1} / ${b.total} · récapitulatif uniquement à la fin</div>`)}
+ }};
+const pmOriginalClose=closeStage;
+closeStage=function(){window.pmActivePackSerial++;pmOriginalClose()};
+// Remove legacy intermediate recap; proceed only on player's button/click.
+summary=function(){
+ if(batchState){if(typeof pmCinemaSequence!=='undefined')pmCinemaSequence++;batchNext();return}
+ const cards=rv?.cards||[];if(!cards.length)return;
+ $('#stage').className='';$('#stage').innerHTML=`<div class="sbox"><h2>${rv.god?'GOD PACK !':'Ton ouverture'}</h2><div class="sum">${cards.map(c=>`<div class="tc">${cimg(c,'high')}<div><b>${esc(c.name)}</b><br><span class="tag t-${c.tier}">${TIERS[c.tier]}</span><br>${value(c)} PC</div></div>`).join('')}</div><p><button type="button" onclick="openBooster('${cur.s.id}')" ${S.stock[cur.s.id]?'':'disabled'}>Ouvrir un autre booster (stock : ${S.stock[cur.s.id]||0})</button> <button class="g" type="button" onclick="closeStage()">Retour à la boutique</button></p></div>`;
+};
+// One final summary after entire batch (native batchNext already does this).
+const pmOldBatchNext=batchNext;
+batchNext=function(){if(!batchState)return;pmOldBatchNext()};
+// Never have "Skip" auto-complete a batch; only the user can advance.
+const pmOriginalGodIntro=godIntro;
+</script>
+
+<style id="pm-mobile-first-css">
+
+/* ===== POKEMASTER MOBILE-FIRST 2026 ===== */
+html{scroll-padding-top:75px;-webkit-text-size-adjust:100%;overscroll-behavior-x:none}
+body{overflow-x:hidden;min-width:0}
+button,input,select,textarea{touch-action:manipulation}
+button{min-height:42px}
+#app,#grid,#ky-selected,.ky-showcase{min-width:0}
+#stage{overscroll-behavior:contain}
+#stage .sbox{max-width:100%;min-width:0}
+#stage .sbox>button,#modal button{touch-action:manipulation}
+.ky-carousel,.pm-shop-tabs{-webkit-overflow-scrolling:touch;overscroll-behavior-inline:contain}
+.ky-carousel .ky-slide{transform:none!important;opacity:1!important;filter:none!important;transition:opacity .2s,border-color .2s!important;scroll-snap-stop:always}
+.ky-carousel .ky-slide:not(.active){opacity:.66!important}
+.ky-carousel .ky-slide.active{opacity:1!important;filter:drop-shadow(0 14px 26px #0008)!important}
+@media(max-width:760px){
+ :root{--pm-mobile-nav-h:calc(66px + env(safe-area-inset-bottom,0px))}
+ body{padding-bottom:var(--pm-mobile-nav-h);background-attachment:scroll}
+ header{position:sticky;top:0;z-index:89;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px 10px;padding:11px 14px;background:#0b0b0ef5;border-bottom:1px solid #ffffff19;min-height:60px}
+ header h1{font-size:clamp(17px,5vw,22px)!important;line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:0!important;align-self:center;grid-column:1}
+ header .coins{grid-column:2;grid-row:1;justify-self:end;font-size:12px!important;max-width:44vw;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:8px 9px}
+ header .coins #uniq,header .coins #val{display:none}
+ header #menu-toggle{display:none!important}
+ header #gs{grid-column:1/-1;width:100%;max-width:none!important;min-width:0!important;min-height:43px;font-size:16px;border-radius:12px}
+ #main-nav{position:fixed!important;bottom:0!important;top:auto!important;left:0!important;right:0!important;width:100%!important;max-width:none!important;height:var(--pm-mobile-nav-h);padding:6px max(5px,env(safe-area-inset-right,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(5px,env(safe-area-inset-left,0px))!important;background:#0e0e12f5!important;border-top:1px solid #ffffff28;backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr));align-items:center;gap:2px!important;z-index:92!important;box-shadow:0 -9px 25px #0007;transform:none!important;visibility:visible!important;opacity:1!important}
+ #main-nav button{min-width:0!important;width:100%;height:50px;min-height:50px!important;border-radius:12px!important;padding:5px 2px!important;font-size:clamp(9px,2.8vw,12px)!important;font-weight:700!important;white-space:normal!important;line-height:1.12;display:flex;justify-content:center;align-items:center;flex-direction:column;gap:3px;background:transparent!important;color:#d5d1d3!important;border:1px solid transparent!important}
+ #main-nav button.on{background:#991e3242!important;color:white!important;border-color:#d63c5d66!important;outline:0!important}
+ #main-nav button::before{content:'⌂';font-size:20px;font-weight:500;line-height:1;display:block}
+ #main-nav #n-shop::before{content:'▣'}
+ #main-nav #n-coll::before{content:'▤'}
+ #main-nav #n-ach::before{content:'★'}
+ #main-nav #n-profile::before{content:'◉'}
+ #main-nav #n-ach .badge{position:absolute;top:4px;right:6px}
+ main{padding:12px 12px 22px!important;max-width:100%;overflow:visible}
+ footer{font-size:11px;line-height:1.5;padding:12px 16px 18px}
+ .bar{gap:8px}
+ .bar input[type=text],.bar input[type=search]{width:100%;min-width:0;font-size:16px}
+ .cards{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:11px!important}
+ .tc{min-width:0}.tc img,.tc .ph{max-width:100%}
+ .sets{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:10px}
+ .set{min-width:0;padding:12px 8px!important}
+ .set h3{font-size:13px;overflow-wrap:anywhere}
+ .ky-welcome,.pm-shop-top{padding:17px!important;border-radius:17px!important;max-width:100%}
+ .ky-welcome h2,.pm-shop-top h2{font-size:clamp(21px,6vw,29px)!important;line-height:1.18}
+ .pm-shop-feature{padding:15px!important;border-radius:15px!important;max-width:100%}
+ .pm-shop-tabs{gap:8px!important;margin:0 -12px;padding:8px 12px 13px!important;scroll-snap-type:x proximity}
+ .pm-shop-tabs button{min-width:111px!important;padding:10px 13px!important;min-height:51px;scroll-snap-align:start}
+ #grid{width:100%;min-width:0}
+ #grid .ky-carousel-row{grid-template-columns:30px minmax(0,1fr) 30px!important;gap:3px!important;max-width:100%}
+ #grid .ky-carousel{min-width:0!important;max-width:100%!important;width:100%;gap:13px!important;padding-block:12px 17px!important;scroll-snap-type:x mandatory;align-items:stretch!important}
+ #grid .ky-carousel .ky-slide{flex:0 0 min(62vw,222px)!important;width:min(62vw,222px)!important;min-width:min(62vw,222px)!important;max-width:min(62vw,222px)!important;scroll-snap-align:center;overflow:visible}
+ #grid .ky-carousel-row>button{width:30px!important;min-width:30px!important;padding:0!important;font-size:18px;min-height:48px}
+ #grid .ky-pack{max-width:100%;width:100%;margin-inline:auto}
+ #grid .ky-showcase{border-radius:18px;padding:16px!important;max-width:100%;margin-top:9px}
+ #grid .ky-showcase h2{font-size:clamp(20px,6vw,29px);line-height:1.2;overflow-wrap:anywhere}
+ #grid .ky-showcase .ky-stats{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:9px!important}
+ #grid .ky-showcase .ky-stats>div{min-width:0;padding:12px 9px}
+ #grid .ky-showcase .ky-actions{display:grid!important;grid-template-columns:1fr!important;gap:10px!important}
+ #grid .ky-showcase .ky-actions button{width:100%;min-height:49px;font-size:14px}
+ #grid .ky-showcase .ky-extra{display:grid!important;grid-template-columns:minmax(0,1fr)!important;gap:10px!important}
+ #grid .ky-showcase .ky-extra button{min-height:45px}
+ #grid .qty,#grid .qty-controls,#grid .ky-qty,#grid .ky-qty-row{max-width:100%;flex-wrap:wrap}
+ .pm-vitrine-cards{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:8px!important}
+ .pm-vitrine-cards img{width:100%!important;min-width:0;max-width:100%;height:auto}
+ .pm-vitrine{margin-top:15px!important;padding-top:13px!important}
+ #stage{inset:0;z-index:120!important;overflow-x:hidden;overflow-y:auto;align-items:flex-start!important;justify-content:center;padding:calc(12px + env(safe-area-inset-top,0px)) 9px calc(14px + env(safe-area-inset-bottom,0px))!important}
+ #stage .sbox{width:100%;max-width:440px;padding:12px 6px 24px!important;margin:auto;overflow:visible}
+ #stage .sbox .x{top:4px!important;right:4px!important;min-height:44px;min-width:44px;z-index:15}
+ #stage .pack{width:min(53vw,196px)!important;height:min(78vw,315px)!important;margin-top:32px!important}
+ #stage .pack .body{padding:9px}
+ #stage .flip{width:min(68vw,260px)!important;max-height:55dvh!important;margin-inline:auto}
+ #stage .cw{max-width:100%}
+ #stage .info{min-height:60px;margin-top:10px;font-size:14px}
+ #stage .sum{max-width:100%;gap:8px}
+ #stage .sum .tc{width:calc((100% - 24px)/3)!important;min-width:0}
+ #stage button{min-height:46px;max-width:100%}
+ #stage .rrow{gap:6px!important;justify-content:center;flex-wrap:wrap}
+ #stage .pile,#stage .pc{max-width:20vw!important;width:20vw!important}
+ .pm-batch-progress-only{margin-top:35px;padding:10px!important;font-size:13px}
+ #modal{z-index:125!important;align-items:flex-start!important;padding:calc(12px + env(safe-area-inset-top,0px)) 10px calc(12px + env(safe-area-inset-bottom,0px))}
+ #modal .mb{padding:16px!important;max-height:calc(100dvh - 24px);overflow-y:auto;border-radius:18px}
+ #modal .mb button{min-height:44px}
+ .sum .tc{max-width:145px}
+}
+@media(max-width:380px){
+ .cards{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+ header h1{font-size:17px!important}
+ header .coins{font-size:11px!important}
+ #grid .ky-carousel .ky-slide{flex-basis:60vw!important;width:60vw!important;min-width:60vw!important;max-width:60vw!important}
+ #main-nav button{font-size:9px!important}
+}
+@media(min-width:761px){#main-nav button::before{content:none!important}}
+@media(hover:none) and (pointer:coarse){button{min-height:44px}input,select,textarea{font-size:16px}}
+@media(prefers-reduced-motion:reduce){.ky-slide,#stage .inner,.pack,.shine{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+
+</style>
+<script id="pm-mobile-first-js">
+
+/* ===== Ajustements mobile : défilement stable sans toucher au gameplay ===== */
+(function(){
+ const isMobile=()=>window.matchMedia('(max-width: 760px)').matches;
+ const activeNav=()=>{const nav=document.getElementById('main-nav');if(!nav)return;const active=nav.querySelector('button.on');if(active) active.setAttribute('aria-current','page'); nav.querySelectorAll('button:not(.on)[aria-current]').forEach(b=>b.removeAttribute('aria-current'));};
+ const nav=document.getElementById('main-nav');
+ if(nav){const obs=new MutationObserver(activeNav);obs.observe(nav,{subtree:true,attributes:true,attributeFilter:['class']});activeNav()}
+ let boundRail=null, pointerDown=false, touchMoved=false, startX=0;
+ const bindRail=()=>{
+  const rail=document.querySelector('#ky-carousel');if(!rail||rail===boundRail)return;boundRail=rail;
+  rail.addEventListener('pointerdown',e=>{if(!isMobile())return;pointerDown=true;startX=e.clientX;touchMoved=false},{passive:true});
+  rail.addEventListener('pointermove',e=>{if(pointerDown&&Math.abs(e.clientX-startX)>14)touchMoved=true},{passive:true});
+  rail.addEventListener('pointerup',()=>{pointerDown=false;if(!touchMoved||!isMobile())return; const slides=[...rail.querySelectorAll('.ky-slide')];if(!slides.length)return;const middle=rail.getBoundingClientRect().left+rail.clientWidth/2;let best=0,dist=Infinity;slides.forEach((node,i)=>{const b=node.getBoundingClientRect(),d=Math.abs((b.left+b.right)/2-middle);if(d<dist){dist=d;best=i}});if(typeof showcaseSets!=='undefined'&&showcaseSets[best]&&typeof selectPack==='function'){const id=showcaseSets[best].id;setTimeout(()=>{if(document.getElementById('ky-carousel')===rail)selectPack(id)},90)}},{passive:true});
+  rail.addEventListener('pointercancel',()=>{pointerDown=false},{passive:true});
+ };
+ const app=document.getElementById('app');if(app){const obs=new MutationObserver(()=>{bindRail()});obs.observe(app,{childList:true,subtree:true});bindRail()}
+})();
+
 </script>
 </body></html>
