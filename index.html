@@ -501,14 +501,39 @@ input,select,textarea{background:#16171f!important;border-color:#484951!importan
 @media(prefers-reduced-motion:reduce){button{transition:none!important}}
 </style>
 <style>.pm-feature-banner{margin:12px 0 20px;padding:22px 24px;border-radius:20px;background:linear-gradient(125deg,#130e14,#25202b 65%,#3c171e);border:1px solid #593440}.pm-feature-banner h2{margin:8px 0;color:#fff}.pm-feature-banner p{color:#ddd;line-height:1.5}</style></head><body class="dos">
-<header>
-<h1><i class="pbl"></i>PokéMaster Set</h1>
-<button id="menu-toggle" class="g" type="button" aria-label="Ouvrir le menu" aria-expanded="false" onclick="toggleMenu()"><span></span><span></span><span></span></button><nav id="main-nav"><button class="g" id="n-home" onclick="show('home')">Accueil</button><button class="g" id="n-shop" onclick="show('shop')">Boutique</button><button class="g" id="n-coll" onclick="show('coll')">Collection</button><button class="g" id="n-ach" onclick="show('ach')">Succès <span id="ach-count" class="badge" aria-label="Récompenses de succès à récupérer"></span></button><button class="g" id="n-profile" onclick="show('profile')">Mon profil</button></nav>
-
-<span class="coins" title="PokéCoins"><span class="pc-symbol" aria-label="PokéCoins">P<span>◆</span></span> <b id="coins"></b> · <span id="uniq"></span> cartes · valeur <span id="val"></span> PC</span>
-<input type="text" id="gs" placeholder="Rechercher une carte…" onkeydown="if(event.key=='Enter')gsearch(this.value)">
-
+<header id="pm-header">
+  <div class="pm-header-inner">
+    <div class="pm-header-brand">
+      <button id="menu-toggle" class="pm-menu-button" type="button" aria-label="Ouvrir le menu" aria-controls="pm-drawer" aria-expanded="false" onclick="pmToggleDrawer()"><span></span><span></span><span></span></button>
+      <h1 onclick="pmNavigate('home')" title="Retour à l'accueil"><i class="pbl" aria-hidden="true"></i><span>PokéMaster <em>Set</em><small>COLLECTION TCG</small></span></h1>
+    </div>
+    <nav id="main-nav" aria-label="Navigation principale">
+      <button class="g" id="n-home" onclick="pmNavigate('home')">Accueil</button>
+      <button class="g" id="n-shop" onclick="pmNavigate('shop')">Boutique</button>
+      <button class="g" id="n-coll" onclick="pmNavigate('coll')">Collection</button>
+      <button class="g" id="n-ach" onclick="pmNavigate('ach')">Missions <span id="ach-count" class="badge" aria-label="Récompenses à récupérer"></span></button>
+      <button class="g" id="n-profile" onclick="pmNavigate('profile')">Profil</button>
+    </nav>
+    <div class="pm-header-tools">
+      <input type="search" id="gs" aria-label="Rechercher une carte" placeholder="⌕  Rechercher une carte…" onkeydown="if(event.key==='Enter')gsearch(this.value)">
+      <span class="coins" title="PokéCoins"><span class="pc-symbol" aria-label="PokéCoins">P<span>◆</span></span> <b id="coins"></b> <span class="pm-coin-unit">PC</span><span class="pm-coin-extra"> · <span id="uniq"></span> cartes · <span id="val"></span> PC</span></span>
+    </div>
+  </div>
 </header>
+<div id="pm-drawer-root" class="pm-drawer-root" aria-hidden="true"><button class="pm-drawer-backdrop" onclick="pmToggleDrawer(false)" aria-label="Fermer le menu"></button><aside id="pm-drawer" class="pm-drawer" aria-label="Menu du jeu">
+  <div class="pm-drawer-heading"><div><span class="pm-eyebrow">POKÉMASTER</span><h2>Menu du jeu</h2></div><button class="pm-drawer-close" aria-label="Fermer" onclick="pmToggleDrawer(false)">✕</button></div>
+  <p class="pm-drawer-label">JOUER</p>
+  <button onclick="pmNavigate('home')"><span>⌂</span><b>Accueil</b><small>Mon espace</small></button>
+  <button onclick="pmNavigate('shop')"><span>▤</span><b>Boutique</b><small>Boosters & extensions</small></button>
+  <p class="pm-drawer-label">COLLECTIONNER</p>
+  <button onclick="pmNavigate('coll')"><span>▦</span><b>Mes classeurs</b><small>Master Sets</small></button>
+  <button onclick="pmNavigate('solo')"><span>◇</span><b>Doublons & revente</b><small>Gérer mon inventaire</small></button>
+  <p class="pm-drawer-label">PROGRESSER</p>
+  <button onclick="pmNavigate('ach')"><span>✦</span><b>Missions & succès</b><small>Récompenses et défis</small></button>
+  <button onclick="pmNavigate('wheel')"><span>◉</span><b>Roulette</b><small>Récompense quotidienne</small></button>
+  <button onclick="pmNavigate('profile')"><span>♙</span><b>Profil</b><small>Mes statistiques</small></button>
+  <div class="pm-drawer-foot">Un jeu de collection virtuel non officiel.</div>
+</aside></div>
 <main id="app"></main>
 <footer>Simulation virtuelle non officielle : 6 cartes par booster, sans reproduire la composition exacte des boosters physiques. Cartes © Pokémon / Nintendo / Creatures / GAME FREAK. Données et images : TCGdex.</footer>
 <div id="stage" class="hidden"></div><div id="modal" class="hidden" onclick="if(event.target==this)this.className='hidden'"></div>
@@ -578,7 +603,7 @@ let S=JSON.parse(localStorage.getItem('wmp')||'null')||{coins:CONFIG.start,daily
 let save=()=>{if(!Number.isFinite(S.coins)||S.coins<0)S.coins=0;checkAch();localStorage.setItem('wmp',JSON.stringify(S));head()};
 const head=()=>{if(!Number.isFinite(S.coins)||S.coins<0)S.coins=0;$('#coins').textContent=S.coins;$('#uniq').textContent=Object.keys(S.owned).length;$('#val').textContent=Object.entries(S.owned).reduce((a,[id,n])=>S.meta[id]?a+n*value(cm(id,S.meta[id])):a,0);(()=>{const b=$('#ach-count');if(b){const n=ACH().filter(a=>a.cur>=a.goal&&!S.cl[a.id]).length;b.textContent=n||'';b.title=n?n+' récompense(s) à récupérer':'Aucune récompense à récupérer';}})()};
 function toast(m){let t=$('#toast');t&&t.remove();t=document.createElement('div');t.id='toast';t.textContent=m;document.body.appendChild(t);setTimeout(()=>t.remove(),3500)}
-const cimg=(c,q='low')=>((c.image||c.sid==='30th')?`<img loading="lazy" decoding="async" alt="${esc(c.name)}" src="${c.image?.startsWith('data:')?c.image:`${c.image||`https://assets.tcgdex.net/fr/30th/${encodeURIComponent(c.localId||'1')}`}/${q}.webp`}" onerror="this.style.display='none';this.nextSibling.style.display='flex'">`:'')+`<div class="ph" style="display:${c.image||c.sid==='30th'?'none':'flex'}">${esc(c.name)}<small>Image indisponible</small></div>`;
+let cimg=(c,q='low')=>((c.image||c.sid==='30th')?`<img loading="lazy" decoding="async" alt="${esc(c.name)}" src="${c.image?.startsWith('data:')?c.image:`${c.image||`https://assets.tcgdex.net/fr/30th/${encodeURIComponent(c.localId||'1')}`}/${q}.webp`}" onerror="this.style.display='none';this.nextSibling.style.display='flex'">`:'')+`<div class="ph" style="display:${c.image||c.sid==='30th'?'none':'flex'}">${esc(c.name)}<small>Image indisponible</small></div>`;
 const logo=s=>s.logo?`<img loading="lazy" alt="" src="${s.logo}.png" onerror="this.style.display='none'">`:'';
 const errBox=()=>`<div class="err"> Impossible de joindre TCGdex. Vérifie ta connexion internet, puis réessaie.<br><br><button onclick="init()">Réessayer</button></div>`;
 const prog=(d,t)=>{$('#pm')&&($('#pm').textContent=`Chargement des cartes et raretés : ${d}/${t}`);$('#pi')&&($('#pi').style.width=d/t*100+'%')};
@@ -2428,5 +2453,511 @@ button{min-height:42px}
  const app=document.getElementById('app');if(app){const obs=new MutationObserver(()=>{bindRail()});obs.observe(app,{childList:true,subtree:true});bindRail()}
 })();
 
+</script>
+<style id="pm-redesign-2026">
+/* ===== POKÉMASTER SET — REDESIGN UNIFIÉ v10 ===== */
+:root { --bg:#0c0d12; --pn:#191b24; --ac:#fa5868; --rd:#ff526d; --tx:#f7f7fb; --mu:#989eac; --ui-bg:#0c0d12; --ui-panel:#171922; --ui-panel2:#20232e; --ui-line:#303440; --ui-bright:#f7f7fb; --ui-muted:#a1a5b4; --ui-accent:#ff5b72; --ui-gold:#ffcd6d; }
+html { scroll-padding-top:108px; }
+body { background: radial-gradient(ellipse at 85% -10%,#262138 0%,transparent 45%), #0c0d12 !important; color:var(--ui-bright);font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Avenir Next",sans-serif; min-width:320px;}
+body::selection{background:#ff5b7277}
+button {border-radius:12px; transition:filter .16s,border-color .16s,background .16s,transform .16s;}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid #ff8394!important;outline-offset:2px}
+button:not(:disabled):active{transform:scale(.985)}
+button:hover:not(:disabled){filter:brightness(1.1)}
+#pm-header { position:sticky!important;top:0;z-index:95!important;border:0!important;border-bottom:1px solid #ffffff16!important;background:#101118f2!important;backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);box-shadow:0 8px 32px #0004;padding:0!important;min-height:0!important;display:block!important;}
+.pm-header-inner{display:flex;gap:20px;align-items:center;min-height:80px;max-width:1500px;margin:auto;padding:12px 32px;}
+.pm-header-brand{display:flex;align-items:center;gap:12px;flex-shrink:0;}
+.pm-header-brand h1{display:flex;gap:9px;align-items:center;cursor:pointer;margin:0!important;font-size:21px!important;line-height:.96;letter-spacing:-.8px;white-space:nowrap;color:white}
+.pm-header-brand h1 em{font-style:normal;color:var(--ui-accent)}
+.pm-header-brand h1 small{display:block;font-size:8px;color:#9699a6;letter-spacing:2.7px;margin-top:6px}
+#pm-header .pbl{width:30px;height:30px;border:3px solid #eee;flex-shrink:0;margin-right:0}
+.pm-menu-button{flex-shrink:0;width:43px;height:43px;min-width:43px;min-height:43px;padding:11px;background:#22242e;color:white;border:1px solid #383b46;border-radius:13px;display:flex!important;flex-direction:column;align-items:center;justify-content:center;gap:5px}
+.pm-menu-button span{width:19px;height:2px;background:#fff;border-radius:10px;display:block}
+#main-nav{display:flex!important;align-items:center;gap:4px;flex-wrap:nowrap!important;position:static!important;visibility:visible!important;opacity:1!important;background:none!important;border:0!important;max-width:none!important;transform:none!important;padding:0!important;box-shadow:none!important;}
+#main-nav button{background:transparent!important;border:1px solid transparent!important;color:#aeb0bd!important;font-size:13px!important;font-weight:750;white-space:nowrap;padding:10px 12px!important;min-height:42px!important;border-radius:11px!important;position:relative}
+#main-nav button.on{background:#ffffff12!important;color:#fff!important;border-color:#ffffff15!important}
+#main-nav button.on:after{content:"";position:absolute;bottom:2px;left:25%;right:25%;height:2px;border-radius:3px;background:var(--ui-accent)}
+#main-nav button:before{display:none!important}
+.pm-header-tools{display:flex;align-items:center;gap:10px;margin-left:auto;min-width:0;}
+#pm-header #gs{height:41px;min-height:41px;width:190px;max-width:190px;min-width:0;flex:none;background:#1b1d26;border:1px solid #373945;color:white;padding:9px 12px;font-size:12px;border-radius:11px;}
+#pm-header .coins{display:flex;align-items:center;gap:5px;padding:9px 12px!important;white-space:nowrap;max-width:none;background:#252029;border:1px solid #504047;color:#ffe7b3!important;border-radius:11px;font-size:13px!important;font-variant-numeric:tabular-nums}
+#pm-header .coins .pm-coin-unit{color:#ad9c8a;font-size:10px;font-weight:800}
+#pm-header .coins .pm-coin-extra{display:none}
+#pm-header .pc-symbol{color:#ffc96b}
+.pm-drawer-root{position:fixed;inset:0;z-index:1300;pointer-events:none;visibility:hidden;opacity:0;transition:opacity .2s,visibility .2s}
+.pm-drawer-root.open{pointer-events:auto;visibility:visible;opacity:1}
+.pm-drawer-backdrop{position:absolute;inset:0;width:100%;height:100%;border:0;background:#05060ac4;backdrop-filter:blur(4px);border-radius:0!important}
+.pm-drawer{position:absolute;top:0;bottom:0;left:0;width:min(350px,calc(100vw - 45px));background:#191b24;border-right:1px solid #3a3b46;box-shadow:20px 0 70px #0008;transform:translateX(-105%);transition:transform .25s;overflow-y:auto;padding:27px 22px 36px;}
+.pm-drawer-root.open .pm-drawer{transform:translateX(0)}
+.pm-drawer-heading{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:23px}
+.pm-eyebrow,.pm-drawer-label,.pm-kicker{font-size:11px;font-weight:850;letter-spacing:2px;color:var(--ui-accent)}
+.pm-drawer-heading h2{font-size:25px;margin:7px 0 0;letter-spacing:-.7px}
+.pm-drawer-close{border:1px solid #464957;color:#fff;background:#252833;min-width:40px;min-height:40px}
+.pm-drawer-label{color:#777e8f;margin:26px 0 10px;font-size:10px}
+.pm-drawer>button:not(.pm-drawer-close){width:100%;min-height:54px;display:grid;grid-template-columns:34px 1fr;grid-template-rows:20px 18px;gap:0 11px;align-items:center;text-align:left;padding:10px 12px;margin-bottom:6px;color:white;background:#222530;border:1px solid #323641;border-radius:12px}
+.pm-drawer>button span{grid-column:1;grid-row:1/3;display:grid;place-items:center;font-size:22px;color:#ff8192}
+.pm-drawer>button b{grid-column:2;grid-row:1;font-size:13px}
+.pm-drawer>button small{grid-column:2;grid-row:2;color:#989dad;font-size:11px}
+.pm-drawer-foot{padding-top:30px;color:#777e8e;font-size:11px}
+#app{min-width:0}
+main#app{width:100%;max-width:1250px!important;margin:auto;padding:30px 25px 85px!important;}
+#app h2,#app h3{letter-spacing:-.6px}
+.pm-intro{display:flex;justify-content:space-between;align-items:flex-end;gap:18px;margin-bottom:24px}
+.pm-intro h2{font-size:clamp(29px,4vw,43px)!important;margin:7px 0 10px!important;font-weight:900;line-height:1.08}
+.pm-intro p{color:var(--ui-muted);margin:0;line-height:1.6;max-width:680px;font-size:14px}
+.pm-outline,.pm-link{background:#262833;color:#fff;border:1px solid #3b3f4e;min-height:43px;white-space:nowrap;font-size:12px;font-weight:800}
+.pm-primary{background:var(--ui-accent)!important;color:#190c15!important;border:1px solid #ff8190!important;font-weight:850!important;}
+.pm-mini-label{font-size:11px;color:#a9acbb;font-weight:800;letter-spacing:1.4px;text-transform:uppercase}
+.pm-feature-hero{--pack-color:#b62f58;display:grid;grid-template-columns:minmax(0,1.12fr) minmax(300px,.88fr);gap:12px;min-height:340px;overflow:hidden;border:1px solid #493542;border-radius:25px;background:radial-gradient(ellipse at 83% 33%,#733448 0%,transparent 55%),linear-gradient(118deg,#29202b 0%,#161820 73%);padding:35px 34px 27px;position:relative;isolation:isolate;}
+.pm-feature-hero:before{content:"";position:absolute;right:-120px;top:-160px;width:490px;height:490px;border:1px solid #ffffff18;border-radius:50%;box-shadow:0 0 0 50px #ffffff04,0 0 0 100px #ffffff04;pointer-events:none;z-index:-1}
+.pm-feature-copy{display:flex;flex-direction:column;align-items:flex-start;min-width:0}
+.pm-feature-copy .pm-kicker{color:#ff9caa}
+.pm-feature-copy h2{font-size:clamp(32px,4.5vw,60px)!important;line-height:1.05;letter-spacing:-2px;margin:20px 0 14px;max-width:550px}
+.pm-feature-copy p{font-size:14px;color:#c5b5c0;line-height:1.65;max-width:420px;margin:0 0 24px}
+.pm-feature-chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:24px}
+.pm-feature-chips span{font-size:11px;padding:7px 11px;border:1px solid #ffffff2b;background:#ffffff0d;border-radius:100px;color:#e6dee3;font-weight:700}
+.pm-feature-buttons{display:flex;gap:9px;flex-wrap:wrap;margin-top:auto}
+.pm-feature-buttons button{padding:11px 17px}
+.pm-feature-visual{display:flex;align-items:center;justify-content:center;min-width:0;position:relative;}
+.pm-hero-pack{width:190px;height:265px;transform:rotate(4deg);filter:drop-shadow(0 24px 26px #000a);z-index:2;position:relative}
+.pm-hero-pack .pm-booster{width:100%;height:100%}
+.pm-hero-loose{position:absolute;aspect-ratio:63/88;width:150px;height:209px;border:4px solid #e6dcdd;border-radius:9px;background:#242632;object-fit:cover;box-shadow:0 16px 28px #000a}
+.pm-hero-loose:nth-child(1){transform:translate(-108px,-9px) rotate(-21deg)}
+.pm-hero-loose:nth-child(2){transform:translate(115px,2px) rotate(20deg)}
+.pm-feature-index{position:absolute;bottom:17px;right:20px;font-size:10px;font-weight:800;letter-spacing:2px;color:#ffffff7f}
+.pm-section-title{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin:32px 0 15px}
+.pm-section-title h2{font-size:24px!important;margin:5px 0 2px!important;font-weight:850}
+.pm-section-title p{margin:4px 0 0;color:var(--ui-muted);font-size:12px}
+.pm-section-title .pm-link{background:transparent;border:0;color:#ff9ca9;padding:8px}
+.pm-dashboard-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:11px;margin-top:15px}
+.pm-stat{background:var(--ui-panel);border:1px solid var(--ui-line);border-radius:16px;padding:17px 18px;min-width:0}
+.pm-stat b{display:block;font-size:25px;color:#fafafa;line-height:1.2;font-variant-numeric:tabular-nums}
+.pm-stat span{display:block;margin-top:7px;color:#a2a7b4;font-size:11px}
+.pm-home-actions{display:grid;grid-template-columns:repeat(3,1fr);gap:11px;margin:22px 0 5px}
+.pm-home-action{background:#1b1d26;border:1px solid #30333f;min-height:77px;padding:15px;border-radius:16px;display:flex;align-items:center;gap:14px;color:white;text-align:left}
+.pm-home-action>span{display:grid;place-items:center;background:#322936;width:42px;height:42px;border-radius:12px;font-size:23px;color:#ff9aa4;flex-shrink:0}
+.pm-home-action strong{font-size:13px;display:block}
+.pm-home-action small{font-size:11px;color:#979eac;display:block;margin-top:3px;line-height:1.35}
+.pm-home-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}
+.pm-free-card{display:grid;grid-template-columns:minmax(0,1fr) 115px;min-width:0;overflow:hidden;gap:12px;align-items:center;background:#22232c;border:1px solid #42404b;border-radius:20px;padding:23px 23px}
+.pm-free-card h3{font-size:21px;margin:9px 0 10px;line-height:1.18}
+.pm-free-card p{color:#a7a9b6;font-size:12px;line-height:1.55;margin:0 0 14px}
+.pm-free-card .pm-pack-spot{width:104px;height:144px;transform:rotate(8deg);filter:drop-shadow(0 12px 15px #0008)}
+.pm-free-card .pm-booster{width:100%;height:100%}
+.pm-free-card .pm-free-count{font-size:14px;color:#fff;font-weight:800;margin:4px 0}
+.pm-free-card .pm-free-count strong{color:#ffd39a}
+.pm-free-card .pm-free-clock{font-size:12px;color:#aeb4c0;min-height:18px}
+.pm-free-card .pm-free-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.pm-free-card .pm-free-actions button{min-height:40px;font-size:11px;padding:7px 10px}
+.pm-daily-card{background:linear-gradient(132deg,#282333,#1b1c26);border:1px solid #434051;border-radius:20px;padding:24px;display:flex;flex-direction:column;justify-content:space-between}
+.pm-daily-card h3{font-size:21px;margin:10px 0}
+.pm-daily-card p{font-size:13px;color:#a9a5b5;line-height:1.6;max-width:310px}
+.pm-daily-card .pm-daily-icon{font-size:26px;color:#ffcf7f}
+.pm-daily-card button{align-self:flex-start;margin-top:8px}
+.pm-pack-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;align-items:stretch}
+.pm-pack-card{min-width:0;background:#1a1c25;border:1px solid #30343f;border-radius:19px;overflow:hidden;padding:13px 13px 15px;transition:border-color .15s,transform .18s,background .15s;display:flex;flex-direction:column;position:relative}
+.pm-pack-card:hover{border-color:#816576;background:#22242e;transform:translateY(-2px)}
+.pm-pack-card.is-selected{border-color:#ff7488;background:#29212b;box-shadow:0 0 0 1px #ff607d2b}
+.pm-pack-card .pm-pack-cover{cursor:pointer;background:radial-gradient(ellipse at 50% 48%,#35334b,transparent 67%);border:0;padding:9px 7px 5px;display:flex;align-items:center;justify-content:center;width:100%;height:225px;border-radius:13px;position:relative;overflow:hidden}
+.pm-pack-card .pm-pack-cover:hover{filter:brightness(1.08)}
+.pm-pack-card .pm-pack-cover:before{content:"";position:absolute;width:150px;height:150px;border:1px solid #ffffff0e;border-radius:50%}
+.pm-pack-card .pm-booster{width:126px;height:190px;transition:transform .18s;filter:drop-shadow(0 12px 10px #0007)}
+.pm-pack-card:hover .pm-booster{transform:translateY(-4px)}
+.pm-pack-card .pm-pack-level{position:absolute;z-index:2;top:11px;left:11px;background:#13141ce5;border:1px solid #ffffff16;border-radius:8px;padding:5px 7px;color:#d3d5e1;font-weight:850;font-size:10px}
+.pm-pack-title{font-size:14px;line-height:1.35;font-weight:850;min-height:38px;margin:12px 2px 6px;color:#f4f2f7;letter-spacing:-.15px}
+.pm-pack-sub{display:flex;justify-content:space-between;gap:6px;color:#a4a8b5;font-size:11px;margin:0 2px 11px;}
+.pm-pack-price{color:#ffda96;font-size:13px;font-weight:900}
+.pm-pack-foot{display:grid;grid-template-columns:1fr auto;gap:7px;margin-top:auto;align-items:center}
+.pm-pack-foot button{font-size:11px;min-height:39px;padding:7px 8px;border-radius:10px}
+.pm-pack-foot .pm-pack-main{grid-column:1;color:#180f14}
+.pm-pack-foot .pm-pack-more{grid-column:2;background:#292b37;border:1px solid #424552;color:#eee;min-width:39px;}
+.pm-pack-card.is-locked .pm-pack-cover{filter:saturate(.55)}
+.pm-pack-card.is-locked .pm-pack-main{background:#353744!important;color:#a2a6b5!important;border:1px solid #424552!important}
+.pm-booster{--booster-a:#982741;--booster-b:#29204b;position:relative;display:block;overflow:hidden;border-radius:10px 10px 13px 13px;background:linear-gradient(140deg,var(--booster-a),var(--booster-b) 58%,#101324);border:1px solid #ffffff65;isolation:isolate;box-shadow:inset 0 0 0 2px #ffffff12,0 4px 20px #0005;}
+.pm-booster.pm-lv0{--booster-a:#ac3754;--booster-b:#352342}
+.pm-booster.pm-lv1{--booster-a:#335a9b;--booster-b:#1b2344}
+.pm-booster.pm-lv2{--booster-a:#693b99;--booster-b:#251c4b}
+.pm-booster.pm-lv3{--booster-a:#b57932;--booster-b:#3e223e}
+.pm-booster:before,.pm-booster:after{content:"";position:absolute;left:0;right:0;height:7.2%;z-index:3;background:repeating-linear-gradient(90deg,#e0d6d9 0 3px,#8a8595 3px 5px);box-shadow:0 1px 6px #0007}
+.pm-booster:before{top:0}.pm-booster:after{bottom:0;transform:scaleY(-1)}
+.pm-booster-aura{position:absolute;inset:8% 0;background:radial-gradient(circle at 50% 45%,#ffffff38 0%,#ff7f9f1e 24%,transparent 64%),repeating-conic-gradient(from 0deg at 50% 46%,transparent 0deg 16deg,#ffffff0a 17deg 20deg);pointer-events:none}
+.pm-booster-top{position:absolute;top:10%;left:4%;right:4%;text-align:center;color:#fff;font-weight:1000;font-size:clamp(9px,.9vw,11px);letter-spacing:1.2px;text-shadow:0 2px 4px #000a;line-height:1.1;z-index:3}
+.pm-booster-cards{position:absolute;left:8%;right:8%;top:26%;bottom:26%;display:block;z-index:2}
+.pm-booster-cards img{position:absolute;top:4%;left:24%;width:53%;height:90%;aspect-ratio:63/88;object-fit:cover;box-shadow:0 3px 8px #0009;border:1px solid #fff7;border-radius:3px;transform:rotate(0deg);background:#3f4056}
+.pm-booster-cards img:nth-child(1){transform:translate(-31%,8%) rotate(-19deg)}
+.pm-booster-cards img:nth-child(2){transform:translate(31%,8%) rotate(18deg)}
+.pm-booster-cards img:nth-child(3){z-index:2;transform:translateY(-1%) scale(1.03)}
+.pm-booster-glare{position:absolute;inset:7% 0;background:linear-gradient(115deg,transparent 33%,#ffffff2b 48%,transparent 58%);z-index:4;pointer-events:none}
+.pm-booster-bottom{position:absolute;left:7%;right:7%;bottom:10.8%;font-weight:900;font-size:clamp(8px,.8vw,11px);line-height:1.05;text-align:center;text-shadow:0 2px 4px #000c;color:#fff;z-index:3;overflow-wrap:anywhere}
+.pm-booster-series{position:absolute;bottom:6.8%;left:0;right:0;text-align:center;font-size:7px;letter-spacing:1px;font-weight:800;color:#ffe7ee;z-index:3}
+.pm-shop-layout{display:grid;grid-template-columns:minmax(0,1fr) 338px;align-items:start;gap:19px}
+.pm-shop-main{min-width:0}
+.pm-shop-aside{position:sticky;top:104px;min-width:0}
+.pm-shop-topnote{background:#1a1d27;border:1px solid #363947;border-radius:18px;padding:16px 20px;margin:20px 0 19px;display:flex;gap:16px;align-items:center;justify-content:space-between}
+.pm-shop-topnote b{font-size:14px;display:block;margin-bottom:4px}.pm-shop-topnote span{font-size:12px;color:#a6aab7}
+.pm-shop-topnote button{min-height:38px;font-size:11px;flex-shrink:0;padding:7px 12px}
+.pm-shop-tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:0 0 16px!important;padding:0!important;overflow:visible!important;background:transparent!important;position:static!important;border:0!important}
+.pm-shop-tabs button{background:#20222c;border:1px solid #373a47;border-radius:13px;color:#b0b4c0;min-width:0;min-height:70px;padding:10px 10px!important;text-align:left;font-size:13px;font-weight:850;display:flex;flex-direction:column;justify-content:center;gap:4px}
+.pm-shop-tabs button span{font-size:11px;font-weight:700;color:#8e94a5}
+.pm-shop-tabs button.is-active{background:#38232f;border-color:#ff7284;color:white}
+.pm-shop-tabs button.is-active span{color:#ffabb8}
+.pm-shop-toolbar{display:flex;align-items:center;gap:12px;margin:0 0 15px}
+.pm-shop-toolbar input{background:#20222b!important;border:1px solid #373b47!important;border-radius:12px!important;color:#fff!important;width:100%;min-width:0;min-height:45px;font-size:14px;padding:10px 14px}
+.pm-shop-toolbar .pm-results{flex-shrink:0;color:#a0a4b2;font-size:12px}
+.pm-shop-main .pm-pack-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.pm-shop-main .pm-pack-card .pm-pack-cover{height:210px}
+.pm-shop-main .pm-pack-card .pm-booster{width:120px;height:180px}
+.pm-detail{border:1px solid #41414d;background:#1d1e28;border-radius:20px;padding:20px;position:relative;min-width:0;}
+.pm-detail .pm-detail-closed{display:none}
+.pm-detail-top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+.pm-detail-tag{font-size:10px;letter-spacing:1.4px;font-weight:900;color:#ff9bad}
+.pm-detail h2{font-size:24px;line-height:1.13;letter-spacing:-.9px;margin:8px 0 8px!important}
+.pm-detail p{font-size:12px;line-height:1.65;color:#aeb0bf;margin:9px 0 15px}
+.pm-detail .pm-detail-cover{display:flex;justify-content:center;align-items:center;min-height:218px;padding:8px;margin:4px 0 0;border-radius:15px;background:radial-gradient(ellipse at 50% 45%,#4e3348,#252431 70%,transparent 75%)}
+.pm-detail .pm-booster{width:140px;height:210px;filter:drop-shadow(0 9px 14px #0008)}
+.pm-detail .pm-detail-stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin:15px 0}
+.pm-detail .pm-detail-stats>div{background:#272934;border:1px solid #3b3d49;border-radius:11px;padding:10px 12px}
+.pm-detail .pm-detail-stats b{display:block;color:white;font-size:15px}
+.pm-detail .pm-detail-stats small{display:block;color:#9196a6;font-size:10px;margin-top:5px}
+.pm-detail .pm-detail-progress{height:6px;border-radius:9px;overflow:hidden;background:#434553;margin:12px 0}
+.pm-detail .pm-detail-progress i{height:100%;display:block;background:linear-gradient(90deg,#fa647b,#ffbd84)}
+.pm-detail .pm-detail-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px 0}
+.pm-detail .pm-detail-actions button{width:100%;min-height:43px;font-size:11px;padding:7px 8px}
+.pm-detail .pm-detail-actions .pm-full{grid-column:1/-1}
+.pm-detail .pm-detail-actions button:disabled{opacity:.4}
+.pm-detail .pm-qty-area{border-top:1px solid #373a46;margin:16px -2px 0;padding-top:13px}
+.pm-detail .pm-qty-area>small{display:block;color:#adb1bf;font-size:11px;margin:11px 0 6px;font-weight:800}
+.pm-detail .qty-line{display:grid!important;grid-template-columns:36px 24px 36px minmax(0,1fr);gap:6px;align-items:center}
+.pm-detail .qty-line button{width:auto!important;min-height:36px;padding:5px!important;font-size:11px;border-radius:8px}
+.pm-detail .qty-line strong{text-align:center;font-size:12px}
+.pm-detail .pm-chase-preview{border-top:1px solid #3b3c47;padding-top:14px;margin-top:15px}
+.pm-detail .pm-chase-preview h3{margin:3px 0 7px;font-size:13px;letter-spacing:0}
+.pm-detail .pm-chase-preview p{margin:0 0 9px;font-size:11px}
+.pm-detail .pm-hit-cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
+.pm-detail .pm-hit-cards img{width:100%;aspect-ratio:63/88;object-fit:contain;border-radius:5px;background:#1b1c25}
+.pm-detail .pm-hit-cards .pm-hit-placeholder{aspect-ratio:63/88;background:#31323d;border:1px dashed #535360;border-radius:6px;display:grid;place-items:center;color:#a2a1b1;font-size:10px}
+.pm-detail .pm-pity{margin:12px 0}
+.pm-detail .pm-detail-close{display:none}
+.pm-empty{padding:28px 16px;border:1px dashed #474b58;border-radius:16px;text-align:center;color:#a1a6b5;font-size:13px}
+.pm-home-pack-list{grid-template-columns:repeat(4,minmax(0,1fr))}
+.pm-home-pack-list .pm-pack-card .pm-pack-cover{height:200px}
+.pm-home-pack-list .pm-booster{width:118px;height:176px}
+.pm-page-context{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;border:1px solid #343744;background:#1a1c26;border-radius:16px;padding:13px 16px;margin:0 0 17px}
+.pm-page-context b{font-size:13px}
+.pm-page-context nav{display:flex;flex-wrap:wrap;gap:7px}
+.pm-page-context nav button{min-height:35px;padding:7px 10px;font-size:11px;border:1px solid #414554;background:#292b36;color:white}
+.pm-home-action{background:#1b1d26!important;color:#f6f6fa!important;border-color:#323542!important}
+.pm-pack-card .pm-pack-cover{background:radial-gradient(ellipse at 50% 48%,#35334b,transparent 67%)!important;border:0!important}
+.pm-detail .pm-batch-more{margin:8px 0 0;border:1px solid #353944;border-radius:10px;background:#252731;padding:6px 9px}
+.pm-detail .pm-batch-more summary{color:#abb1be;font-size:11px;font-weight:800;cursor:pointer;padding:4px 0}
+.pm-detail .pm-batch-more .qty-presets{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px!important;margin-top:7px}
+.pm-detail .pm-batch-more .qty-presets button{padding:7px 3px!important;min-width:0;font-size:10px!important;min-height:36px;background:#343644!important;border:1px solid #4d4c5a;color:#e5e5f0!important}
+.pm-detail .pm-batch-more .qty-subline{font-size:10px;color:#8f95a4;margin-top:6px}
+/* Refinement of existing pages while keeping their original actions / state */
+#app .ky-welcome,#app .ky-showcase,#app .profile-hero,#app .pm-mission-preview,#app .chase-panel{background:#1a1c25!important;border:1px solid #393b48!important;border-radius:19px!important}
+#app .set,#app .binder{background:#1c1f29!important;border:1px solid #3a3e49!important;border-radius:14px!important;box-shadow:none!important}
+#app .binder{border-left:6px solid #f36f84!important}
+#app .set:hover,#app .binder:hover{border-color:#fe7f92!important}
+#app .shelf{grid-template-columns:repeat(auto-fill,minmax(165px,1fr));gap:13px}
+#app .page{background:#1a1c25;border:1px solid #474957;border-left:15px dotted #51525e;max-width:590px;gap:10px}
+#app .pocket{background:#262934;border:1px solid #343845}
+#app .pb{background:#343745}
+#app .crumb{font-size:22px;margin-bottom:20px}
+#app .bar select,#app .bar input{background:#20232c;border:1px solid #3d404e;color:white}
+#app .pm-section-heading{gap:12px}
+#modal{background:#0a0b10c9!important;backdrop-filter:blur(9px)}
+#modal .mb{background:#1c1e28!important;border:1px solid #4b4e5b;border-radius:20px}
+#stage{background:#08090fef!important}
+footer{background:#0f1016;border-top:1px solid #292b34;color:#858998;font-size:10px;line-height:1.7}
+@media(max-width:1180px){
+ .pm-header-inner{padding:11px 20px;gap:12px}
+ #main-nav button{padding:9px 8px!important;font-size:12px!important}
+ #pm-header #gs{width:150px;max-width:150px}
+ .pm-shop-layout{grid-template-columns:minmax(0,1fr) 306px}
+ .pm-shop-main .pm-pack-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:820px){
+ .pm-header-inner{min-height:64px;flex-wrap:wrap;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;padding:10px 14px}
+ .pm-header-brand{grid-column:1;grid-row:1}
+ .pm-header-tools{grid-column:2;grid-row:1;justify-self:end;margin:0}
+ #pm-header #gs{display:none}
+ #pm-header .coins{padding:8px 9px!important}
+ #main-nav{position:fixed!important;bottom:0!important;top:auto!important;left:0!important;right:0!important;z-index:950!important;min-height:calc(69px + env(safe-area-inset-bottom,0px));display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr));align-items:start;gap:3px!important;padding:6px 6px calc(6px + env(safe-area-inset-bottom,0px))!important;background:#161821f7!important;border-top:1px solid #444653!important;border-radius:0!important;backdrop-filter:blur(20px);box-shadow:0 -6px 22px #0008!important}
+ #main-nav button{min-width:0!important;height:49px;min-height:49px!important;max-height:50px;border-radius:12px!important;white-space:normal!important;line-height:1.1;font-size:10px!important;gap:1px;padding:3px 0!important;display:flex!important;flex-direction:column;justify-content:center;align-items:center}
+ #main-nav button:before{display:block!important;content:'⌂'!important;font-size:19px!important;line-height:1.05}
+ #main-nav #n-shop:before{content:'▣'!important}
+ #main-nav #n-coll:before{content:'▤'!important}
+ #main-nav #n-ach:before{content:'✦'!important}
+ #main-nav #n-profile:before{content:'♙'!important}
+ #main-nav button.on{background:#3c2735!important;border:1px solid #83445b!important;color:#fff!important}
+ #main-nav button.on:after{display:none}
+ #main-nav .badge{position:absolute;top:0;right:2px}
+ body{padding-bottom:calc(74px + env(safe-area-inset-bottom,0px))!important}
+ main#app{padding:17px 14px 40px!important}
+ .pm-feature-hero{grid-template-columns:minmax(0,1fr) 240px;padding:24px;min-height:315px}
+ .pm-hero-pack{width:152px;height:225px}
+ .pm-hero-loose{width:106px;height:148px}
+ .pm-hero-loose:nth-child(1){transform:translate(-77px,-8px) rotate(-21deg)}
+ .pm-hero-loose:nth-child(2){transform:translate(80px,8px) rotate(19deg)}
+ .pm-shop-layout{grid-template-columns:1fr}
+ .pm-shop-aside{position:static}
+ .pm-shop-main .pm-pack-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+ .pm-detail{position:fixed;inset:auto 0 0;top:4dvh;z-index:990;max-height:96dvh;overflow-y:auto;border-radius:23px 23px 0 0!important;border-bottom:0;padding:24px 18px calc(84px + env(safe-area-inset-bottom,0px));transform:translateY(110%);transition:transform .23s;box-shadow:0 -20px 80px #000b}
+ .pm-detail.is-open{transform:translateY(0)}
+ .pm-detail .pm-detail-close{display:grid;place-items:center;min-height:34px;width:34px;border:1px solid #575662;background:#292b35;color:white;position:sticky;top:0;z-index:4;margin-left:auto;border-radius:10px}
+ .pm-detail .pm-detail-cover{min-height:170px}
+ .pm-detail .pm-booster{width:115px;height:170px}
+ .pm-detail-shade{position:fixed;inset:0;background:#05060bad;z-index:985;display:none}
+ .pm-detail-shade.is-open{display:block}
+ .pm-feature-hero{grid-template-columns:1fr 220px}
+}
+@media(max-width:620px){
+ .pm-header-brand h1{font-size:18px!important}
+ .pm-header-brand h1 small{font-size:7px;letter-spacing:1.7px}
+ #pm-header .pbl{width:26px;height:26px}
+ .pm-header-tools{max-width:104px}
+ #pm-header .coins{font-size:12px!important;max-width:105px;overflow:hidden;text-overflow:ellipsis}
+ .pm-intro{display:block}
+ .pm-intro h2{font-size:30px!important}
+ .pm-feature-hero{grid-template-columns:1fr;gap:15px;min-height:0;padding:22px 19px 26px;border-radius:19px}
+ .pm-feature-copy h2{font-size:38px!important;margin:12px 0 8px}
+ .pm-feature-copy p{font-size:12px;line-height:1.55;margin-bottom:14px}
+ .pm-feature-chips{margin-bottom:13px}
+ .pm-feature-visual{height:200px;order:-1;margin:-5px 0 0}
+ .pm-hero-pack{width:135px;height:184px}
+ .pm-hero-loose{width:100px;height:140px}
+ .pm-hero-loose:nth-child(1){transform:translate(-80px,-3px) rotate(-19deg)}
+ .pm-hero-loose:nth-child(2){transform:translate(80px,0) rotate(18deg)}
+ .pm-feature-buttons{width:100%;display:grid;grid-template-columns:1fr 1fr}
+ .pm-feature-buttons button{font-size:11px;min-height:44px;padding:6px}
+ .pm-feature-index{display:none}
+ .pm-home-actions{grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin-top:11px}
+ .pm-home-action{min-height:79px;padding:10px 3px;display:flex;gap:7px;flex-direction:column;text-align:center;justify-content:center}
+ .pm-home-action>span{width:29px;height:29px;font-size:17px;border-radius:9px}
+ .pm-home-action strong{font-size:10px}
+ .pm-home-action small{display:none}
+ .pm-dashboard-stats{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+ .pm-stat{padding:14px 15px;border-radius:13px}
+ .pm-stat b{font-size:22px}
+ .pm-home-row{grid-template-columns:1fr}
+ .pm-free-card{grid-template-columns:minmax(0,1fr) 98px;gap:6px;padding:19px 15px}
+ .pm-free-card .pm-pack-spot{width:91px;height:130px}
+ .pm-daily-card{min-height:152px;padding:19px}
+ .pm-section-title{margin:28px 0 14px}
+ .pm-section-title h2{font-size:20px!important}
+ .pm-section-title .pm-link{font-size:10px;white-space:normal}
+ .pm-pack-grid,.pm-home-pack-list,.pm-shop-main .pm-pack-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:9px}
+ .pm-pack-card{border-radius:15px;padding:9px 9px 12px}
+ .pm-pack-card .pm-pack-cover,.pm-home-pack-list .pm-pack-card .pm-pack-cover,.pm-shop-main .pm-pack-card .pm-pack-cover{height:188px;padding:4px}
+ .pm-pack-card .pm-booster,.pm-home-pack-list .pm-booster,.pm-shop-main .pm-pack-card .pm-booster{width:114px;height:169px}
+ .pm-pack-title{font-size:12px;min-height:33px;margin:9px 1px 5px}
+ .pm-pack-sub{font-size:10px;margin-bottom:9px;align-items:center}
+ .pm-pack-price{font-size:11px}
+ .pm-pack-foot{gap:4px}
+ .pm-pack-foot button{padding:6px 5px;min-height:37px;font-size:10px}
+ .pm-pack-foot .pm-pack-more{min-width:33px}
+ .pm-shop-topnote{padding:13px;gap:8px;border-radius:14px}
+ .pm-shop-topnote b{font-size:12px}
+ .pm-shop-topnote span{font-size:10px}
+ .pm-shop-topnote button{padding:7px 9px;font-size:10px}
+ .pm-shop-tabs{display:flex;overflow-x:auto!important;gap:8px;margin:0 -14px 15px!important;padding:0 14px 8px!important;scroll-snap-type:x mandatory}
+ .pm-shop-tabs button{flex:0 0 125px!important;min-width:125px!important;scroll-snap-align:start;min-height:62px;font-size:12px;padding:9px 11px!important}
+ .pm-shop-toolbar{gap:8px}
+ .pm-shop-toolbar .pm-results{font-size:10px}
+ .pm-detail{top:3dvh;padding-left:15px;padding-right:15px}
+ .pm-detail h2{font-size:21px!important}
+ .pm-detail .pm-qty-area{max-width:100%}
+ .pm-detail .qty-line{grid-template-columns:34px 20px 34px minmax(0,1fr)}
+ #app .shelf{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+ #app .cards{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:8px!important}
+ #app .sets{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+ #app .page{gap:6px;padding:10px 8px;border-left:9px dotted #51525e}
+ #app .pm-page-context{align-items:flex-start}
+}
+@media(max-width:370px){
+ .pm-pack-card .pm-pack-cover,.pm-home-pack-list .pm-pack-card .pm-pack-cover,.pm-shop-main .pm-pack-card .pm-pack-cover{height:166px}
+ .pm-pack-card .pm-booster,.pm-shop-main .pm-pack-card .pm-booster,.pm-home-pack-list .pm-booster{width:96px;height:145px}
+ .pm-shop-tabs button{flex-basis:115px!important;min-width:115px!important}
+ #pm-header .coins .pm-coin-unit{display:none}
+}
+#pm-header #menu-toggle{display:flex!important;background:#242630!important;border:1px solid #434550!important;color:#fff!important}
+@media(max-width:820px){#pm-header{backdrop-filter:none!important;-webkit-backdrop-filter:none!important;}#pm-header #main-nav{display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;grid-template-rows:1fr!important;position:fixed!important;visibility:visible!important;opacity:1!important;top:auto!important;bottom:0!important;left:0!important;right:0!important;}}
+#pm-header #main-nav > :not(#n-home):not(#n-shop):not(#n-coll):not(#n-ach):not(#n-profile){display:none!important}
+@media(prefers-reduced-motion:reduce){.pm-drawer,.pm-drawer-root,.pm-detail,.pm-pack-card,.pm-pack-card .pm-booster{transition:none!important}}
+</style>
+<script id="pm-redesign-2026-js">
+/* ===== POKÉMASTER SET — navigation et présentation v10, moteur de jeu préservé ===== */
+let pmNewShopLevel=0,pmNewShopQuery='',pmNewShopSelected='',pmNewShopOpen=false,pmNewShopPicsSeq=0;
+const pmArtCache=new Map();
+function pmNavigate(page){
+ pmToggleDrawer(false);pmCloseDetails();
+ if(typeof show==='function')show(page);
+ window.scrollTo({top:0,behavior:'instant'});
+}
+function pmToggleDrawer(force){
+ const d=document.getElementById('pm-drawer-root'),b=document.getElementById('menu-toggle');
+ const o=(typeof force==='boolean'?force:!d.classList.contains('open'));
+ d.classList.toggle('open',o);d.setAttribute('aria-hidden',String(!o));b.setAttribute('aria-expanded',String(o));
+}
+function pmFeaturedSet(){return SETS.find(s=>s.id===window.PM_FEATURED_ID)||SETS.find(s=>/nuit noire/i.test(s.name))||SETS[0]||null}
+function pmSetList(){return SETS.filter(s=>!s.pmPending||s.id===window.PM_FEATURED_ID)}
+function pmArtImage(id,local){
+ const lang=id==='M6'?'ja':'fr';
+ return `https://assets.tcgdex.net/${lang}/${encodeURIComponent(id)}/${encodeURIComponent(String(local))}/high.webp`;
+}
+function pmFullImage(c){
+ let raw=String(c?.image||c?.i||'');
+ if(!raw&&c?.sid&&c?.localId)raw=`https://assets.tcgdex.net/fr/${c.sid}/${c.localId}`;
+ if(!raw)return '';
+ return /^(data:)/.test(raw)||/\.(?:png|jpe?g|webp)(?:[?#]|$)/i.test(raw)?raw:raw+'/high.webp';
+}
+function pmSetArt(s){
+ const id=s.id==='ALL'?(pmFeaturedSet()?.id||'me01'):s.id;
+ const max=Math.max(5,Number(s.cardCount?.total||90));
+ const inds=[1,Math.max(2,Math.round(max*.36)),Math.max(3,Math.round(max*.72))];
+ return inds.map(i=>pmArtImage(id,i));
+}
+function pmBooster(s,extra=''){
+ if(!s)return '';
+ const lv=levelOf(s),id=s.id==='ALL'?(pmFeaturedSet()?.id||'me01'):s.id;
+ const arts=pmArtCache.get(id)?.slice(0,3).map(pmFullImage).filter(Boolean)||pmSetArt(s);
+ const seed=pmSetArt(s);
+ const sources=arts.length>=3?arts:seed;
+ return `<span class="pm-booster pm-lv${lv} ${extra}" data-pm-art="${esc(id)}"><span class="pm-booster-aura"></span><span class="pm-booster-top">POKÉMASTER SET</span><span class="pm-booster-cards">${sources.map((u,i)=>`<img loading="lazy" src="${esc(u)}" data-pm-image="${i}" alt="Aperçu de carte ${esc(s.name)}" onerror="pmArtFallback(this)">`).join('')}</span><span class="pm-booster-glare"></span><span class="pm-booster-bottom">${esc(s.name)}</span><span class="pm-booster-series">${esc(id.toUpperCase())} · 6 CARTES</span></span>`;
+}
+function pmArtFallback(img){
+ if(img.dataset.fallback==='1'){img.style.opacity='.17';return}
+ img.dataset.fallback='1';const node=img.closest('[data-pm-art]');const id=node?.dataset.pmArt||'me01';img.src=pmArtImage(id,1);
+}
+async function pmLoadIllustrations(s){
+ if(!s)return [];
+ if(pmArtCache.has(s.id))return pmArtCache.get(s.id);
+ try{
+  const d=await loadSet(s.id);
+  const items=(d?.cards||[]).filter(c=>c?.image&&!/energy|énergie|dresseur|trainer|supporter|stadium|objet|outil/i.test(`${c.category||''}`));
+  const score=c=>({secret:9,SAR:8,AR:7,double:6,holo:5,rare:4,uncommon:2,common:1})[c.tier]||0;
+  const sorted=[...items].sort((a,b)=>score(b)-score(a)||value(b)-value(a));
+  const picks=[...new Map(sorted.map(x=>[x.id,x])).values()].slice(0,3);
+  pmArtCache.set(s.id,picks);
+  return picks;
+ }catch(e){console.warn('Illustrations temporaires non disponibles',s.id,e);return []}
+}
+function pmPaintArt(id,picks){
+ if(!picks?.length)return;
+ document.querySelectorAll('[data-pm-art]').forEach(box=>{
+  if(box.dataset.pmArt!==id)return;
+  box.querySelectorAll('[data-pm-image]').forEach((img,i)=>{const card=picks[i];if(card){const u=pmFullImage(card);if(u){img.dataset.fallback='';img.src=u;img.alt=`${card.name} · ${id}`}}});
+ });
+ document.querySelectorAll(`[data-pm-hero="${id}"]`).forEach((img,i)=>{const u=pmFullImage(picks[i]);if(u){img.src=u;img.alt=picks[i].name}});
+}
+async function pmHydrateSet(s){const seq=++pmNewShopPicsSeq;const cards=await pmLoadIllustrations(s);pmPaintArt(s.id,cards);
+ if(seq!==pmNewShopPicsSeq)return;
+ const target=document.getElementById('pm-new-hit-cards');if(!target||pmNewShopSelected!==s.id)return;
+ target.innerHTML=cards.length?cards.slice(0,3).map(c=>`<img loading="lazy" src="${esc(pmFullImage(c))}" alt="${esc(c.name)}" title="${esc(c.name)}" onerror="this.style.opacity='.2'">`).join(''):'<div class="pm-empty" style="grid-column:1/-1">Catalogue en cours de chargement. Retrouve toutes les cartes avec le bouton ci-dessus.</div>';
+}
+function pmHeroLoose(s,i){const u=pmArtCache.get(s.id)?.[i]&&pmFullImage(pmArtCache.get(s.id)[i])||pmSetArt(s)[i];return `<img loading="lazy" class="pm-hero-loose" data-pm-art="${esc(s.id)}" data-pm-hero="${esc(s.id)}" src="${esc(u)}" alt="Carte de ${esc(s.name)}" onerror="pmArtFallback(this)">`}
+function pmOwnedUnique(){return Object.entries(S.owned||{}).filter(([id,n])=>n>0).length}
+function pmHomeActions(){return `<div class="pm-home-actions"><button class="pm-home-action" onclick="pmNavigate('shop')"><span>▣</span><div><strong>Ouvrir</strong><small>Choisir un booster</small></div></button><button class="pm-home-action" onclick="pmNavigate('coll')"><span>▦</span><div><strong>Mes albums</strong><small>Compléter mes séries</small></div></button><button class="pm-home-action" onclick="pmNavigate('ach')"><span>✦</span><div><strong>Missions</strong><small>Gagner des PokéCoins</small></div></button></div>`}
+function pmPackCard(s){
+ const id=s.id,lk=locked(s),st=S.stock[id]||0,lv=levelOf(s),pct=pmMasterPercent(s.id),cnt=s.cardCount?.total||0;
+ return `<article class="pm-pack-card${lk?' is-locked':''}${pmNewShopSelected===id?' is-selected':''}" data-pm-pack="${esc(id)}">
+ <button class="pm-pack-cover" aria-label="Détails de ${esc(s.name)}" onclick="pmSelectShop('${esc(id)}')"><span class="pm-pack-level">${id===window.PM_FEATURED_ID?'À LA UNE':`NIV. ${lv+1}`}</span>${pmBooster(s)}</button>
+ <div class="pm-pack-title">${esc(s.name)}</div><div class="pm-pack-sub"><span>${cnt} cartes · ${pct}%</span><span class="pm-pack-price">${price(id)} PC</span></div>
+ <div class="pm-pack-foot"><button class="pm-primary pm-pack-main" onclick="${lk?`pmSelectShop('${esc(id)}')`:st?`openBooster('${esc(id)}')`:`pmUIBuy('${esc(id)}',1)`}">${lk?'Verrouillé':st?`Ouvrir · ${st} en stock`:'Acheter'}</button><button class="pm-pack-more" title="Détails du booster" aria-label="Plus de détails de ${esc(s.name)}" onclick="pmSelectShop('${esc(id)}')">→</button></div>
+ </article>`;
+}
+function pmHome(){
+ const s=pmFeaturedSet();if(!s){document.getElementById('app').innerHTML='<p class="pm-empty">Chargement du catalogue Pokémon…</p>';return}
+ const list=pmSetList().sort((a,b)=>a.id===s.id?-1:b.id===s.id?1:levelOf(a)-levelOf(b)||price(a.id)-price(b.id));
+ const available=list.filter(x=>!locked(x));const stock=Object.values(S.stock||{}).reduce((n,x)=>n+(Number(x)||0),0);
+ const free=S.stock.ALL||0;
+ $('#app').innerHTML=`
+ <section class="pm-intro"><div><span class="pm-kicker">BIENVENUE DANS TON ESPACE</span><h2>Prêt pour une nouvelle découverte ?</h2><p>Choisis une extension, ouvre tes boosters et construis ta collection Pokémon.</p></div></section>
+ <section class="pm-feature-hero"><div class="pm-feature-copy"><span class="pm-kicker">✦ LA SÉRIE DU MOMENT</span><h2>${esc(s.name)}</h2><p>Une extension à explorer, des cartes à découvrir et de nouveaux objectifs de collection.</p><div class="pm-feature-chips"><span>${s.cardCount?.total||'—'} cartes à collectionner</span><span>Niveau ${levelOf(s)+1}</span><span>${price(s.id)} PC / booster</span></div><div class="pm-feature-buttons"><button class="pm-primary" onclick="pmNavigate('shop');pmSelectShop('${esc(s.id)}')">Découvrir la série →</button><button class="pm-outline" onclick="drops('${esc(s.id)}')">Voir les cartes</button></div></div><div class="pm-feature-visual">${pmHeroLoose(s,0)}${pmHeroLoose(s,1)}<div class="pm-hero-pack">${pmBooster(s)}</div></div><span class="pm-feature-index">POKÉMASTER // FEATURED SET</span></section>
+ ${pmHomeActions()}
+ <div class="pm-dashboard-stats"><div class="pm-stat"><b>${pmOwnedUnique()}</b><span>Cartes différentes</span></div><div class="pm-stat"><b>${completedMasters()}</b><span>Master Sets</span></div><div class="pm-stat"><b>${stock}</b><span>Boosters en réserve</span></div><div class="pm-stat"><b>${unlockedLevel()+1}/4</b><span>Niveau débloqué</span></div></div>
+ <div class="pm-home-row"><article class="pm-free-card"><div><span class="pm-kicker">CADEAU RÉGULIER</span><h3>Ton booster gratuit</h3><p>Un nouveau booster toutes les 10 minutes. Garde jusqu'à 10 boosters en réserve.</p><div class="pm-free-count"><strong id="free-count">${free}/10</strong> disponibles</div><div class="pm-free-clock" id="free-timer">Prochain booster…</div><div class="pm-free-actions"><button id="fb" class="pm-primary" onclick="freeBoost();pmUpdateHomeFree()">Récupérer</button><button id="free-open" class="pm-outline" onclick="openFreeOwned()">Ouvrir</button></div></div><div class="pm-pack-spot">${pmBooster(s)}</div></article>
+ <article class="pm-daily-card"><div><span class="pm-daily-icon">✦</span><h3>Un coup de pouce pour ta collection</h3><p>Récupère ta récompense quotidienne et profite de nouvelles ouvertures.</p></div><div><button class="pm-primary" onclick="daily()">Cadeau du jour →</button></div></article></div>
+ <div class="pm-section-title"><div><span class="pm-kicker">DÉCOUVRIR</span><h2>Les boosters à explorer</h2><p>Une sélection d'extensions accessibles pour commencer.</p></div><button class="pm-link" onclick="pmNavigate('shop')">Toute la boutique →</button></div>
+ <div class="pm-pack-grid pm-home-pack-list">${(available.length?available:list).slice(0,8).map(pmPackCard).join('')}</div>
+ ${pmMissionPreview()}${chaseSection()}`;
+ fbUpdate();pmHydrateSet(s);
+}
+function pmUpdateHomeFree(){if(vw==='home'){const label=document.getElementById('free-count');if(label)label.textContent=`${S.stock.ALL||0}/10`;fbUpdate()}}
+function pmShopOverview(){const m=completedMasters();return `<div class="pm-shop-topnote"><div><b>✦ Des extensions pour chaque niveau</b><span>Complète des Master Sets pour débloquer les niveaux suivants. Progression : ${m} Master Set${m>1?'s':''}.</span></div><button class="pm-outline" onclick="pmNavigate('coll')">Mes classeurs →</button></div>`}
+function pmShop(){
+ const sets=pmSetList();if(!sets.length)return;
+ if(!sets.some(s=>levelOf(s)===pmNewShopLevel))pmNewShopLevel=0;
+ $('#app').innerHTML=`<section class="pm-intro"><div><span class="pm-kicker">BOUTIQUE / BOOSTERS</span><h2>Choisis ton prochain booster.</h2><p>Quatre niveaux d'extensions, des pochettes illustrées et toutes les informations avant d'ouvrir.</p></div></section>${pmShopOverview()}<div id="pm-shop-tabs" class="pm-shop-tabs" aria-label="Niveaux de boosters"></div><div class="pm-shop-layout"><div class="pm-shop-main"><div class="pm-shop-toolbar"><input id="pm-shop-input" type="search" placeholder="Rechercher une extension…" value="${esc(pmNewShopQuery)}" oninput="pmShopSearch(this.value)"><span class="pm-results" id="pm-shop-count"></span></div><div id="pm-shop-packs" class="pm-pack-grid"></div></div><div class="pm-shop-aside"><div class="pm-detail-shade" id="pm-detail-shade" onclick="pmCloseDetails()"></div><section id="pm-shop-detail" class="pm-detail" aria-label="Détails du booster"></section></div></div>`;
+ pmShopTabs();pmShopList();
+}
+function pmShopTabs(){
+ const parent=document.getElementById('pm-shop-tabs');if(!parent)return;
+ parent.innerHTML=LEVELS.map((l,i)=>{const count=pmSetList().filter(s=>levelOf(s)===i).length,done=i<=unlockedLevel();return `<button type="button" class="${pmNewShopLevel===i?'is-active':''}" onclick="pmShopLevel(${i})" aria-pressed="${pmNewShopLevel===i}">Niveau ${i+1}<span>${esc(l.name.split('·').pop().trim())} · ${count}${done?'':' 🔒'}</span></button>`}).join('');
+}
+function pmShopLevel(level){pmNewShopLevel=level;pmNewShopSelected='';pmShopTabs();pmShopList();pmCloseDetails();}
+function pmShopSearch(value){pmNewShopQuery=value;pmShopList();}
+function pmShopList(){
+ const parent=document.getElementById('pm-shop-packs');if(!parent)return;
+ const query=pmNewShopQuery.trim().toLocaleLowerCase('fr');
+ const items=pmSetList().filter(s=>levelOf(s)===pmNewShopLevel&&(s.name.toLocaleLowerCase('fr').includes(query)||s.id.toLowerCase().includes(query))).sort((a,b)=>a.id===window.PM_FEATURED_ID?-1:b.id===window.PM_FEATURED_ID?1:a.name.localeCompare(b.name,'fr'));
+ parent.innerHTML=items.length?items.map(pmPackCard).join(''):'<div class="pm-empty" style="grid-column:1/-1">Aucune extension trouvée pour ce niveau. Essaie un autre nom.</div>';
+ const count=document.getElementById('pm-shop-count');if(count)count.textContent=`${items.length} extension${items.length>1?'s':''}`;
+ if(!items.some(s=>s.id===pmNewShopSelected))pmNewShopSelected=items[0]?.id||'';
+ pmShopDetail();
+}
+function pmSelectShop(id){
+ const s=SETS.find(x=>x.id===id);if(!s)return;
+ if(vw!=='shop'){
+  pmNewShopLevel=levelOf(s);pmNewShopQuery='';pmNewShopSelected=id;pmNavigate('shop');
+  if(window.matchMedia('(max-width: 820px)').matches)pmOpenDetails();
+  return;
+ }
+ if(pmNewShopLevel!==levelOf(s)){pmNewShopLevel=levelOf(s);pmNewShopQuery='';pmShopTabs();pmShopList();}
+ pmNewShopSelected=id;
+ document.querySelectorAll('.pm-pack-card').forEach(el=>el.classList.toggle('is-selected',el.dataset.pmPack===id));
+ pmShopDetail();
+ if(window.matchMedia('(max-width: 820px)').matches)pmOpenDetails();
+}
+function pmOpenDetails(){
+ pmNewShopOpen=true;
+ document.getElementById('pm-shop-detail')?.classList.add('is-open');document.getElementById('pm-detail-shade')?.classList.add('is-open');
+}
+function pmCloseDetails(){pmNewShopOpen=false;document.getElementById('pm-shop-detail')?.classList.remove('is-open');document.getElementById('pm-detail-shade')?.classList.remove('is-open');}
+function pmShopDetail(){
+ const aside=document.getElementById('pm-shop-detail');if(!aside)return;
+ const s=SETS.find(x=>x.id===pmNewShopSelected);
+ if(!s){aside.innerHTML='<div class="pm-empty">Sélectionne une extension pour afficher les informations.</div>';return}
+ const id=s.id,lv=levelOf(s),lk=locked(s),st=S.stock[id]||0,owned=pmOwnedCount(id),total=s.cardCount?.total||0,pct=total?Math.min(100,Math.round(100*owned/total)):0;
+ const need=LEVELS[lv].need;
+ aside.innerHTML=`<button class="pm-detail-close" onclick="pmCloseDetails()" aria-label="Fermer les détails">✕</button><div class="pm-detail-top"><div><span class="pm-detail-tag">EXTENSION ${esc(id.toUpperCase())} · NIVEAU ${lv+1}</span><h2>${esc(s.name)}</h2></div></div><div class="pm-detail-cover">${pmBooster(s)}</div><p>${lk?`Verrouillé : complète ${need} Master Sets pour ouvrir cette extension (${completedMasters()}/${need}).`:`Découvre cette extension et avance vers le Master Set en réunissant toutes ses cartes.`}</p><div class="pm-detail-stats"><div><b>${total||'—'}</b><small>Cartes du set</small></div><div><b>${price(id)} PC</b><small>Prix unitaire</small></div><div><b>${st}</b><small>Booster(s) en stock</small></div><div><b>${owned}/${total||'—'}</b><small>Collection · ${pct}%</small></div></div><div class="pm-detail-progress"><i style="width:${pct}%"></i></div><div class="pm-detail-actions"><button class="pm-outline pm-full" onclick="drops('${esc(id)}')">Voir toutes les cartes de la série ↗</button>${lk?'<button class="pm-primary pm-full" disabled>Extension verrouillée</button>':`<button class="pm-primary" onclick="pmUIBuy('${esc(id)}',1)">Acheter · ${price(id)} PC</button><button class="pm-outline" onclick="openBooster('${esc(id)}')" ${st?'':'disabled'}>Ouvrir · ${st} en stock</button>`}</div>${!lk?`<div class="pm-qty-area"><small>Plusieurs boosters à acheter</small>${qtyControl(id,'buy')}<small>Ouvrir un lot de boosters</small>${qtyControl(id,'open')}</div>`:''}${id==='30th'?`<p>Achats restants aujourd'hui : ${left(id)}/10.</p>`:''}<div class="pm-chase-preview"><h3>✦ Cartes à découvrir</h3><p>Aperçu de trois cartes parmi les raretés de cette extension.</p><div class="pm-hit-cards" id="pm-new-hit-cards"><div class="pm-hit-placeholder">Chargement…</div><div class="pm-hit-placeholder">Chargement…</div><div class="pm-hit-placeholder">Chargement…</div></div></div>`;
+ aside.querySelectorAll('.qty-wrap').forEach(w=>{const presets=w.querySelector('.qty-presets'),sub=w.querySelector('.qty-subline');if(presets){const d=document.createElement('details');d.className='pm-batch-more';d.innerHTML='<summary>Options de lots rapides</summary>';d.appendChild(presets);if(sub)d.appendChild(sub);w.appendChild(d)}});
+ if(pmNewShopOpen)aside.classList.add('is-open');
+ pmHydrateSet(s);
+}
+function pmUIBuy(id,n){
+ const before=S.stock[id]||0;
+ buy(id,n);
+ if((S.stock[id]||0)!==before){
+  if(vw==='shop'){
+   const sc=window.scrollY;
+   pmShopList();document.querySelectorAll('.pm-pack-card').forEach(x=>x.classList.toggle('is-selected',x.dataset.pmPack===pmNewShopSelected));
+   window.scrollTo({top:sc,behavior:'instant'});
+  }else if(vw==='home'){
+   document.querySelectorAll(`[data-pm-pack="${id}"] .pm-pack-main`).forEach(btn=>{btn.textContent=`Ouvrir · ${S.stock[id]} en stock`;btn.setAttribute('onclick',`openBooster('${id}')`)});
+  }
+ }
+}
+const pmOriginalNavigateShow=show;
+show=function(v){pmToggleDrawer(false);pmCloseDetails();pmOriginalNavigateShow(v)};
+home=pmHome;shop=pmShop;
+/* Navigation contextuelle vers les outils existants, sans changer leur mécanique. */
+const pmOriginalCollPage=coll;
+coll=function(){pmOriginalCollPage();const app=document.getElementById('app');if(!app)return;app.insertAdjacentHTML('afterbegin',`<div class="pm-page-context"><b>▦ Ma collection de cartes</b><nav><button onclick="pmNavigate('solo')">Gérer mes doublons</button><button onclick="pmNavigate('shop')">Trouver des boosters</button></nav></div>`)};
+const pmOriginalAchPage=ach;
+ach=function(){pmOriginalAchPage();const app=document.getElementById('app');if(app)app.insertAdjacentHTML('afterbegin',`<div class="pm-page-context"><b>✦ Missions & récompenses</b><nav><button onclick="pmNavigate('wheel')">Roulette</button><button onclick="pmNavigate('coll')">Ma collection</button></nav></div>`)};
+const pmOriginalProfilePage=profile;
+profile=function(){pmOriginalProfilePage();const app=document.getElementById('app');if(app)app.insertAdjacentHTML('beforeend',`<div class="pm-page-context"><b>Outils de collectionneur</b><nav><button onclick="pmNavigate('solo')">Vendre mes doublons</button><button onclick="pmNavigate('wheel')">Roulette</button><button onclick="pmNavigate('ach')">Mes missions</button></nav></div>`)};
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){pmToggleDrawer(false);pmCloseDetails()}});
 </script>
 </body></html>
