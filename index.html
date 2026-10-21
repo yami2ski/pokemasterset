@@ -801,8 +801,8 @@ function chaseSection(){const ids=Object.keys(S.chase||{});return `<section clas
 
 function setCard(s){const id=s.id,st=S.stock[id]||0,lk=locked(s),lv=levelOf(s),need=LEVELS[lv].need;return `<article class="set simple-set ky-set ${lk?'locked-pack':''}"><div class="booster-choice" role="button" tabindex="0" onclick="selectPack('${id}')" onkeydown="if(event.key==='Enter')this.click()"><span class="pack-edition">${s.id==='ALL'?'BASE':`NIVEAU ${lv+1}`}</span>${packVisual(s)}${featuredThree(s)}<strong>${esc(s.name)}</strong></div><h3>${esc(s.name)}</h3><div class="pack-meta">${price(id)} PC · ${st} en stock${id===BASE_30_SET?` · ${Math.max(0,left(id))}/10 achats restants`:''}</div>${lk?`<div class="lock-explain">Débloqué après ${need} Master Set${need>1?'s':''} (${completedMasters()}/${need})</div>`:''}<button class="g" onclick="${id==='ALL'?'drops(window.PM_FEATURED_ID)':`drops('${id}')`}">Voir les cartes</button>${lk?'<button disabled>Verrouillé</button>':`<button onclick="${st?`openBooster('${id}')`:`buy('${id}',1)`}">${st?'Ouvrir':'Acheter'}</button>`}</article>`}
 const qtyBuy={},qtyOpen={};
-function qtyControl(id,mode){const st=S.stock[id]||0,max=mode==='buy'?Math.min(99,Math.max(0,left(id))):st,defaultQty=mode==='buy'?1:Math.min(st,1);const obj=mode==='buy'?qtyBuy:qtyOpen;const n=Math.max(1,Math.min(max||1,obj[id]||defaultQty));obj[id]=n;return `<div class="qty-line"><button class="g" onclick="adjustQty('${id}','${mode}',-1)">−</button><strong id="qty-${mode}-${id}">${n}</strong><button class="g" onclick="adjustQty('${id}','${mode}',1)">+</button><button onclick="${mode==='buy'?`buy('${id}',qtyBuy['${id}'])`:`openMany('${id}',qtyOpen['${id}'])`}" ${max<1?'disabled':''}>${mode==='buy'?'Acheter':'Ouvrir'} × <span id="qty-btn-${mode}-${id}">${n}</span></button></div>`}
-function adjustQty(id,mode,delta){const o=mode==='buy'?qtyBuy:qtyOpen,max=mode==='buy'?Math.min(99,Math.max(0,left(id))):(S.stock[id]||0);o[id]=Math.max(1,Math.min(max||1,(o[id]||1)+delta));const a=document.getElementById(`qty-${mode}-${id}`),b=document.getElementById(`qty-btn-${mode}-${id}`);if(a)a.textContent=o[id];if(b)b.textContent=o[id]}
+function qtyControl(id,mode){const st=S.stock[id]||0,max=mode==='buy'?Math.min(99,Math.max(0,left(id))):Math.min(100,st),defaultQty=mode==='buy'?1:Math.min(st,1);const obj=mode==='buy'?qtyBuy:qtyOpen;const n=Math.max(1,Math.min(max||1,obj[id]||defaultQty));obj[id]=n;return `<div class="qty-line"><button class="g" onclick="adjustQty('${id}','${mode}',-1)">−</button><strong id="qty-${mode}-${id}">${n}</strong><button class="g" onclick="adjustQty('${id}','${mode}',1)">+</button><button onclick="${mode==='buy'?`buy('${id}',qtyBuy['${id}'])`:`openMany('${id}',qtyOpen['${id}'])`}" ${max<1?'disabled':''}>${mode==='buy'?'Acheter':'Ouvrir'} × <span id="qty-btn-${mode}-${id}">${n}</span></button></div>`}
+function adjustQty(id,mode,delta){const o=mode==='buy'?qtyBuy:qtyOpen,max=mode==='buy'?Math.min(99,Math.max(0,left(id))):Math.min(100,(S.stock[id]||0));o[id]=Math.max(1,Math.min(max||1,(o[id]||1)+delta));const a=document.getElementById(`qty-${mode}-${id}`),b=document.getElementById(`qty-btn-${mode}-${id}`);if(a)a.textContent=o[id];if(b)b.textContent=o[id]}
 function packShowcase(s){const id=s.id,st=S.stock[id]||0,lv=levelOf(s),lk=locked(s),need=LEVELS[lv].need;return `<section class="ky-showcase"><div class="ky-kicker">EXTENSION SÉLECTIONNÉE · NIVEAU ${lv+1}</div><h2>${esc(s.name)}</h2><p>${lk?`Termine ${need} Master Set${need>1?'s':''} pour débloquer cette extension. Progression : ${completedMasters()}/${need}.`:'Choisis ton booster, découvre les cartes possibles et ouvre tes paquets.'}</p>${id===BASE_30_SET?`<p class="note"><b>Stock boutique limité : ${Math.max(0,left(id))}/10 booster(s) encore achetables aujourd’hui.</b> Réinitialisation chaque jour. Les boosters gratuits restent séparés.</p>`:''}<div class="ky-stats"><div><b>${s.cardCount?.total||'—'}</b><small>cartes du set</small></div><div><b>${price(id)} PC</b><small>prix du booster</small></div><div><b>${st}</b><small>en stock</small></div><div><b>${lk?'Verrouillé':'Disponible'}</b><small>niveau ${lv+1}</small></div></div><div class="ky-actions"><button class="g" onclick="drops('${id}')">Voir toutes les cartes</button>${lk?'<button disabled>Extension verrouillée</button>':`<button onclick="${st?`openBooster('${id}')`:`buy('${id}',1)`}">${st?'Ouvrir le booster':'Acheter un booster'}</button>`}</div>${!lk?`<div class="ky-extra"><small>Quantité à acheter</small>${qtyControl(id,'buy')}<small>Quantité à ouvrir</small>${qtyControl(id,'open')}</div>`:''}</section>`}
 let selectedPack=0;
 function selectPack(id){const idx=showcaseSets.findIndex(s=>s.id===id);if(idx<0)return;selectedPack=idx;renderShowcase()}
@@ -1543,8 +1543,8 @@ ACH=function(){const a=pmMoreACH(),unique=Object.keys(S.owned).filter(id=>S.owne
  ['extraann10','30 ans : ouvrir 10 boosters',ann,10,500],['extraann50','30 ans : ouvrir 50 boosters',ann,50,2200],['extraann250','30 ans : ouvrir 250 boosters',ann,250,12000],
  ['extramaster2','Compléter 2 Master Sets',completedMasters(),2,5000],['extramaster4','Compléter 4 Master Sets',completedMasters(),4,12500],['extramaster5','Compléter 5 Master Sets',completedMasters(),5,20000]
  ])if(!a.some(t=>t.id===id))a.push({id,n,cur,goal,rw});return a};
-/* Pity : au plus 20 boosters sans EX / double rare ou mieux, par profil. Le 30 ans garde un seul hit. */
-const PM_PITY_LIMIT=20;
+/* Pity : au plus 30 boosters sans EX / double rare ou mieux, par profil. Le 30 ans garde un seul hit. */
+const PM_PITY_LIMIT=30;
 function pmIsPityHit(c){return !!c&&(c.pmRGB||c.pmFutur||c.pmReprint||['double','AR','SAR','secret'].includes(c.tier))}
 function pmPityAfter(out){const hit=out.some(pmIsPityHit);S.pmPity=hit?0:(S.pmPity||0)+1;}
 const pmDrawBeforePity=pm30Draw;
@@ -1605,7 +1605,7 @@ pick=function(cards,slots){
  if(id&&id!=='ALL'&&id!=='30th')S.pmPity=b.pityBySet[id]||0;
  let out;try{out=pmBalancedGenericPick(cards,slots)}finally{S.pmPity=previous}
  if(!id||id==='ALL'||id==='30th')return out;
- if((b.pityBySet[id]||0)>=19&&!out.some(c=>c.tier==='double')){
+ if((b.pityBySet[id]||0)>=PM_PITY_LIMIT-1&&!out.some(c=>c.tier==='double')){
   const hits=cards.filter(c=>c.tier==='double'&&!out.some(x=>x.id===c.id));
   if(hits.length)out[out.length-1]=hits[Math.floor(Math.random()*hits.length)];
  }
@@ -1992,7 +1992,7 @@ flipIt=function(){if(!rv||rv.busy)return;if(rv.cinemaPending){pmCinemaComplete()
 <script>
 (function(){
   window.setQtyPreset=function(id,mode,val){
-    const max=mode==='buy'?Math.min(99,Math.max(0,left(id))):(S.stock[id]||0);
+    const max=mode==='buy'?Math.min(99,Math.max(0,left(id))):Math.min(100,(S.stock[id]||0));
     const o=mode==='buy'?qtyBuy:qtyOpen;
     const n = val==='max' ? Math.max(1,max||1) : Math.max(1,Math.min(max||1,Number(val)||1));
     o[id]=n;
@@ -2005,8 +2005,8 @@ flipIt=function(){if(!rv||rv.busy)return;if(rv.cinemaPending){pmCinemaComplete()
     if(mode==='buy') buy(id, qtyBuy[id]); else openMany(id, qtyOpen[id]);
   };
   qtyControl=function(id,mode){
-    const st=S.stock[id]||0,max=mode==='buy'?Math.min(99,Math.max(0,left(id))):st,defaultQty=mode==='buy'?1:Math.min(st,1);const obj=mode==='buy'?qtyBuy:qtyOpen;const n=Math.max(1,Math.min(max||1,obj[id]||defaultQty));obj[id]=n;
-    const presets = mode==='buy' ? [10,20,40] : [10,20,'max'];
+    const st=S.stock[id]||0,max=mode==='buy'?Math.min(99,Math.max(0,left(id))):Math.min(100,st),defaultQty=mode==='buy'?1:Math.min(st,1);const obj=mode==='buy'?qtyBuy:qtyOpen;const n=Math.max(1,Math.min(max||1,obj[id]||defaultQty));obj[id]=n;
+    const presets = mode==='buy' ? [10,20,40] : [10,30,50,100,'max'];
     const label = mode==='buy' ? 'Acheter' : 'Ouvrir';
     return `<div class="qty-wrap"><div class="qty-line"><button class="g" onclick="adjustQty('${id}','${mode}',-1)">−</button><strong id="qty-${mode}-${id}">${n}</strong><button class="g" onclick="adjustQty('${id}','${mode}',1)">+</button><button class="qty-primary" onclick="${mode==='buy'?`buy('${id}',qtyBuy['${id}'])`:`openMany('${id}',qtyOpen['${id}'])`}" ${max<1?'disabled':''}>${label} × <span id="qty-btn-${mode}-${id}">${n}</span></button></div><div class="qty-presets" data-qgroup="${mode}-${id}">${presets.map(v=>{const text=v==='max'?'Ouvrir max.':`${label} ${v}`;const disabled=max<1 || (v!=='max'&&max<Number(v)&&mode==='open'); return `<button type="button" data-q="${v}" onclick="performQtyAction('${id}','${mode}','${v}')" ${disabled?'disabled':''}>${text}</button>`}).join('')}</div><div class="qty-subline">${mode==='buy'?'Achat rapide de lots':'Ouverture rapide, sans re-régler la quantité à chaque fois.'}</div></div>`;
   };
@@ -3068,7 +3068,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'){pmToggleDrawer(fals
    let out=id==='30th'?pm30Draw(cards):standardDraw(cards,god);
    const pityBefore=pityRecord(id).pityBySet[id];
    if(pityBefore>=PM_PITY_LIMIT-1 && !out.some(c=>isHit(c,cards)) && h.items.length){
-     // Le 20e booster OUVERT garantit une carte du meilleur groupe disponible.
+     // Le 30e booster OUVERT garantit une carte du meilleur groupe disponible.
      const used=new Set(out.map(c=>c.id));
      const hit=weightedPick(h.items,used);
      if(hit){const slot=id==='30th'?3:out.length-1;out[slot]=hit;}
@@ -3111,6 +3111,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'){pmToggleDrawer(fals
  };
  openMany=async function(id,n){
    n=Math.max(1,Math.floor(Number(n)||1));
+   if(n>100)return toast('Un lot est limité à 100 boosters pour préserver la fluidité.');
    if(n===1)return openBooster(id);
    if(batchState)return toast('Termine le lot en cours avant d’en ouvrir un autre.');
    if(locked(SETS.find(s=>s.id===id)||BASE))return toast('Extension verrouillée.');
@@ -3188,7 +3189,18 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'){pmToggleDrawer(fals
  };
  summary=function(){
    if(tearing)return;
-   if(batchState){if(!rv||rv.pmHandled)return;rv.pmHandled=true;pmCinemaSequence++;batchNext();return;}
+   if(batchState){
+     if(!rv||rv.pmHandled)return;
+     rv.pmHandled=true;
+     pmCinemaSequence++;
+     if(typeof pmSuspenseTimer!=='undefined')clearTimeout(pmSuspenseTimer);
+     if(typeof pmFxTimer!=='undefined')clearTimeout(pmFxTimer);
+     if(typeof pmUltraFxCleanup==='function')try{pmUltraFxCleanup()}catch(_){}
+     // Transition différée à une seule étape, hors de la pile d'animation précédente.
+     const activeBatch=batchState;
+     setTimeout(()=>{if(batchState!==activeBatch)return;try{batchNext()}catch(e){console.error('[PokéMaster] Transition de lot',e);if(typeof lotFailure==='function')lotFailure(e,'la transition du lot');}},0);
+     return;
+   }
    if(!rv?.cards?.length)return;
    const cards=rv.cards,stockId=cur.s.id;
    stage().className='';
@@ -3257,7 +3269,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'){pmToggleDrawer(fals
      const rows=tiers.filter(x=>x.c).map(x=>`<tr><td>${esc(TIERS[x.tier])}</td><td>${x.c}</td><td>${(x.r*100).toFixed(2).replace('.',',')} %</td></tr>`);
      if(vintage)rows.push(`<tr><td>${h.kind==='holo'?'Holo vintage':'Rare vintage'}</td><td>${h.items.length}</td><td>8,00 %</td></tr>`);
      const total=tiers.reduce((a,x)=>a+(x.c?x.r:0),0)+(vintage?.08:0);
-     out.innerHTML=`<p>Probabilités de <b>jeu, non officielles</b>, par booster. Tirage de 6 cartes : une place spéciale, cinq cartes ordinaires.</p><table><tr><th>Type de hit</th><th>Cartes</th><th>Chance / booster</th></tr>${rows.join('')||'<tr><td colspan="3">Aucun hit classé disponible</td></tr>'}</table><p><b>Chance totale d’un hit naturel : ${(total*100).toFixed(2).replace('.',',')} %</b>${total?` · en moyenne 1 sur ${(1/total).toFixed(1).replace('.',',')} boosters`:''}.</p><p><b>Pity de cette extension :</b> ${pityRecord(id).pityBySet[id]}/${PM_PITY_LIMIT} sans hit. Le 20e booster <u>ouvert</u> sans hit garantit une rareté disponible, et le compteur revient à zéro après un hit. Aucun effet à l’achat.</p><p>God Pack : ${(CONFIG.godPack*100).toFixed(1).replace('.',',')} % si au moins six hits premium différents sont disponibles. Un Luck Charm actif modifie les taux de base affichés.</p>`;
+     out.innerHTML=`<p>Probabilités de <b>jeu, non officielles</b>, par booster. Tirage de 6 cartes : une place spéciale, cinq cartes ordinaires.</p><table><tr><th>Type de hit</th><th>Cartes</th><th>Chance / booster</th></tr>${rows.join('')||'<tr><td colspan="3">Aucun hit classé disponible</td></tr>'}</table><p><b>Chance totale d’un hit naturel : ${(total*100).toFixed(2).replace('.',',')} %</b>${total?` · en moyenne 1 sur ${(1/total).toFixed(1).replace('.',',')} boosters`:''}.</p><p><b>Pity de cette extension :</b> ${pityRecord(id).pityBySet[id]}/${PM_PITY_LIMIT} sans hit. Le 30e booster <u>ouvert</u> sans hit garantit une rareté disponible, et le compteur revient à zéro après un hit. Aucun effet à l’achat.</p><p>God Pack : ${(CONFIG.godPack*100).toFixed(1).replace('.',',')} % si au moins six hits premium différents sont disponibles. Un Luck Charm actif modifie les taux de base affichés.</p>`;
    }catch(e){const out=modal.querySelector('#pm-rates-body');if(out)out.textContent='Taux indisponibles : données des cartes non chargées.';}
  };
  window.pmReliabilityTest={rates:RATES,poolHits,standardDraw,finalDraw,isHit,session:()=>session};
@@ -3503,6 +3515,7 @@ batchNext=function(){
 const previousOpenMany=openMany;
 openMany=async function(id,n){
   const value=Math.max(1,Math.floor(Number(n)||1));
+  if(value>100)return toast('Maximum 100 boosters par lot.');
   try{await previousOpenMany(id,value)}
   catch(e){if(value>1)return lotFailure(e,'le chargement du lot');throw e}
 };
