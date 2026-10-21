@@ -538,15 +538,70 @@ input,select,textarea{background:#16171f!important;border-color:#484951!importan
 <footer>Simulation virtuelle non officielle : 6 cartes par booster, sans reproduire la composition exacte des boosters physiques. Cartes © Pokémon / Nintendo / Creatures / GAME FREAK. Données et images : TCGdex.</footer>
 <div id="stage" class="hidden"></div><div id="modal" class="hidden" onclick="if(event.target==this)this.className='hidden'"></div>
 <script>
+/* Mapping des catégories de récompense à partir de la rareté OFFICIELLE.
+   La rareté TCGdex demeure dans c.rar ; les tiers équivalents sont signalés. */
+/* Raretes authentiques et equivalents de collection PAR GENERATION.
+   c.rar et c.officialRarity ne sont jamais reecrites par ce mapping. */
+function pmMarketTier(c,id){
+ const norm=x=>String(x||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+ const r=norm(c.rar||c.officialRarity),name=norm(c.name),set=String(id||c.sid||'').toLowerCase();
+ const early=/^(base|gym|neo|ecard|ex|dp|pl|hgss|col|bw|xy)/.test(set);
+ const seriesHGSS=/^(hgss|col)/.test(set),seriesEX=/^ex\d+/.test(set),seriesDP=/^(dp|pl)/.test(set);
+ const num=Number.parseInt(String(c.localId||'').replace(/^0+/,''),10);
+ c.pmEquivalent=false;
+ const tag=(tier,equivalent=false,family='')=>{c.pmEquivalent=equivalent;c.pmRarityFamily=family||tier;return tier;};
+ if(/(?:secret|secrete|hyper rare|gold star|goldstar|etoile d.or|crystal|rare rainbow|rainbow rare|rainbow|arc.en.ciel|rare gold|gold rare)/.test(r))return tag('secret',early,'secret-originale');
+ if(/(?:special illustration|illustration speciale|special art rare|alternate art|alternative art|art alternative)/.test(r))return tag('SAR',false,'illustration-speciale');
+ if(seriesHGSS&&/^(?:ultra rare|rare ultra)$/.test(r))return tag('secret',true,'ultra-rare-hgss');
+ if(seriesHGSS&&/(?:legend|legende)/.test(r))return tag('SAR',true,'pokemon-legend');
+ if(seriesHGSS&&/(?:rare prime|prime)/.test(r))return tag(set==='hgss2'&&num===88?'SAR':'AR',true,'pokemon-prime');
+ if(/(?:illustration rare|illustration|character rare|trainer gallery|galarian gallery|radiant collection|art rare|amazing rare)/.test(r))return tag('AR',false,'illustration-officielle');
+ if(seriesDP&&/(?:niv\.?\s*x|level\s*x|lv\.?\s*x|niveau\s*x)/.test(r+' '+name))return tag(/(?:dracaufeu|charizard|lugia|rayquaza|arceus)/.test(name)?'SAR':'AR',true,'pokemon-niveau-x');
+ if(/(?:niv\.?\s*x|level\s*x|lv\.?\s*x|rare break|rare prime)/.test(r))return tag('AR',true,'ultra-vintage');
+ if(/(?:shiny rare|chromatique|shining|brillant)/.test(r))return tag('AR',early,'chromatique');
+ if(/(?:full art|ultra rare|rare ultra)/.test(r)){
+   if(seriesEX && /\bex\b/.test(name) && !/full art/.test(r))return tag('double',true,'pokemon-ex-historique');
+   return tag('AR',early,'full-art-ou-ultra');
+ }
+ if(/(?:double rare|rare ex|ex rare|rare gx|gx rare|rare holo ex|holo rare ex|rare holo gx|vmax|vstar|mega ex)/.test(r))return tag('double',early,'pokemon-ultra');
+ if(/rare/.test(r)&&/(?:\bex\b|\bgx\b|\bvmax\b|\bvstar\b)/.test(name))return tag('double',early,'pokemon-ultra');
+ if(/(?:rare holo|holo rare|holographique)/.test(r)){
+   const classic=/^(base|neo|ecard)/.test(set);
+   if(classic&&/(?:dracaufeu|charizard|lugia|noctali|umbreon|mentali|espeon|mewtwo|ho.oh)/.test(name))return tag('SAR',true,'holo-iconique');
+   return tag('holo',false,'holo-originale');
+ }
+ if(/rare/.test(r))return tag('rare',false,'rare-originale');
+ if(/uncommon|peu commune/.test(r))return tag('uncommon');
+ if(/common|commune/.test(r))return tag('common');
+ return 'unknown';
+}
+/* Repartition par booster, selectionnee UNIQUEMENT parmi les cartes existantes.
+   15% cible lorsque le catalogue contient au moins une rarete de hit.
+   Absence d'EX : les 10% sont affectes aux holographiques historiques,
+   pas a des EX fictifs ; absence de SAR/secret : poids vers la rarete inferieure. */
+function pmSetRates(id,cards){
+ const available=new Set((cards||[]).filter(c=>c&&!c.pmEnergy&&c.tier!=='unknown').map(c=>c.tier));
+ const rates={holo:0,double:0,AR:0,SAR:0,secret:0,rare:0};
+ const targets=[['double',.10,['holo','AR','rare']],['AR',.04,['double','holo','rare']],['SAR',.008,['AR','double','holo','rare']],['secret',.002,['SAR','AR','double','holo','rare']]];
+ for(const [tier,amount,fallback] of targets){
+  const chosen=available.has(tier)?tier:fallback.find(x=>available.has(x));
+  if(chosen)rates[chosen]+=amount;
+ }
+ // Si l'extension ne propose aucune carte de rarete elevee, la rare normale
+ // est l'unique categorie de gain ; aucun nouveau Pokemon n'est invente.
+ return rates;
+}
+function pmSetRateFor(tier,cards,id){return pmSetRates(id,cards)[tier]||0;}
+
 /* ===== RÉGLAGES (modifiables) ===== */
-const PM30_DROP_RATES={RGB:0.0001,reprint:0.008,SAR:0.006,AR:0.02,double:0.08,futur:0.0015,secret:0.001};
+const PM30_DROP_RATES={RGB:0.0002,reprint:0.008,SAR:0.008,AR:0.04,double:0.10,futur:0.0015,secret:0.0018};
 const CONFIG={
  godPack:.003,       // chance d'un God Pack (0,3 %)
  godSlot:{double:50,AR:35,SAR:12,secret:3}, // tirage de chaque carte d'un God pack
- start:60,          // PokéCoins de départ
- daily:300,           // récompense quotidienne (PokéCoins)
+ start:5000,          // PokéCoins de départ
+ daily:800,           // récompense quotidienne (PokéCoins)
  // Valeur de base d'une carte selon sa rareté (chaque carte varie ensuite de -25% à +35%, de façon stable)
- val:{common:4,uncommon:8,rare:20,holo:40,double:100,AR:250,SAR:600,secret:1000},
+ val:{common:2,uncommon:3,rare:6,holo:12,double:35,AR:90,SAR:340,secret:750},
  // Prix des boosters (PokéCoins) : reflète la rareté réelle des extensions (anciennes et recherchées = plus chères)
  priceById:{base1:600,base2:260,base3:240,base5:300,neo1:320,xy12:90,'sm3.5':70,'sm11.5':80,sm12:60,swsh3:40,'swsh4.5':70,swsh7:150,swsh8:35,swsh9:40,'swsh10.5':45,swsh11:40,swsh12:40,'swsh12.5':90,sv01:25,sv02:25,sv03:30,'sv03.5':90,sv04:30,'sv04.5':80,sv05:25,sv06:30,sv07:35,sv08:35,'sv08.5':220,sv09:30,sv10:35,'sv10.5b':45,'sv10.5w':45,me01:40,me02:35,ALL:15},
  // Probabilités (en poids) pour chacune des 6 cartes. Les raretés absentes de l'extension sont ignorées.
@@ -554,7 +609,132 @@ const CONFIG={
         {common:43.2,uncommon:30,rare:11,holo:5,double:8,AR:2,SAR:.6,secret:.2}]
 };
 const FAMOUS=['base1','base2','base3','base5','neo1','xy12','sm3.5','sm11.5','sm12','swsh3','swsh4.5','swsh7','swsh8','swsh9','swsh10.5','swsh11','swsh12','swsh12.5','sv01','sv02','sv03','sv03.5','sv04','sv04.5','sv05','sv06','sv07','sv08','sv08.5','sv09','sv10','sv10.5b','sv10.5w','me01','me02','bw1','bw2','bw4','bw5','bw6','bw7','bw8','bw9','bw10','bw11','hgss1','hgss2','hgss3','hgss4','pl1','pl2','pl3','pl4','dp1','dp2','dp4','dp5','dp6','dp7','ex1','ex2','ex3','ex5','ex6','ex7','ex8','ex9','ex12','ex14','ex15','ex16'];
-const price=id=>Math.ceil(((id==='30th'?45:CONFIG.priceById[id])??(/^(base|gym|neo|ecard)/.test(id)?120:/^(ex|pop)/.test(id)?60:/^(dp|pl|hgss|col)/.test(id)?40:/^(bw|xy|sm|swsh)/.test(id)?28:22))*2.775); // prix augmentés de 50 % par rapport à la version précédente (x1,85 × 1,5)
+const pmLegacyPrice=id=>Math.ceil(((id==='30th'?45:CONFIG.priceById[id])??(/^(base|gym|neo|ecard)/.test(id)?120:/^(ex|pop)/.test(id)?60:/^(dp|pl|hgss|col)/.test(id)?40:/^(bw|xy|sm|swsh)/.test(id)?28:22))*2.775); // prix augmentés de 50 % par rapport à la version précédente (x1,85 × 1,5);
+/* Classement éditorial 2026 : popularité et cartes recherchées (70 %), ancienneté (30 %).
+   Décorrélé du prix et de la progression pour empêcher tout déplacement automatique. */
+/* Répartition fixe : seulement six extensions NV1, prestige renforcé au NV4.
+   Le classement ne dépend ni des prix, ni du solde, ni des sauvegardes. */
+const PM_ENTRY_SETS=['me05','sv01','sv04','sv05','sv07','sv09'];
+const PM_CURATED_LEVELS={
+ // NV1 : six séries d'entrée (Nuit Noire à la une incluse)
+ 'swsh3':1,'swsh9':0,'swsh11':0,'sv01':0,'sv02':0,'sv03':0,
+ // NV2 : accessibles mais davantage recherchées
+ 'bw1':1,'bw2':1,'bw3':1,'bw4':1,'bw5':1,'bw7':1,
+ 'xy1':1,'xy2':1,'xy3':1,'xy4':1,'xy5':1,'xy6':1,
+ 'sm1':1,'sm2':1,'sm3':1,'sm4':1,'sm5':1,'sm6':1,'sm7':1,'sm8':1,'sm9':1,'sm10':1,
+ 'swsh1':1,'swsh2':1,'swsh4':1,'swsh5':1,'swsh6':1,
+ 'sv04':1,'sv05':1,'sv06':1,'sv07':1,'sv08':1,'sv09':1,'sv10':1,
+ 'dp1':1,'dp2':1,'dp4':1,'dp5':1,'dp6':1,'dp7':1,
+ // NV3 : ancienneté ou cote intermédiaire élevée
+ 'bw6':2,'bw10':2,'bw11':2,'xy7':2,'xy8':2,'xy9':2,'xy10':2,'xy11':2,
+ 'sm10.5':2,'sm12':2,'swsh4.5':2,'swsh8':2,'swsh10.5':2,'swsh12':2,
+ 'pl1':2,'pl2':2,'pl3':2,'pl4':2,'hgss1':2,'hgss2':2,'hgss3':2,'hgss4':2,
+ 'sv10.5b':2,'sv10.5w':2,'sv03.5':2,'sv04.5':2,
+ // NV4 : séries iconiques et extensions à forte chasse
+ 'base1':3,'base2':3,'base3':3,'base5':3,'neo1':3,
+ 'bw8':3,'bw9':3,'xy12':3,'sm3.5':3,'sm11':3,'sm11.5':3,
+ 'swsh7':3,'swsh10':3,'swsh12.5':3,'sv08.5':3,
+ 'ex1':3,'ex2':3,'ex3':3,'ex5':3,'ex6':3,'ex7':3,'ex8':3,'ex9':3,'ex12':3,'ex14':3,'ex15':3,'ex16':3,
+ 'me05':0
+};
+const pmBaseLevel=id=>{
+ id=String(id||'').toLowerCase();
+ if(id==='all')return 0;
+ if(typeof PM_MARKET_DATA!=='undefined' && PM_MARKET_DATA[id])return PM_MARKET_DATA[id].level;
+ if(Object.prototype.hasOwnProperty.call(PM_CURATED_LEVELS,id))return PM_CURATED_LEVELS[id];
+ // Les futures extensions ne peuvent pas grossir automatiquement le NV1.
+ if(/^(base|gym|neo|ecard|ex)/.test(id))return 3;
+ if(/^(dp|pl|hgss|col|bw)/.test(id))return 2;
+ if(/^(xy|sm|swsh|sv|me)/.test(id))return 2;
+ return 2;
+};
+/* Audit du 21/10/2026 : niveaux fixes, prix individuels et motifs éditoriaux.
+   Les PokéCoins sont fictifs : aucun prix affiché ne prétend être une cote en euros. */
+const PM_MARKET_DATA={
+  "base1":{level:3,price:1450,demand:5,chase:5,note:"Set fondateur ; Dracaufeu holographique iconique"},
+  "base2":{level:3,price:840,demand:4,chase:4,note:"Jungle : premières holographiques de collection"},
+  "base3":{level:3,price:870,demand:4,chase:4,note:"Fossile : Pokémon cultes et ancienneté"},
+  "base5":{level:3,price:1200,demand:5,chase:5,note:"Team Rocket historique et cartes Dark"},
+  "neo1":{level:3,price:1060,demand:5,chase:5,note:"Neo Genesis : Lugia et début de Johto"},
+  "xy12":{level:3,price:760,demand:5,chase:4,note:"Évolutions XY : nostalgie du Set de Base"},
+  "sm3.5":{level:3,price:940,demand:5,chase:5,note:"Légendes Brillantes : Shining emblématiques"},
+  "sm11.5":{level:3,price:1280,demand:5,chase:5,note:"Destinées Occultes : Shiny Charizard GX"},
+  "sm12":{level:3,price:860,demand:5,chase:5,note:"Éclipse Cosmique : cartes illustrées recherchées"},
+  "swsh3":{level:1,price:150,demand:2,chase:2,note:"Ténèbres Embrasées : découverte moderne"},
+  "swsh4.5":{level:1,price:390,demand:4,chase:3,note:"Destinées Radieuses : nombreuses Shiny"},
+  "swsh7":{level:3,price:1390,demand:5,chase:5,note:"Évolution Céleste : Noctali VMAX alternative"},
+  "swsh8":{level:3,price:830,demand:5,chase:5,note:"Poing de Fusion : Ectoplasma VMAX et Mew"},
+  "swsh9":{level:1,price:435,demand:4,chase:4,note:"Stars Étincelantes : Dracaufeu alternative"},
+  "swsh10.5":{level:1,price:520,demand:4,chase:4,note:"Pokémon GO : collection spéciale"},
+  "swsh11":{level:3,price:875,demand:5,chase:5,note:"Origine Perdue : Giratina V alternative"},
+  "swsh12":{level:2,price:485,demand:4,chase:4,note:"Tempête Argentée : Lugia V alternative"},
+  "swsh12.5":{level:3,price:810,demand:5,chase:5,note:"Zénith Suprême : galerie de Galar et Gold"},
+  "sv01":{level:0,price:160,demand:2,chase:2,note:"Écarlate et Violet : base de génération"},
+  "sv02":{level:1,price:415,demand:4,chase:4,note:"Évolutions à Paldea : Magicarpe AR recherché"},
+  "sv03":{level:1,price:260,demand:3,chase:3,note:"Flammes Obsidiennes : Dracaufeu ex"},
+  "sv03.5":{level:3,price:1010,demand:5,chase:5,note:"151 : forte nostalgie et Dracaufeu SAR"},
+  "sv04":{level:0,price:155,demand:2,chase:2,note:"Faille Paradoxe : accessible avec plusieurs illustrations"},
+  "sv04.5":{level:2,price:480,demand:4,chase:4,note:"Destinées de Paldea : Shiny et Dracaufeu"},
+  "sv05":{level:0,price:170,demand:2,chase:2,note:"Forces Temporelles : extension accessible"},
+  "sv06":{level:3,price:900,demand:5,chase:5,note:"Mascarade Crépusculaire : Amphinobi SAR"},
+  "sv07":{level:0,price:175,demand:2,chase:2,note:"Couronne Stellaire : collection d’entrée"},
+  "sv08":{level:2,price:550,demand:4,chase:5,note:"Étincelles Déferlantes : Pikachu ex SAR"},
+  "sv08.5":{level:3,price:1320,demand:5,chase:5,note:"Évolutions Prismatiques : Noctali ex SAR"},
+  "sv09":{level:0,price:180,demand:2,chase:2,note:"Aventures Ensemble : découverte récente"},
+  "sv10":{level:3,price:790,demand:5,chase:4,note:"Rivalités Destinées : Team Rocket et Dracaufeu"},
+  "sv10.5b":{level:2,price:495,demand:4,chase:4,note:"Foudre Noire : cartes d’Unys recherchées"},
+  "sv10.5w":{level:2,price:495,demand:4,chase:4,note:"Flamme Blanche : cartes d’Unys recherchées"},
+  "me01":{level:1,price:480,demand:3,chase:3,note:"Méga-Évolution : génération actuelle, cote provisoire"},
+  "me02":{level:2,price:510,demand:3,chase:4,note:"Extension Méga récente, cote provisoire"},
+  "me05":{level:0,price:150,demand:3,chase:4,note:"Nuit Noire : nouveauté, cote provisoire"},
+  "bw1":{level:2,price:420,demand:3,chase:3,note:"Noir & Blanc : lancement d’Unys et Full Art"},
+  "bw2":{level:1,price:225,demand:2,chase:2,note:"Pouvoirs Émergents : chasses plus limitées"},
+  "bw3":{level:1,price:255,demand:2,chase:2,note:"Victoires Nobles : séries classiques d’Unys"},
+  "bw4":{level:1,price:380,demand:3,chase:3,note:"Destinées Futures : EX d’Unys"},
+  "bw5":{level:2,price:510,demand:4,chase:4,note:"Explorateurs Obscurs : Dracaufeu et EX"},
+  "bw6":{level:2,price:590,demand:4,chase:4,note:"Dragons Exaltés : dragons et secrets"},
+  "bw7":{level:1,price:440,demand:3,chase:3,note:"Frontières Franchies : EX et illustration vintage"},
+  "bw8":{level:3,price:1090,demand:5,chase:5,note:"Tempête Plasma : Dracaufeu secrète"},
+  "bw9":{level:3,price:890,demand:5,chase:4,note:"Glaciation Plasma : grandes cartes secrètes"},
+  "bw10":{level:2,price:570,demand:4,chase:4,note:"Explosion Plasma : Full Art Plasma"},
+  "bw11":{level:3,price:810,demand:5,chase:4,note:"Trésors Légendaires : collection Radieuse"},
+  "hgss1":{level:2,price:610,demand:4,chase:4,note:"HeartGold SoulSilver : LEGEND"},
+  "hgss2":{level:2,price:600,demand:4,chase:4,note:"Déchaînement : Pokémon LEGEND"},
+  "hgss3":{level:2,price:620,demand:4,chase:4,note:"Indomptable : cartes LEGEND"},
+  "hgss4":{level:2,price:650,demand:4,chase:4,note:"Triomphe : cartes LEGEND et primes"},
+  "pl1":{level:2,price:670,demand:4,chase:4,note:"Platine : Pokémon Niv. X"},
+  "pl2":{level:2,price:720,demand:4,chase:4,note:"Rivaux Émergents : Pokémon Niv. X"},
+  "pl3":{level:2,price:735,demand:4,chase:4,note:"Vainqueurs Suprêmes : Dracaufeu Niv. X"},
+  "pl4":{level:2,price:760,demand:4,chase:4,note:"Arceus : collection particulière"},
+  "dp1":{level:1,price:480,demand:3,chase:3,note:"Diamant & Perle : anciens Niv. X"},
+  "dp2":{level:1,price:450,demand:3,chase:3,note:"Trésors Mystérieux : début DP"},
+  "dp4":{level:1,price:490,demand:3,chase:3,note:"Duels au Sommet : DP rétro"},
+  "dp5":{level:1,price:515,demand:3,chase:3,note:"Aube Majestueuse : Eeveelutions et Niv. X"},
+  "dp6":{level:1,price:545,demand:4,chase:3,note:"Éveil des Légendes : Niv. X"},
+  "dp7":{level:2,price:580,demand:4,chase:3,note:"Tempête : collection DP vintage"},
+  "ex1":{level:3,price:900,demand:4,chase:4,note:"Rubis & Saphir : premières ex"},
+  "ex2":{level:3,price:850,demand:4,chase:4,note:"Tempête de Sable : ex vintage"},
+  "ex3":{level:3,price:920,demand:4,chase:4,note:"Dragon : ex et types Dragon"},
+  "ex5":{level:3,price:920,demand:4,chase:4,note:"Légendes Oubliées : ex du milieu des années 2000"},
+  "ex6":{level:3,price:1100,demand:5,chase:4,note:"Rouge Feu & Vert Feuille : starters ex"},
+  "ex7":{level:3,price:1530,demand:5,chase:5,note:"Team Rocket Returns : Gold Stars et Team Rocket"},
+  "ex8":{level:3,price:1190,demand:5,chase:5,note:"Deoxys : Gold Stars et Pokémon ex"},
+  "ex9":{level:3,price:850,demand:4,chase:4,note:"Émeraude : cartes ex anciennes"},
+  "ex12":{level:3,price:1020,demand:4,chase:4,note:"Créateurs de Légendes : Gold Star"},
+  "ex14":{level:3,price:1130,demand:5,chase:5,note:"Gardiens de Cristal : Gold Stars"},
+  "ex15":{level:3,price:1370,demand:5,chase:5,note:"Île des Dragons : Gold Stars et Delta"},
+  "ex16":{level:3,price:880,demand:4,chase:4,note:"Gardiens du Pouvoir : ex vintage"},
+};
+const pmMarketInfo=(id)=>{
+  const key=String(id||'').toLowerCase();
+  if(key==='all')return {level:0,price:0,demand:0,chase:0,note:'Booster gratuit'};
+  if(PM_MARKET_DATA[key])return PM_MARKET_DATA[key];
+  // Nouvelle extension encore non étudiée : classement prudent, jamais en NV1.
+  const lv=pmBaseLevel(key);
+  return {level:lv,price:[170,250,430,790][lv],demand:3,chase:3,note:'Tarif provisoire : données de marché insuffisantes'};
+};
+const price=id=>id==='ALL'?15:pmMarketInfo(id).price;
+
 /* Cotation fictive: millésime du set + époque + mécaniques emblématiques. */
 const PM_SET_YEARS={};
 const pmEraYear=id=>{id=String(id||'').toLowerCase();if(/^base|^gym|^neo/.test(id))return 2000;if(/^ecard|^ex/.test(id))return 2004;if(/^dp/.test(id))return 2007;if(/^pl/.test(id))return 2009;if(/^hgss|^col/.test(id))return 2010;if(/^bw/.test(id))return 2012;if(/^xy/.test(id))return 2015;if(/^sm/.test(id))return 2018;if(/^swsh/.test(id))return 2021;if(/^sv/.test(id))return 2024;if(/^me/.test(id))return 2026;return 2026};
@@ -564,13 +744,14 @@ const pmEraYear=id=>{id=String(id||'').toLowerCase();if(/^base|^gym|^neo/.test(i
 function cardSetPremium(sid){
  const booster=Math.max(15,Number(price(sid))||50);
  // Influence progressive du prix du booster, sans écraser l'écart entre raretés.
- const boosterFactor=Math.min(2.9,Math.max(.78,Math.pow(booster/65,.32)));
+ const boosterFactor=Math.min(2.5,Math.max(.75,Math.pow(booster/280,.24)));
  const year=PM_SET_YEARS[sid]||pmEraYear(sid);
  const age=Math.max(0,2026-year);
  const vintageFactor=1+Math.min(.28,age*.009);
  // Les extensions Plasma originales bénéficient d'une faible prime de collection.
- const plasmaFactor=/^bw(?:8|9|10)$/.test(sid)?1.08:1;
- return boosterFactor*vintageFactor*plasmaFactor;
+ const plasmaFactor=/^bw(?:8|9|10)$/.test(sid)?1.06:1;
+ const collector=pmMarketInfo(sid);
+ return Math.min(3.3,boosterFactor*vintageFactor*plasmaFactor*(.85+.045*collector.demand+.04*collector.chase));
 }
 function value(c){
  const id=String(c.id||''),sid=String(c.sid||id.slice(0,id.lastIndexOf('-')));
@@ -608,7 +789,7 @@ const logo=s=>s.logo?`<img loading="lazy" alt="" src="${s.logo}.png" onerror="th
 const errBox=()=>`<div class="err"> Impossible de joindre TCGdex. Vérifie ta connexion internet, puis réessaie.<br><br><button onclick="init()">Réessayer</button></div>`;
 const prog=(d,t)=>{$('#pm')&&($('#pm').textContent=`Chargement des cartes et raretés : ${d}/${t}`);$('#pi')&&($('#pi').style.width=d/t*100+'%')};
 const loader=`<div class="sbox"><p id="pm">Chargement…</p><div class="pb"><i id="pi"></i></div></div>`;
-function daily(){const t=new Date().toLocaleDateString('sv-SE');if((S.daily===t||S.daily===new Date().toDateString()))return toast('Récompense déjà récupérée aujourd’hui. Reviens demain !');S.daily=t;S.coins+=1000;save();toast(`+1000 PC récupérées !`)}
+function daily(){const t=new Date().toLocaleDateString('sv-SE');if((S.daily===t||S.daily===new Date().toDateString()))return toast('Récompense déjà récupérée aujourd’hui. Reviens demain !');S.daily=t;S.coins+=800;save();toast(`+800 PC récupérés !`)}
 /* ===== DONNÉES ===== */
 let SETS=[],cache={};
 async function loadSet(id,p){
@@ -640,7 +821,7 @@ const todo=cards.filter(c=>!c.pmReprint&&!c.pmRGB&&!(c.id in rm));let done=cards
   try{rm[c.id]=(await j(`${pmApi}/cards/${encodeURIComponent(c.id)}`)).rarity||'Aucune'}catch(e){}
   p&&p(++done,cards.length)}}));
  localStorage.setItem(rk,JSON.stringify(rm));
- cards.forEach(c=>{if(!c.pmReprint&&!c.pmRGB){c.rar=rm[c.id]||null;c.tier=c.rar?tierOf(c.rar):'unknown'}});
+ cards.forEach(c=>{if(!c.pmReprint&&!c.pmRGB){c.rar=rm[c.id]||null;c.officialRarity=c.rar;c.tier=c.rar?pmMarketTier(c,id):'unknown'}});
  cards.forEach(c=>{if(S.owned[c.id])S.meta[c.id]=mc(c)});localStorage.setItem('wmp',JSON.stringify(S));
  return cache[id]={s,cards}}
 
@@ -744,7 +925,7 @@ const PM30_SET={id:'30th',name:'30ᵉ Anniversaire',cardCount:{total:191},releas
 const BASE={id:'ALL',name:'Booster gratuit · Série à la une'},BASE_30_SET='30th',RAND=25;
 function refresh(){if(vw!='home'&&vw!='shop')return;const r=$('.rail'),x=r?r.scrollLeft:0;show(vw);const r2=$('.rail');if(r2)r2.scrollLeft=x}
 const LEVELS=[{name:'Niveau 1 · Découverte',need:0},{name:'Niveau 2 · Confirmé',need:2},{name:'Niveau 3 · Expert',need:4},{name:'Niveau 4 · Légendaire',need:5}];
-function levelOf(s){if(s.id==='ALL'||s.id===window.PM_FEATURED_ID)return 0;const p=price(s.id)/1.85;return p>=100?3:p>=55?2:p>=35?1:0}
+function levelOf(s){return pmBaseLevel(s.id)}
 function pmOwnedCount(setId){
  const raw=Object.keys(S.owned||{}).filter(id=>S.owned[id]>0&&id.startsWith(setId+'-')).length;
  return setId==='30th'&&Object.keys(S.owned||{}).some(id=>S.owned[id]>0&&/^30th-[RGB]-RGB$/i.test(id))?raw+2:raw;
@@ -1098,7 +1279,7 @@ function accounts(){try{return JSON.parse(localStorage.getItem(ACCOUNT_KEY)||'{}
 function writeAccounts(a){localStorage.setItem(ACCOUNT_KEY,JSON.stringify(a))}
 /* Cadeau exceptionnel : 10 000 PokéCoins une seule fois par profil local. */
 const PMS_GIFT_10K_KEY='gift_10k_2026_10';
-function pmsGrant10k(){
+function pmsGrant10k(){return; /* Ancien cadeau 10K désactivé ; préserve le solde */
  if(!currentUser)return;
  const a=accounts(),entry=a[currentUser];
  if(!entry)return;
@@ -1320,18 +1501,14 @@ function pm30ResetLocalProfiles(){
  if(active&&a[active]?.game){S=a[active].game;}
  localStorage.setItem('wmp',JSON.stringify(S));
 }
-pm30ResetLocalProfiles();
+// Ancienne migration destructive désactivée : conserver les collections existantes.
 const pm30PreviousAccountSubmit=accountSubmit;
 accountSubmit=async function(){
  await pm30PreviousAccountSubmit();
  if(!currentUser)return;
- if(pm30ResetGame(S)){
-  const a=accounts();if(a[currentUser]){a[currentUser].game=S;writeAccounts(a)}
-  localStorage.setItem('wmp',JSON.stringify(S));
-  init();
- }
+ // Ne pas réinitialiser la progression anniversaire à la connexion.
 };
-const session=localStorage.getItem(SESSION_KEY);if(session&&accounts()[session]){currentUser=session;const a=accounts()[session];S=a.game||S;if(!Number.isFinite(S.coins)||S.coins<0)S.coins=0;MK=a.market||MK;pmsGrant10k();init()}else accountView();
+const session=localStorage.getItem(SESSION_KEY);if(session&&accounts()[session]){currentUser=session;const a=accounts()[session];S=a.game||S;if(!Number.isFinite(S.coins)||S.coins<0)S.coins=0;S.meta??={};S.stock??={};S.st??={open:0,sold:0,trades:0,godp:0};S.cl??={};S.nt??={};S.notif??=[];S.mine??=[];S.chase??={};S.pmBalance??={pityBySet:{},noNew:{},fragments:0};MK=a.market||MK;pmsGrant10k();init()}else accountView();
 
 /* vNext: pas de zoom au double toucher, ni de scroll derrière la scène */
 let pmLastTouch=0;
@@ -1348,14 +1525,7 @@ function pmEmptyPack(){if(!rv)return;rv.i=rv.cards.length-1;reveal()}
 const pmOldDrops=drops;drops=async function(id,tf=''){await pmOldDrops(id,tf);const d=$('#dr');if(d&&!d.querySelector('.pm-rate'))d.insertAdjacentHTML('afterbegin','<p class="note pm-rate">Les taux dépendent des raretés disponibles dans l’extension. Consulte « Voir les taux de drop » pendant une ouverture.</p>')};
 
 /* ===== Mise à jour : nouveautés, Master Sets et suspense ===== */
-const pmPreviousLevelOf=levelOf;
-levelOf=function(set){
- if(set.id==='ALL')return 0;
- // Toujours au moins trois extensions accessibles au niveau 1.
- const ranked=[...SETS].sort((a,b)=>price(a.id)-price(b.id)||a.id.localeCompare(b.id));
- if(ranked.slice(0,3).some(x=>x.id===set.id))return 0;
- return Math.max(1,pmPreviousLevelOf(set));
-};
+/* Le niveau fixe de chaque extension est défini dans PM_CURATED_LEVELS. */
 function pmNewCards(){if(!S.newCards||typeof S.newCards!=='object'||Array.isArray(S.newCards))S.newCards={};return S.newCards}
 const pmOldTear=tear;
 tear=function(){
@@ -1870,7 +2040,7 @@ flipIt=function(){if(!rv||rv.busy)return;if(rv.cinemaPending){pmCinemaComplete()
     else if(card.pmFutur) pool=cards.filter(c=>c.pmFutur);
     else if(card.pmReprint) pool=cards.filter(c=>c.pmReprint);
     else pool=cards.filter(c=>c.tier===card.tier);
-    const bucket=pmChanceBucket(card);
+    const bucket=setId==='30th'?pmChanceBucket(card):pmSetRateFor(card.tier,cards,setId);
     const n=Math.max(1,pool.length||1);
     let chance=bucket/n;
     const pity=pmPityInfo(setId);
@@ -2967,26 +3137,20 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'){pmToggleDrawer(fals
    Une seule validation par booster déchiré, aucune validation à l'achat. */
 (() => {
  'use strict';
- const RATES = Object.freeze({double:.08,AR:.02,SAR:.006,secret:.001});
+ const RATES = Object.freeze({double:.10,AR:.04,SAR:.008,secret:.002});
  const HIT_TIERS = ['double','AR','SAR','secret'];
  let session = 0;
  const choose = a => a[Math.floor(Math.random()*a.length)];
  const setKey = () => cur?.s?.pmSourceId || cur?.s?.id;
  const stage = () => document.getElementById('stage');
  const poolHits = cards => {
-   const c = cards.filter(x=>x&&x.tier!=='unknown'&&!x.pmEnergy);
-   const premium=c.filter(x=>pmIsPityHit(x));
-   if(premium.length) return {items:premium,kind:'premium'};
-   const holos=c.filter(x=>x.tier==='holo');
-   if(holos.length)return {items:holos,kind:'holo'};
-   const rare=c.filter(x=>x.tier==='rare');
-   return {items:rare,kind:'rare'};
+   const eligible=cards.filter(c=>c&&c.tier!=='unknown'&&!c.pmEnergy);
+   const rates=pmSetRates(cur?.s?.pmSourceId||cur?.s?.id,eligible);
+   const items=eligible.filter(c=>(rates[c.tier]||0)>0);
+   const premium=items.filter(c=>['double','AR','SAR','secret'].includes(c.tier));
+   return {items,kind:premium.length?'premium':items.some(c=>c.tier==='holo')?'holo':'rare'};
  };
- const isHit = (c,cards) => {
-   if(pmIsPityHit(c))return true;
-   const h=poolHits(cards);
-   return h.kind!=='premium'&&h.items.some(x=>x.id===c?.id);
- };
+ const isHit = (c,cards) => !!c && pmSetRates(cur?.s?.pmSourceId||cur?.s?.id,cards)[c.tier]>0;
  const pityRecord = id => {
    const b=pmBalanceState();
    b.pityBySet??={};b.noNew??={};
@@ -3014,7 +3178,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'){pmToggleDrawer(fals
    if(c)out.push(c);
  };
  const rateFor = (tier) => {
-   let r=RATES[tier]||0;
+   let r=pmSetRateFor(tier,cur?.cards||[],setKey());
    const ch=(typeof pmsProgress==='function')?pmsProgress():null;
    if(ch?.charmRemaining && r){
      // Bonus du charme sur la probabilité de hit (plafond raisonnable).
@@ -3024,43 +3188,39 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'){pmToggleDrawer(fals
    return r;
  };
  const standardDraw = (cards,god=false) => {
-   const eligible=cards.filter(c=>c.tier!=='unknown'&&!c.pmEnergy);
-   if(!eligible.length)throw Error('Aucune carte avec une rareté connue dans cette série.');
-   const h=poolHits(eligible);
-   if(god){
-     const distinct=[...new Map(h.items.map(c=>[c.id,c])).values()];
-     if(h.kind==='premium'&&distinct.length>=6){
-       const out=[],used=new Set();
-       for(let i=0;i<6;i++){
-         const remaining=distinct.filter(c=>!used.has(c.id));
-         const tiers=HIT_TIERS.filter(t=>remaining.some(c=>c.tier===t));
-         const sum=tiers.reduce((n,t)=>n+(CONFIG.godSlot[t]||1),0);
-         let r=Math.random()*sum,tier=tiers[0];
-         for(const t of tiers){r-=CONFIG.godSlot[t]||1;if(r<=0){tier=t;break}}
-         const c=weightedPick(remaining.filter(c=>c.tier===tier),used);
-         if(!c)throw Error('God Pack incomplet');out.push(c);used.add(c.id);
-       }
-       return out;
+   const eligible=cards.filter(c=>c&&c.tier!=='unknown'&&!c.pmEnergy);
+   if(!eligible.length)throw Error('Le catalogue ne contient aucune rarete verifiee.');
+   const premium=eligible.filter(c=>['double','AR','SAR','secret'].includes(c.tier));
+   if(god&&new Set(premium.map(c=>c.id)).size>=6){
+     const out=[],used=new Set();
+     for(let i=0;i<6;i++){
+       const remaining=premium.filter(c=>!used.has(c.id));
+       const tiers=HIT_TIERS.filter(t=>remaining.some(c=>c.tier===t));
+       const sum=tiers.reduce((n,t)=>n+(CONFIG.godSlot[t]||1),0);
+       let r=Math.random()*sum,tier=tiers[0];
+       for(const t of tiers){r-=CONFIG.godSlot[t]||1;if(r<=0){tier=t;break}}
+       const c=weightedPick(remaining.filter(c=>c.tier===tier),used);
+       if(!c)throw Error('God Pack incomplet');out.push(c);used.add(c.id);
      }
-     god=false;
+     return out;
    }
-   const normals=eligible.filter(c=>['common','uncommon','rare','holo'].includes(c.tier) && (h.kind==='premium'||!h.items.some(x=>x.id===c.id)));
-   const base=normals.length?normals:eligible;
+   const rates=pmSetRates(setKey(),eligible);
+   const commons=eligible.filter(c=>['common','uncommon','rare'].includes(c.tier)&&!(rates[c.tier]>0));
+   const base=commons.length?commons:eligible.filter(c=>!(rates[c.tier]>0));
+   // Exception catalogue incomplet : afficher seulement des vraies cartes, jamais
+   // inventer de commune. Ces extensions necessitent une inspection du catalogue.
+   const normal=base.length?base:eligible;
    const out=[];
-   for(const types of [['common'],['common'],['common','uncommon'],['uncommon','common'],['uncommon','rare','holo']])take(out,types,base);
-   while(out.length<5)take(out,['common','uncommon','rare','holo'],base);
-   const r=Math.random();let cumulative=0, special=null;
-   for(const tier of ['secret','SAR','AR','double']){
-     cumulative+=eligible.some(c=>c.tier===tier)?rateFor(tier):0;
-     if(r<cumulative){special=weightedPick(eligible.filter(c=>c.tier===tier),new Set(out.map(x=>x.id)));break}
+   for(const types of [['common'],['common'],['common','uncommon'],['uncommon','common'],['rare','uncommon','common']])take(out,types,normal);
+   while(out.length<5)take(out,['common','uncommon','rare'],normal);
+   const r=Math.random();let cumulative=0,special=null;
+   for(const tier of ['secret','SAR','AR','double','holo','rare']){
+     cumulative+=rateFor(tier);
+     if(r<cumulative){special=weightedPick(eligible.filter(c=>c.tier===tier),new Set(out.map(c=>c.id)));break}
    }
-   // Si aucun hit moderne n'existe, les holos (ou, à défaut, les rares)
-   // servent de hits vintage avec la fréquence de base de 8 %.
-   if(!special && h.kind!=='premium' && h.items.length && r<rateFor('double')){
-     special=weightedPick(h.items,new Set(out.map(x=>x.id)));
-   }
-   if(special)out.push(special);else take(out,['rare','holo','uncommon','common'],base);
-   while(out.length<6)take(out,['common','uncommon','rare','holo'],base);
+   if(special)out.push(special);
+   else take(out,['rare','uncommon','common','holo'],normal);
+   while(out.length<6)take(out,['common','uncommon','rare','holo'],normal);
    return out;
  };
  const finalDraw = (cards,god=false) => {
@@ -3070,7 +3230,10 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'){pmToggleDrawer(fals
    if(pityBefore>=PM_PITY_LIMIT-1 && !out.some(c=>isHit(c,cards)) && h.items.length){
      // Le 30e booster OUVERT garantit une carte du meilleur groupe disponible.
      const used=new Set(out.map(c=>c.id));
-     const hit=weightedPick(h.items,used);
+     // La pity de 30 garantit le groupe inférieur seulement ; jamais SAR/secrète.
+     const accessible=cards.filter(c=>c&&['double','AR','holo','rare'].includes(c.tier)&&isHit(c,cards));
+     const valid=accessible.filter(c=>!used.has(c.id));
+     const hit=weightedPick(valid.length?valid:accessible,used);
      if(hit){const slot=id==='30th'?3:out.length-1;out[slot]=hit;}
    }
    // La garantie de nouvelle carte n'ajoute pas de hits hors taux de drop.
@@ -3138,7 +3301,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'){pmToggleDrawer(fals
    tearing=true;let drawn,god=false;
    try{
      const h=poolHits(cur.cards);
-     god=id!=='30th'&&h.kind==='premium'&&new Set(h.items.map(c=>c.id)).size>=6&&Math.random()<CONFIG.godPack;
+     god=id!=='30th'&&h.kind==='premium'&&new Set(h.items.filter(c=>['double','AR','SAR','secret'].includes(c.tier)).map(c=>c.id)).size>=6&&Math.random()<CONFIG.godPack;
      drawn=finalDraw(cur.cards,god);
      if(god && (new Set(drawn.map(c=>c.id)).size!==drawn.length||!drawn.every(c=>pmIsPityHit(c))))god=false;
      if(drawn.length!==6||drawn.some(c=>!c?.id))throw Error('Tirage incomplet');
@@ -3236,9 +3399,9 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'){pmToggleDrawer(fals
  const chanceFor = (c) => {
    const h=poolHits(cur?.cards||[]);
    const tier=c?.tier;
-   if(h.kind!=='premium'&&h.items.some(x=>x.id===c.id))return .08/Math.max(1,h.items.length);
+   if(h.kind!=='premium'&&h.items.some(x=>x.id===c.id))return (pmSetRates(setKey(),cur?.cards||[])[tier]||0)/Math.max(1,(cur?.cards||[]).filter(x=>x.tier===tier).length);
    const available=(cur?.cards||[]).filter(x=>x.tier===tier);
-   return (RATES[tier]||0)/Math.max(1,available.length);
+   return (pmSetRates(setKey(),cur?.cards||[])[tier]||0)/Math.max(1,available.length);
  };
  const showChance = c => {
    const pct=chanceFor(c)*100;
@@ -3264,11 +3427,11 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'){pmToggleDrawer(fals
    try{
      const d=await loadSet(id);if(!modal.isConnected||modal.classList.contains('hidden'))return;
      const h=poolHits(d.cards),out=modal.querySelector('#pm-rates-body');if(!out)return;
-     const tiers=['double','AR','SAR','secret'].map(t=>({tier:t,c:d.cards.filter(c=>c.tier===t).length,r:RATES[t]}));
-     const vintage=h.kind!=='premium'&&h.items.length;
-     const rows=tiers.filter(x=>x.c).map(x=>`<tr><td>${esc(TIERS[x.tier])}</td><td>${x.c}</td><td>${(x.r*100).toFixed(2).replace('.',',')} %</td></tr>`);
+     const rates=pmSetRates(id,d.cards);const tiers=['holo','double','AR','SAR','secret','rare'].map(t=>({tier:t,c:d.cards.filter(c=>c.tier===t).length,r:rates[t]||0}));
+     const vintage=false;
+     const rows=tiers.filter(x=>x.c&&x.r).map(x=>`<tr><td>${esc(TIERS[x.tier])}</td><td>${x.c}</td><td>${(x.r*100).toFixed(2).replace('.',',')} %</td></tr>`);
      if(vintage)rows.push(`<tr><td>${h.kind==='holo'?'Holo vintage':'Rare vintage'}</td><td>${h.items.length}</td><td>8,00 %</td></tr>`);
-     const total=tiers.reduce((a,x)=>a+(x.c?x.r:0),0)+(vintage?.08:0);
+     const total=tiers.reduce((a,x)=>a+(x.c?x.r:0),0);
      out.innerHTML=`<p>Probabilités de <b>jeu, non officielles</b>, par booster. Tirage de 6 cartes : une place spéciale, cinq cartes ordinaires.</p><table><tr><th>Type de hit</th><th>Cartes</th><th>Chance / booster</th></tr>${rows.join('')||'<tr><td colspan="3">Aucun hit classé disponible</td></tr>'}</table><p><b>Chance totale d’un hit naturel : ${(total*100).toFixed(2).replace('.',',')} %</b>${total?` · en moyenne 1 sur ${(1/total).toFixed(1).replace('.',',')} boosters`:''}.</p><p><b>Pity de cette extension :</b> ${pityRecord(id).pityBySet[id]}/${PM_PITY_LIMIT} sans hit. Le 30e booster <u>ouvert</u> sans hit garantit une rareté disponible, et le compteur revient à zéro après un hit. Aucun effet à l’achat.</p><p>God Pack : ${(CONFIG.godPack*100).toFixed(1).replace('.',',')} % si au moins six hits premium différents sont disponibles. Un Luck Charm actif modifie les taux de base affichés.</p>`;
    }catch(e){const out=modal.querySelector('#pm-rates-body');if(out)out.textContent='Taux indisponibles : données des cartes non chargées.';}
  };
@@ -3525,49 +3688,515 @@ window.pmVitrineDiagnostics={artCache:pmArtCache,load:enqueueArt,refresh:hydrate
 })();
 
 </script>
-<style id="pm-god-surprise-style">
-#stage .pm-god-reveal{width:min(94vw,520px);min-height:360px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;text-align:center;padding:28px 18px;background:radial-gradient(circle at 50% 45%,#4d1927 0%,#161117 55%,#090909 100%);border:1px solid #61323f;border-radius:20px;box-shadow:0 15px 70px #000a}
-.pm-god-reveal .pm-god-title{font-size:clamp(36px,8vw,66px);font-weight:1000;letter-spacing:2px;color:#fff;text-shadow:0 0 18px #e10600,0 0 45px #f18c33;animation:pm-god-pop .6s ease-out both}
-.pm-god-reveal .pm-god-sub{color:#eacbd1;font-size:16px}
-.pm-god-reveal button{min-height:48px;padding:12px 25px}
-@keyframes pm-god-pop{from{transform:scale(.8);opacity:0}to{transform:scale(1);opacity:1}}
-@media(prefers-reduced-motion:reduce){.pm-god-reveal .pm-god-title{animation:none}}
+
+<style id="pm-economy-2026-style">
+.pm-claimall{background:#edc96c!important;color:#151515!important;font-weight:900;padding:12px 18px;margin:10px 0 22px;border-radius:12px}.pm-trophy{display:inline-block;padding:5px 9px;border-radius:15px;background:#292b3a;border:1px solid #77738b;color:#ffdd89;font-size:12px;font-weight:800}.pm-trophy.done{background:#49351a;border-color:#dbb35b}.pm-full-set{position:absolute;z-index:15;top:9px;right:8px;background:#19856a;color:white;border:1px solid #9de6cc;border-radius:999px;font-size:10px;font-weight:900;padding:4px 8px;box-shadow:0 3px 12px #0009}.pm-pack-card{position:relative}.pm-trophies-board{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:18px}.pm-trophy-tile{padding:14px;border-radius:14px;border:1px solid #504c5c;background:#1a1b27}.pm-trophy-tile.locked{opacity:.5}.pm-trophy-tile strong{display:block;margin:6px 0}.pm-trophy-tile small{color:#bcbcc9}
 </style>
-<script id="pm-god-surprise-fix">
-/* The original card draw and stock/pity bookkeeping stay untouched.
-   God Pack becomes visible only after the player has seen card #1. */
+<script id="pm-economy-2026-js">
+/* V2: profil local, économie durable, badges acquis au moment de la réclamation. */
 (function(){
-  const priorNext=next;
-  let introOwner=null;
+ const VERSION='pm_economy_2026_currency_only_v3';
+ // Migration non destructive : seul le solde est modifié, une fois par profil.
+ function migrate(){
+   try{
+     const a=accounts();let changed=false;
+     for(const entry of Object.values(a)){
+       if(!entry || !entry.game || typeof entry.game!=='object')continue;
+       if(entry.game[VERSION])continue;
+       entry.game.coins=5000;
+       entry.game[VERSION]=true;
+       changed=true;
+     }
+     if(changed)writeAccounts(a);
+     const ses=localStorage.getItem(SESSION_KEY);
+     if(ses && a[ses]?.game){
+       S=a[ses].game;
+       MK=a[ses].market||MK;
+     }else if(S && typeof S==='object' && !S[VERSION]){
+       S.coins=5000;
+       S[VERSION]=true;
+     }
+     if(S && typeof S==='object')localStorage.setItem('wmp',JSON.stringify(S));
+   }catch(e){console.error('Migration des PokéCoins interrompue',e)}
+ }
+ function migrate(){ /* Désactivée : les PokéCoins et collections existants doivent être préservés. */ }
+ pmsGrant10k=function(){};
+ CONFIG.start=5000;CONFIG.daily=800;
+ const originalInit=init;
+ init=async function(){migrate();return originalInit.apply(this,arguments)};
+ migrate();
+ // Les nouveaux comptes obtiennent 5 000 PC au départ. Aucun autre état n'est touché.
+ const previousAccounts=writeAccounts;
+ writeAccounts=function(a){
+   for(const entry of Object.values(a||{})){
+     if(entry?.game && !entry.game[VERSION] && Number(entry.game.coins)===5000 && Object.keys(entry.game.owned||{}).length===0){
+       entry.game[VERSION]=true;
+     }
+   }
+   return previousAccounts(a);
+ };
+ const oldClaim=claim;
+ claim=function(id){
+   const a=ACH().find(x=>x.id===id);if(!a||a.cur<a.goal||S.cl[id])return;
+   S.pmTrophies??={};S.pmTrophies[id]={name:a.n,at:Date.now()};
+   return oldClaim(id);
+ };
+ window.pmClaimAll=function(){
+   const ready=ACH().filter(a=>a.cur>=a.goal&&!S.cl[a.id]);
+   if(!ready.length)return toast('Aucune récompense disponible.');
+   S.pmTrophies??={};let total=0;
+   for(const a of ready){S.cl[a.id]=1;S.pmTrophies[a.id]={name:a.n,at:Date.now()};total+=a.rw}
+   S.coins+=total;save();ach();toast(ready.length+' récompenses récupérées : +'+total+' PC et badges !');
+ };
+ const oldAch=ach;
+ ach=function(){oldAch();const app=document.getElementById('app');if(!app)return;
+   const count=ACH().filter(a=>a.cur>=a.goal&&!S.cl[a.id]).length;
+   const btn=document.createElement('button');btn.className='pm-claimall';btn.textContent='🏆 Tout récupérer ('+count+')';btn.disabled=!count;btn.onclick=pmClaimAll;
+   const crumb=app.querySelector('.crumb');(crumb||app.firstChild)?.after(btn);
+   const earned=Object.entries(S.pmTrophies||{});
+   const section=document.createElement('section');section.className='ky-showcase';
+   section.innerHTML='<h2>🏆 Mes trophées et badges · '+earned.length+'</h2><div class="pm-trophies-board">'+(earned.length?earned.map(([id,t])=>'<div class="pm-trophy-tile"><div>🏆 <span class="pm-trophy done">OBTENU</span></div><strong>'+esc(t.name||id)+'</strong><small>Mission accomplie</small></div>').join(''):'<p>Termine des missions et récupère leurs récompenses pour gagner des badges.</p>')+'</div>';
+   btn.after(section);
+   const all=ACH();app.querySelectorAll('.set').forEach((el,i)=>{const a=all[i];if(!a)return;const label=document.createElement('span');label.className='pm-trophy'+(S.cl[a.id]?' done':'');label.textContent=S.cl[a.id]?'🏆 Badge obtenu':'🏅 Badge à débloquer';el.append(label)});
+ };
+ const oldPackCard=pmPackCard;
+ pmPackCard=function(s){const result=oldPackCard(s);if(!s?.cardCount?.total)return result;const owned=pmOwnedCount(s.id),complete=owned>=s.cardCount.total;
+   if(!complete)return result;
+   return result.replace(/(<article\b[^>]*class="[^"]*pm-pack-card[^"]*"[^>]*>)/,'$1<span class="pm-full-set">✓ COMPLET</span>');
+ };
+ const oldList=pmShopList;
+ pmShopList=function(){oldList();document.querySelectorAll('.pm-pack-card').forEach(el=>{
+    const id=el.dataset.pmPack;if(!id||el.querySelector('.pm-full-set'))return;const s=SETS.find(x=>x.id===id);if(s?.cardCount?.total&&pmOwnedCount(id)>=s.cardCount.total)el.insertAdjacentHTML('afterbegin','<span class="pm-full-set">✓ COMPLET</span>');
+   });};
+})();
+</script>
+
+<script id="pm-instant-purchase-update">
+/* Synchronisation du stock avec l'interface actuelle, sans recharger la page. */
+(function(){
+  const purchaseBeforeUI = buy;
+  buy = function(id,n){
+    const previous = Number(S.stock[id] || 0);
+    const outcome = purchaseBeforeUI(id,n);
+    const current = Number(S.stock[id] || 0);
+    if(current <= previous) return outcome; // achat refusé, aucun rafraîchissement
+    try {
+      // Boutique moderne : actualiser les cartes et le tiroir de détails.
+      if(vw === 'shop' && typeof pmShopList === 'function' && document.getElementById('pm-shop-packs')){
+        const scroll = window.scrollY;
+        const list = document.getElementById('pm-shop-packs');
+        const listScroll = list.scrollTop;
+        pmShopList();
+        list.scrollTop = listScroll;
+        window.scrollTo(0,scroll);
+      }
+      // Accueil : réactiver immédiatement les boutons des extensions achetées.
+      document.querySelectorAll('[data-pm-pack]').forEach(el=>{
+        if(el.getAttribute('data-pm-pack')!==id)return;
+        const b=el.querySelector('.pm-pack-main');
+        if(!b)return;
+        b.textContent='Ouvrir · '+current+' en stock';
+        b.setAttribute('onclick',"openBooster('"+id+"')");
+      });
+      // Affichage classique : actualiser les informations si toujours présent.
+      if(vw === 'shop' && !document.getElementById('pm-shop-packs') && typeof renderShowcase === 'function')renderShowcase();
+      if(typeof fbUpdate === 'function')fbUpdate();
+    } catch(err) { console.warn('Actualisation achat',err); }
+    return outcome;
+  };
+  // Ne plus redessiner une deuxième fois la boutique après un achat :
+  // ce rafraîchissement redondant pouvait remplacer les boutons mis à jour.
+  pmUIBuy = function(id,n){ return buy(id,n); };
+})();
+</script>
+
+<style id="pm-oct21-safe-style">
+/* Les nouveautés sont annoncées une fois : plus de pastilles persistantes après déblocage. */
+.pm-new-badge{display:none!important}
+#stage.pm-god-after-first .real-stack, #stage.pm-god-after-first .flip,
+#stage.pm-god-after-first .cw {filter:drop-shadow(0 0 13px #f6c34a) drop-shadow(0 0 22px #9c6a09)!important}
+#stage.pm-god-after-first .stack-front,#stage.pm-god-after-first .front{box-shadow:0 0 0 2px #dfb84a,0 0 20px #a37726!important;border-radius:12px}
+.pm-god-reveal {min-height:100dvh;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:16px;text-align:center;padding:26px;background:radial-gradient(ellipse at center,#48300d 0%,#100c08 68%,#030303 100%)}
+.pm-god-reveal h2{font-size:clamp(36px,10vw,72px);color:#ffdf76;text-shadow:0 0 20px #d9a32b;margin:0}
+.pm-god-reveal p{color:#f5e2ac}
+</style>
+<script id="pm-oct21-safe-upgrade">
+(function(){
+  'use strict';
+  // Explicit set-level priority; never derive these two generations from price.
+  // Les anciens forçages Noir & Blanc/Plasma sont remplacés par la grille éditoriale fixe.
+  levelOf=function(set){return pmBaseLevel(set?.id||'ALL');};
+  // One-time currency migration. No owned, stock, pity, quests or market writes.
+  const MONEY_VERSION='pm_only_currency_to_5000_2026_10_21_v4';
+  function resetCurrencyOnly(){
+    try{
+      const all=accounts();let dirty=false;
+      for(const entry of Object.values(all)){
+        if(!entry?.game||entry.game[MONEY_VERSION])continue;
+        entry.game.coins=5000;entry.game[MONEY_VERSION]=true;dirty=true;
+      }
+      if(dirty)writeAccounts(all);
+      const session=localStorage.getItem(SESSION_KEY);
+      if(session&&all[session]?.game){
+        S=all[session].game;
+        if(all[session].market)MK=all[session].market;
+      }else if(S&&!S[MONEY_VERSION]){
+        S.coins=5000;S[MONEY_VERSION]=true;
+      }
+      if(S)localStorage.setItem('wmp',JSON.stringify(S));
+      if(typeof head==='function'&&document.getElementById('coins'))head();
+    }catch(err){console.warn('Migration solde uniquement',err)}
+  }
+  function resetCurrencyOnly(){ /* Désactivée : aucune migration monétaire automatique. */ }
+  CONFIG.start=5000;
+  resetCurrencyOnly();
+  const formerLogin=accountSubmit;
+  accountSubmit=async function(){
+    const result=await formerLogin.apply(this,arguments);
+    resetCurrencyOnly();
+    return result;
+  };
+  // God Pack is not announced in packView, tear, or BEFORE opening the first card.
+  const originalNext=next;
+  let surpriseOwner=null;
   godIntro=function(){
     if(!rv?.cards?.length)return;
-    if(batchState?.skip)batchState.skip=false; // a God Pack must not skip its first card
-    rv.pmGodSurpriseShown=false;
-    rv.pmGodIntroPending=false;
-    // Render first card exactly like an ordinary booster, with no God Pack label.
+    if(batchState)batchState.skip=false;
+    rv.pmGodRevealed=false;rv.pmGodInterlude=false;
     reveal();
   };
   next=function(){
-    if(rv?.god && rv.i===0 && !rv.pmGodSurpriseShown){
-      rv.pmGodSurpriseShown=true;
-      rv.pmGodIntroPending=true;
-      const owner=rv;
-      introOwner=owner;
-      if(typeof pmCinemaSequence!=='undefined')pmCinemaSequence++;
-      const container=document.getElementById('stage');
-      if(!container)return priorNext();
-      container.className='';
-      container.innerHTML='<div class="pm-god-reveal"><div class="pm-god-title">GOD PACK !</div><p class="pm-god-sub">La première carte cachait un booster exceptionnel.</p><button type="button" onclick="pmContinueGodSurprise()">Découvrir la suite →</button></div>';
-      return;
+    if(rv?.god&&rv.i===0&&!rv.pmGodRevealed){
+      rv.pmGodRevealed=true;rv.pmGodInterlude=true;surpriseOwner=rv;
+      const el=document.getElementById('stage');
+      if(el){
+        el.className='';
+        el.innerHTML='<div class="pm-god-reveal"><h2>GOD PACK !</h2><p>La première carte vient de révéler un paquet exceptionnel.</p><button type="button" onclick="pmGodResume()">Découvrir les autres cartes →</button></div>';
+        return;
+      }
     }
-    return priorNext();
+    return originalNext();
   };
-  window.pmContinueGodSurprise=function(){
-    if(!rv||rv!==introOwner||!rv.pmGodIntroPending)return;
-    rv.pmGodIntroPending=false;
-    introOwner=null;
-    priorNext();
+  window.pmGodResume=function(){
+    if(!rv||rv!==surpriseOwner||!rv.pmGodInterlude)return;
+    rv.pmGodInterlude=false;surpriseOwner=null;
+    originalNext();
   };
+  const formerReveal=reveal;
+  reveal=function(){
+    const result=formerReveal.apply(this,arguments);
+    const stage=document.getElementById('stage');
+    if(stage)stage.classList.toggle('pm-god-after-first',Boolean(rv?.god&&rv.i>0));
+    return result;
+  };
+  // Show an ephemeral notification only AFTER the newly obtained card is shown.
+  const formerFlip=flipIt;
+  const seenInThisSession=new Set();
+  flipIt=function(){
+    const opening=rv,card=opening?.cards?.[opening.i];
+    const needsAlert=Boolean(card && !opening?.flipped && S?.newCards?.[card.id]&&!seenInThisSession.has(card.id));
+    const result=formerFlip.apply(this,arguments);
+    if(needsAlert){
+      let attempts=0;
+      const check=function(){
+        if(rv!==opening)return;
+        if(rv?.flipped){
+          seenInThisSession.add(card.id);
+          if(S.newCards)delete S.newCards[card.id];
+          save();
+          toast('Nouvelle carte débloquée : '+card.name+' !');
+          return;
+        }
+        if(++attempts<28)setTimeout(check,150);
+      };
+      setTimeout(check,150);
+    }
+    return result;
+  };
+  // Remove stale temporary marks for already-owned cards when opening a collection.
+  const oldColl=coll;
+  coll=function(){
+    if(S?.newCards){S.newCards={};save()}
+    return oldColl.apply(this,arguments);
+  };
+})();
+</script>
+
+<style id="pm-market-real-2026-style">
+.pm-market-audit{padding:14px 16px;margin:12px 0;border-radius:14px;border:1px solid #454450;background:linear-gradient(135deg,#20202b,#15151d);color:#f3f3f6}
+.pm-market-audit header{position:static;border:0;background:none;padding:0;margin:0 0 8px;display:flex;gap:10px;justify-content:space-between}
+.pm-market-audit h3{margin:0;font-size:16px}
+.pm-market-audit .pm-data-line{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0;font-size:12px;color:#e6d7ad}
+.pm-market-audit .pm-data-line b{background:#292a34;border-radius:8px;padding:6px 9px}
+.pm-market-audit p{margin:5px 0;color:#d3d3df;line-height:1.5;font-size:13px}
+.pm-market-audit .pm-odds{font-size:12px;color:#acc7b6}
+.pm-market-audit small{display:block;line-height:1.5;color:#afb0bf}
+</style>
+<script id="pm-market-real-2026-ui">
+(function(){
+ const block=(s)=>{
+   const data=pmMarketInfo(s.id),year=s.releaseDate?String(s.releaseDate).slice(0,10):'Date inconnue';
+   const cards=cache[s.id]?.cards||[],rates=cards.length?pmSetRates(s.id,cards):null;
+   const tiers=cards.length?['holo','double','AR','SAR','secret'].filter(t=>cards.some(c=>c.tier===t)).map(t=>(TIERS[t]||t)).join(' · '):'Chargées lors de l’ouverture';
+   const odds=rates?Object.entries(rates).filter(([t,v])=>v&&cards.some(c=>c.tier===t)).map(([t,v])=>`${t} ${(v*100).toFixed(2).replace('.',',')} %`).join(' · '):'15 % de hits naturels visés (à ajuster aux cartes officielles du set)';
+   const missing=rates?['AR','SAR','secret'].filter(t=>!cards.some(c=>c.tier===t)).join(', '):'';
+   const legacyExplain=/^(hgss|col|dp|pl|ex|bw|base|neo|gym|ecard)/.test(s.id)?'<p><b>Vintage :</b> les cartes Prime, LEGEND, Niv. X, Gold Star et autres variantes sont classées en équivalences de jeu ; leur rareté officielle reste intacte. Les EX modernes ne sont pas requis.</p>':'';
+   return `<div class="pm-market-audit"><header><h3>Marché & raretés du set</h3><strong>NV${data.level+1}</strong></header><div class="pm-data-line"><b>${price(s.id)} PC / booster</b><b>Sortie : ${esc(year)}</b><b>Popularité ${data.demand}/5</b></div><p>${esc(data.note)}</p>${legacyExplain}<p class="pm-odds">${esc(odds)}</p><small>Raretés observées : ${esc(tiers)}.${missing?' Catégories sans équivalent présent : '+esc(missing)+'.':''} Les catégories équivalentes n’altèrent pas la rareté officielle des cartes. Prix virtuels, non cotations en euros.</small></div>`;
+ };
+ pmDropRates=function(){
+  const cards=cur?.cards||[];if(!cards.length)return toast('Ouvre ou charge un booster pour voir ses taux.');
+  const id=cur?.s?.pmSourceId||cur?.s?.id;
+  const rates=pmSetRates(id,cards);
+  const rows=['holo','double','AR','SAR','secret','rare'].map(t=>{
+    const available=cards.some(c=>c.tier===t);
+    return `<tr><th>${esc(TIERS[t])}</th><td>${available?(rates[t]*100).toFixed(2).replace('.',',')+' %':'Indisponible dans ce set'}</td></tr>`;
+  }).join('');
+  const m=document.getElementById('modal');m.className='';
+  m.innerHTML=`<div class="mb" style="display:block"><button class="g x" onclick="pmCloseRates()">Fermer</button><h2>Taux par booster · ${esc(cur?.s?.name||id)}</h2><p>15 % de hits naturels visés par booster si le catalogue contient des catégories de hit. Raretés absentes adaptées ; pity à 30 et God Packs calculés séparément. Luck Charms : taux temporaires supplémentaires.</p><table class="drop-table">${rows}</table><small>Les noms AR et SAR sont parfois des équivalences de gameplay pour les anciennes séries, jamais des cartes inventées.</small></div>`;
+ };
+ const prev=pmShopDetail;
+ pmShopDetail=function(){
+   prev.apply(this,arguments);
+   const panel=document.getElementById('pm-shop-detail'),set=SETS.find(x=>x.id===pmNewShopSelected);
+   if(panel&&set&&!panel.querySelector('.pm-market-audit'))panel.insertAdjacentHTML('beforeend',block(set));
+ };
+ // Show value on classic expanded booster view too, without replacing current buttons.
+ const lastPack=packShowcase;
+ packShowcase=function(set){return lastPack(set)+block(set)};
+})();
+</script>
+
+<style id="pm-set-missions-theme">
+#pm-set-missions{margin:16px 0 26px;background:#101114;border:1px solid #373943;border-radius:15px;padding:clamp(14px,3vw,24px)}
+#pm-set-missions .pm-mission-head{display:flex;gap:12px;justify-content:space-between;align-items:center;flex-wrap:wrap;margin-bottom:14px}
+#pm-set-missions h2{margin:0 0 4px;font-size:clamp(21px,4vw,28px)}
+#pm-set-missions p{margin:0;color:#b9bbc9}
+#pm-set-missions select{min-width:min(100%,260px);width:min(100%,340px);max-width:100%;background:#1b1d24;color:white;border:1px solid #4d4d54;border-radius:9px;padding:12px}
+.pm-setquest-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,235px),1fr));gap:12px;margin:12px 0}
+.pm-setquest{background:#191a20;border:1px solid #383942;padding:15px;border-radius:12px;min-width:0;display:flex;flex-direction:column;gap:9px}
+.pm-setquest.done{border-color:#5b4b20;background:linear-gradient(150deg,#242014,#17181d 48%)}
+.pm-setquest h3{font-size:16px;margin:0;line-height:1.3}
+.pm-setquest p{font-size:13px;line-height:1.45;flex:1}
+.pm-setquest .pm-setquest-foot{display:flex;align-items:center;justify-content:space-between;gap:6px;font-size:12px;color:#c4c5ce}
+.pm-setquest .pm-setquest-foot b{color:#ebcd67}
+.pm-setquest .pm-setquest-meter{height:6px;background:#32343d;overflow:hidden;border-radius:8px}
+.pm-setquest .pm-setquest-meter i{display:block;height:100%;background:#e2b441;border-radius:inherit}
+.pm-setquest button{width:100%;min-height:40px}
+.pm-setquest .pm-setquest-preview{display:flex;gap:8px;align-items:center;min-height:48px}
+.pm-setquest-preview img{width:34px;aspect-ratio:63/88;object-fit:cover;border-radius:3px}
+.pm-setquest small{color:#abaeba}
+.pm-setquest-award{font-size:12px;font-weight:800;letter-spacing:.3px;color:#ecd47d}
+.pm-setquest-controls{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:space-between;margin-top:12px}
+.pm-setquest-note{font-size:12px;color:#9a9ba5!important;margin-top:9px!important}
+.pm-setquest-loading{padding:10px 0;color:#a8abb7;font-size:13px}
+@media(max-width:650px){#pm-set-missions select{width:100%}.pm-setquest-controls button{width:100%}}
+</style>
+<script id="pm-personalized-set-missions-2026">
+/* Mission engine, read-only with respect to collections: only S.cl, S.pmTrophies,
+   and PokéCoins change on explicit reward claim. Existing saved card IDs stay intact. */
+(function(){
+ 'use strict';
+ let chosen='';
+ let ticket=0;
+ const loading=new Map();
+ // Two checklists verified against the actual official collections (card IDs are TCGdex IDs).
+ // Additional targets are always derived from actual cards loaded from the set API.
+ const SPECIAL={
+   bw1:[
+     {slug:'zekrom-reshiram',title:'Le duo d’Unys',description:'Posséder les Full Art Reshiram 113 et Zekrom 114 de Noir & Blanc.',ids:['bw1-113','bw1-114'],rewardFactor:1.6,badge:'⚡ Duo légendaire'},
+     {slug:'duo-holo',title:'Les légendes d’Unys',description:'Réunir Reshiram 26 et Zekrom 47 dans leur version holographique.',ids:['bw1-26','bw1-47'],rewardFactor:.8,badge:'🔥 Deux dragons'}
+   ],
+   hgss3:[
+     {slug:'rayquaza-deoxys',title:'Rayquaza & Deoxys LEGEND',description:'Réunir les deux moitiés officielles 89 et 90 de Rayquaza & Deoxys LÉGENDE.',ids:['hgss3-89','hgss3-90'],rewardFactor:1.7,badge:'🌠 LÉGENDE complète'}
+   ]
+ };
+ // Paires emblématiques des autres collections : elles ne sont activées
+ // que si les deux cartes exactes existent dans le catalogue téléchargé.
+ const THEMES={
+   base1:['Dracaufeu','Tortank'],
+   neo1:['Lugia','Typhlosion'],
+   swsh7:['Noctali VMAX','Rayquaza VMAX'],
+   swsh8:['Ectoplasma VMAX','Mew VMAX'],
+   swsh9:['Dracaufeu VSTAR','Arceus VSTAR'],
+   swsh11:['Giratina V','Ptéra V'],
+   swsh12:['Lugia V','Lugia VSTAR'],
+   'swsh12.5':['Giratina VSTAR','Arceus VSTAR'],
+   'sv03.5':['Dracaufeu ex','Mew ex'],
+   'sv04.5':['Dracaufeu ex','Mew ex'],
+   'sv08.5':['Noctali ex','Nymphali ex']
+ };
+ const norm=x=>String(x||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();
+ const isNonPokemon=c=>/trainer|dresseur|supporter|item|objet|tool|outil|stadium|stade|energy|énergie|fossil|fossile/i.test(String(c?.category||''));
+ const thumb=c=>{
+   if(!c?.image)return '';
+   const base=String(c.image),url=base.startsWith('data:')?base:base+'/low.webp';
+   return '<img loading="lazy" alt="'+esc(c.name||'Carte')+'" src="'+esc(url)+'" onerror="this.remove()">';
+ };
+ function prize(p,floor,cap){return Math.min(cap,Math.max(floor,Math.round(p/10)*10))}
+ function owned(id){return Number(S?.owned?.[id])>0}
+ function distinct(setId){return Object.entries(S?.owned||{}).filter(([id,n])=>n>0&&id.startsWith(setId+'-')).length}
+ function getSet(id){return SETS.find(s=>s.id===id)}
+ function collectible(cards){
+   return cards.filter(c=>c&&c.id&&c.name&&!isNonPokemon(c)&&!/^(energy|energie|énergie)$/i.test(String(c.category||'')));
+ }
+ const weighting={secret:8,SAR:7,AR:6,double:5,holo:4,rare:3,uncommon:2,common:1,unknown:0};
+ function sortedChases(cards){
+   return collectible(cards).filter(c=>(weighting[c.tier]||0)>=3)
+   .sort((a,b)=>(weighting[b.tier]||0)-(weighting[a.tier]||0)||
+        (Number(b.localId?.replace(/[^0-9]/g,''))||0)-(Number(a.localId?.replace(/[^0-9]/g,''))||0)||
+        String(a.id).localeCompare(String(b.id)));
+ }
+ function getMissions(id){
+   const set=getSet(id);if(!set)return [];
+   const p=price(id),tot=Math.max(0,set.cardCount?.total||0),count=distinct(id);
+   const uniqueGoal=Math.min(10,tot||10);
+   const result=[{id:'set:'+id+':discovery',n:'Explorateur de '+set.name,
+      desc:'Ajouter '+uniqueGoal+' cartes différentes de cette extension à ta collection.',
+      cur:Math.min(count,uniqueGoal),goal:uniqueGoal,rw:prize(p*.4,90,260),badge:'🧭 Explorateur',targets:[]}];
+   const cards=cache[id]?.cards||[];
+   const available=new Set(cards.map(c=>String(c.id)));
+   for(const spec of SPECIAL[id]||[]){
+     // Show the verified mission before the catalogue loads, and check exact IDs
+     // against the catalogue once it is present. Never offer an impossible pair.
+     if(cards.length&&!spec.ids.every(x=>available.has(x)))continue;
+     result.push({id:'set:'+id+':'+spec.slug,n:spec.title,desc:spec.description,
+       cur:spec.ids.filter(owned).length,goal:spec.ids.length,
+       rw:prize(p*spec.rewardFactor,120,1550),badge:spec.badge,
+       targets:spec.ids.map(cardId=>cards.find(c=>c.id===cardId)).filter(Boolean)});
+   }
+   if(cards.length){
+     const candidates=sortedChases(cards);
+     const theme=THEMES[id];
+     if(theme){
+       const matches=theme.map(name=>{
+         const nameKey=norm(name);
+         return candidates.find(c=>norm(c.name)===nameKey) ||
+           collectible(cards).find(c=>norm(c.name)===nameKey);
+       });
+       if(matches.every(Boolean)&&new Set(matches.map(c=>c.id)).size===2){
+         result.push({id:'set:'+id+':emblematic',n:'Duo emblématique · '+theme.join(' & '),
+           desc:'Réunir les deux cartes officielles : '+matches.map(c=>c.name+' n°'+(c.localId||'?')).join(' et ')+'.',
+           cur:matches.filter(c=>owned(c.id)).length,goal:2,
+           rw:prize(p*1.3,210,1250),badge:'✨ Duo emblématique',targets:matches});
+       }
+     }
+     const avoid=new Set((SPECIAL[id]||[]).flatMap(x=>x.ids));
+     const chase=candidates.find(c=>!avoid.has(c.id))||candidates[0];
+     if(chase){
+       result.push({id:'set:'+id+':chase',n:'Carte vedette · '+chase.name,
+         desc:'Découvrir la carte '+chase.name+' n°'+(chase.localId||String(chase.id).split('-').pop())+' de '+set.name+'.',
+         cur:owned(chase.id)?1:0,goal:1,rw:prize(p*.8,120,750),badge:'🌟 Carte phare',targets:[chase]});
+     }
+     const seenNames=new Set(),duo=[];
+     for(const c of candidates){
+       if(avoid.has(c.id)||c.id===chase?.id||seenNames.has(norm(c.name)))continue;
+       seenNames.add(norm(c.name));duo.push(c);if(duo.length===2)break;
+     }
+     if(duo.length===2){
+       result.push({id:'set:'+id+':duo',n:'Duo de '+set.name,
+         desc:'Réunir '+duo.map(c=>c.name+' n°'+(c.localId||'?')).join(' et ')+'.',
+         cur:duo.filter(c=>owned(c.id)).length,goal:2,rw:prize(p*1.2,180,1100),badge:'⚔️ Duo du set',targets:duo});
+     }
+   }
+   if(tot){result.push({id:'set:'+id+':master',n:'Master Set · '+set.name,
+      desc:'Posséder au moins un exemplaire de chacune des '+tot+' cartes officielles de l’extension.',
+      cur:Math.min(count,tot),goal:tot,rw:prize(p*2,400,2600),badge:'🏆 Maître du set',targets:[]});}
+   return result;
+ }
+ const missionDisplay=m=>{
+   const claimed=!!S.cl[m.id],ready=m.cur>=m.goal;
+   const pct=Math.min(100,100*m.cur/Math.max(1,m.goal));
+   return '<article class="pm-setquest'+(claimed?' done':'')+'"><span class="pm-setquest-award">'+esc(m.badge)+'</span>'+
+    '<h3>'+esc(m.n)+'</h3><p>'+esc(m.desc)+'</p>'+
+    (m.targets?.length?'<div class="pm-setquest-preview">'+m.targets.map(thumb).join('')+'</div>':'')+
+    '<div class="pm-setquest-meter"><i style="width:'+pct+'%"></i></div>'+
+    '<div class="pm-setquest-foot"><span>'+m.cur+'/'+m.goal+'</span><b>+'+m.rw+' PC</b></div>'+
+    '<button '+(!ready||claimed?'disabled':'')+' onclick="pmSetMissionClaim(\''+m.id+'\')">'+(claimed?'✓ Badge obtenu':ready?'Récupérer + badge':'En cours')+'</button></article>';
+ };
+ function renderMissions(){
+   if(vw!=='ach')return;
+   const box=document.getElementById('pm-set-missions');if(!box)return;
+   const set=getSet(chosen);if(!set)return;
+   const missions=getMissions(chosen),ready=missions.filter(m=>m.cur>=m.goal&&!S.cl[m.id]);
+   const list=box.querySelector('#pm-setquest-list'),counter=box.querySelector('#pm-setquest-counter'),all=box.querySelector('#pm-setquest-all');
+   const status=box.querySelector('#pm-setquest-status');
+   if(status&&cache[chosen]?.cards?.length)status.textContent='✓ Cartes et objectifs vérifiés à partir du catalogue de cette extension.';
+   if(list)list.innerHTML=missions.map(missionDisplay).join('');
+   if(counter)counter.textContent=missions.filter(m=>S.cl[m.id]).length+' / '+missions.length+' badges obtenus'+(cache[chosen]?.cards?.length?'':' · cartes vedettes en cours de chargement');
+   if(all){all.disabled=!ready.length;all.textContent='Tout récupérer pour ce set ('+ready.length+')';}
+ }
+ async function fetchSetMissions(id){
+   if(cache[id]?.cards?.length){renderMissions();return;}
+   if(loading.has(id)){await loading.get(id);renderMissions();return;}
+   const promise=loadSet(id).catch(e=>{console.warn('Missions du set indisponibles',id,e);if(vw==='ach'&&chosen===id){const el=document.getElementById('pm-setquest-status');if(el)el.textContent='Catalogue indisponible : missions de découverte disponibles. Réessaie en sélectionnant la série.';}});
+   loading.set(id,promise);try{await promise}finally{loading.delete(id)}
+   if(chosen===id)renderMissions();
+ }
+ function mountMissions(){
+   if(vw!=='ach'||!SETS.length)return;
+   const app=document.getElementById('app');if(!app)return;
+   if(!getSet(chosen))chosen=getSet(window.PM_FEATURED_ID)?.id||SETS[0].id;
+   const old=app.querySelector('#pm-set-missions');if(old)old.remove();
+   const sorted=[...SETS].filter(s=>s.cardCount?.total||s.id===window.PM_FEATURED_ID)
+     .sort((a,b)=>levelOf(a)-levelOf(b)||a.name.localeCompare(b.name,'fr'));
+   const opts=sorted.map(s=>'<option value="'+esc(s.id)+'"'+(s.id===chosen?' selected':'')+'>NV'+(levelOf(s)+1)+' · '+esc(s.name)+'</option>').join('');
+   const node=document.createElement('section');node.id='pm-set-missions';
+   node.innerHTML='<div class="pm-mission-head"><div><h2>🎖️ Missions par extension</h2><p>Défis uniques, duos légendaires et badges liés aux vraies cartes des séries.</p></div><select aria-label="Choisir une extension" onchange="pmChooseSetMission(this.value)">'+opts+'</select></div>'+
+    '<div id="pm-setquest-status" class="pm-setquest-loading">Les cartes emblématiques sont vérifiées dans le catalogue officiel.</div>'+
+    '<div class="pm-setquest-grid" id="pm-setquest-list"></div>'+
+    '<div class="pm-setquest-controls"><small id="pm-setquest-counter"></small><button id="pm-setquest-all" onclick="pmSetMissionClaimAll()">Tout récupérer pour ce set</button></div>'+
+    '<p class="pm-setquest-note">Les cartes déjà obtenues comptent rétroactivement. Les badges et PC ne sont attribués qu’une fois, lorsque tu récupères la récompense. Les cartes restent dans ta collection.</p>';
+   const crumb=app.querySelector('.crumb');if(crumb)crumb.after(node);else app.prepend(node);
+   renderMissions();fetchSetMissions(chosen);
+ }
+ window.pmChooseSetMission=function(id){
+   if(!getSet(id))return;
+   chosen=id;const status=document.getElementById('pm-setquest-status');if(status)status.textContent='Chargement des cartes de '+getSet(id).name+'…';
+   renderMissions();fetchSetMissions(id);
+ };
+ function award(m){
+   if(!m||m.cur<m.goal||S.cl[m.id])return false;
+   S.cl[m.id]=1;S.pmTrophies??={};S.pmTrophies[m.id]={name:m.n,badge:m.badge,set:chosen,at:Date.now()};
+   S.coins+=m.rw;
+   return true;
+ }
+ window.pmSetMissionClaim=function(id){
+   const m=getMissions(chosen).find(q=>q.id===id);if(!award(m))return;
+   save();renderMissions();toast('🏆 '+m.badge+' : +'+m.rw+' PC !');
+ };
+ window.pmSetMissionClaimAll=function(){
+   const list=getMissions(chosen).filter(m=>m.cur>=m.goal&&!S.cl[m.id]);
+   if(!list.length)return toast('Aucune récompense à récupérer pour cette extension.');
+   let total=0;for(const m of list){if(award(m))total+=m.rw;}
+   save();renderMissions();toast(list.length+' badge(s) récupéré(s) · +'+total+' PC');
+ };
+ const oldShopDetail=pmShopDetail;
+ pmShopDetail=function(){
+   oldShopDetail();
+   const details=document.getElementById('pm-shop-detail');
+   if(!details||!pmNewShopSelected||details.querySelector('.pm-setquests-shop-link'))return;
+   const button=document.createElement('button');
+   button.className='pm-outline pm-setquests-shop-link';
+   button.textContent='🎖️ Missions de cette extension';
+   button.type='button';
+   button.style.cssText='width:100%;min-height:42px;margin:10px 0;';
+   const id=pmNewShopSelected;
+   button.onclick=()=>{chosen=id;show('ach')};
+   (details.querySelector('.pm-detail-actions')||details).append(button);
+ };
+ const formerAch=ach;
+ ach=function(){formerAch();mountMissions();};
+ // Preserve the familiar "Tout récupérer" button: claim the set's rewards too.
+ const oldClaimAll=window.pmClaimAll;
+ if(typeof oldClaimAll==='function'){
+   window.pmClaimAll=function(){
+     const before=S.coins;
+     oldClaimAll();
+     const list=getMissions(chosen).filter(m=>m.cur>=m.goal&&!S.cl[m.id]);
+     let sum=0;for(const m of list)if(award(m))sum+=m.rw;
+     if(sum){save();if(vw==='ach')ach();toast('Récompenses globales et missions du set : +'+(S.coins-before)+' PC');}
+   };
+ }
 })();
 </script>
 </body></html>
