@@ -500,7 +500,17 @@ input,select,textarea{background:#16171f!important;border-color:#484951!importan
 @media(max-width:700px){#main-nav.expanded{background:#14141b!important;border-color:#47424b!important}.ky-showcase,.pm-mission-preview{padding:16px!important}}
 @media(prefers-reduced-motion:reduce){button{transition:none!important}}
 </style>
-<style>.pm-feature-banner{margin:12px 0 20px;padding:22px 24px;border-radius:20px;background:linear-gradient(125deg,#130e14,#25202b 65%,#3c171e);border:1px solid #593440}.pm-feature-banner h2{margin:8px 0;color:#fff}.pm-feature-banner p{color:#ddd;line-height:1.5}</style></head><body class="dos">
+<style>.pm-feature-banner{margin:12px 0 20px;padding:22px 24px;border-radius:20px;background:linear-gradient(125deg,#130e14,#25202b 65%,#3c171e);border:1px solid #593440}.pm-feature-banner h2{margin:8px 0;color:#fff}.pm-feature-banner p{color:#ddd;line-height:1.5}</style>
+<style id="pm-five-levels-2026-style">
+/* Five different visual tiers, with a scrollable five-tab navigation on mobile. */
+.pm-booster.pm-lv4{--booster-a:#c79c48;--booster-b:#382411;filter:drop-shadow(0 9px 16px #a9782129)}
+.pm-pack-card:has(.pm-lv4) .pm-pack-level{color:#f3d797;border-color:#be9b6080;background:#251c13e8}
+#pm-shop-tabs{scroll-snap-type:x proximity;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch}
+#pm-shop-tabs button{scroll-snap-align:center}
+#pm-shop-tabs button:last-child{border-color:#b9935f88!important}
+@media(max-width:700px){#pm-shop-tabs button{min-width:115px!important}}
+</style>
+</head><body class="dos">
 <header id="pm-header">
   <div class="pm-header-inner">
     <div class="pm-header-brand">
@@ -617,24 +627,24 @@ const pmLegacyPrice=id=>Math.ceil(((id==='30th'?45:CONFIG.priceById[id])??(/^(ba
 const PM_ENTRY_SETS=['me05','sv01','sv04','sv05','sv07','sv09'];
 const PM_CURATED_LEVELS={
  // NV1 : six séries d'entrée (Nuit Noire à la une incluse)
- 'swsh3':1,'swsh9':0,'swsh11':0,'sv01':0,'sv02':0,'sv03':0,
+ 'swsh3':1,'swsh9':1,'swsh11':4,'sv01':0,'sv02':1,'sv03':1,
  // NV2 : accessibles mais davantage recherchées
- 'bw1':1,'bw2':1,'bw3':1,'bw4':1,'bw5':1,'bw7':1,
+ 'bw1':2,'bw2':1,'bw3':1,'bw4':1,'bw5':2,'bw7':1,
  'xy1':1,'xy2':1,'xy3':1,'xy4':1,'xy5':1,'xy6':1,
  'sm1':1,'sm2':1,'sm3':1,'sm4':1,'sm5':1,'sm6':1,'sm7':1,'sm8':1,'sm9':1,'sm10':1,
  'swsh1':1,'swsh2':1,'swsh4':1,'swsh5':1,'swsh6':1,
- 'sv04':1,'sv05':1,'sv06':1,'sv07':1,'sv08':1,'sv09':1,'sv10':1,
- 'dp1':1,'dp2':1,'dp4':1,'dp5':1,'dp6':1,'dp7':1,
+ 'sv04':0,'sv05':0,'sv06':3,'sv07':0,'sv08':3,'sv09':0,'sv10':3,
+ 'dp1':1,'dp2':1,'dp4':1,'dp5':2,'dp6':2,'dp7':2,
  // NV3 : ancienneté ou cote intermédiaire élevée
- 'bw6':2,'bw10':2,'bw11':2,'xy7':2,'xy8':2,'xy9':2,'xy10':2,'xy11':2,
- 'sm10.5':2,'sm12':2,'swsh4.5':2,'swsh8':2,'swsh10.5':2,'swsh12':2,
- 'pl1':2,'pl2':2,'pl3':2,'pl4':2,'hgss1':2,'hgss2':2,'hgss3':2,'hgss4':2,
- 'sv10.5b':2,'sv10.5w':2,'sv03.5':2,'sv04.5':2,
- // NV4 : séries iconiques et extensions à forte chasse
- 'base1':3,'base2':3,'base3':3,'base5':3,'neo1':3,
- 'bw8':3,'bw9':3,'xy12':3,'sm3.5':3,'sm11':3,'sm11.5':3,
- 'swsh7':3,'swsh10':3,'swsh12.5':3,'sv08.5':3,
- 'ex1':3,'ex2':3,'ex3':3,'ex5':3,'ex6':3,'ex7':3,'ex8':3,'ex9':3,'ex12':3,'ex14':3,'ex15':3,'ex16':3,
+ 'bw6':2,'bw10':2,'bw11':3,'xy7':2,'xy8':2,'xy9':2,'xy10':2,'xy11':2,
+ 'sm10.5':2,'sm12':3,'swsh4.5':1,'swsh8':3,'swsh10.5':2,'swsh12':2,
+ 'pl1':2,'pl2':2,'pl3':3,'pl4':2,'hgss1':2,'hgss2':2,'hgss3':3,'hgss4':2,
+ 'sv10.5b':2,'sv10.5w':2,'sv03.5':4,'sv04.5':2,
+ // NV4/NV5 : séries prestigieuses / légendaires selon PM_MARKET_DATA
+ 'base1':4,'base2':3,'base3':3,'base5':4,'neo1':4,
+ 'bw8':4,'bw9':3,'xy12':3,'sm3.5':3,'sm11':3,'sm11.5':4,
+ 'swsh7':4,'swsh10':3,'swsh12.5':3,'sv08.5':4,
+ 'ex1':3,'ex2':3,'ex3':3,'ex5':3,'ex6':3,'ex7':4,'ex8':4,'ex9':3,'ex12':3,'ex14':4,'ex15':4,'ex16':3,
  'me05':0
 };
 const pmBaseLevel=id=>{
@@ -651,35 +661,35 @@ const pmBaseLevel=id=>{
 /* Audit du 21/10/2026 : niveaux fixes, prix individuels et motifs éditoriaux.
    Les PokéCoins sont fictifs : aucun prix affiché ne prétend être une cote en euros. */
 const PM_MARKET_DATA={
-  "base1":{level:3,price:1450,demand:5,chase:5,note:"Set fondateur ; Dracaufeu holographique iconique"},
+  "base1":{level:4,price:1690,demand:5,chase:5,note:"Set fondateur ; Dracaufeu holographique iconique"},
   "base2":{level:3,price:840,demand:4,chase:4,note:"Jungle : premières holographiques de collection"},
   "base3":{level:3,price:870,demand:4,chase:4,note:"Fossile : Pokémon cultes et ancienneté"},
-  "base5":{level:3,price:1200,demand:5,chase:5,note:"Team Rocket historique et cartes Dark"},
-  "neo1":{level:3,price:1060,demand:5,chase:5,note:"Neo Genesis : Lugia et début de Johto"},
+  "base5":{level:4,price:1290,demand:5,chase:5,note:"Team Rocket historique et cartes Dark"},
+  "neo1":{level:4,price:1190,demand:5,chase:5,note:"Neo Genesis : Lugia et début de Johto"},
   "xy12":{level:3,price:760,demand:5,chase:4,note:"Évolutions XY : nostalgie du Set de Base"},
   "sm3.5":{level:3,price:940,demand:5,chase:5,note:"Légendes Brillantes : Shining emblématiques"},
-  "sm11.5":{level:3,price:1280,demand:5,chase:5,note:"Destinées Occultes : Shiny Charizard GX"},
+  "sm11.5":{level:4,price:1390,demand:5,chase:5,note:"Destinées Occultes : Shiny Charizard GX"},
   "sm12":{level:3,price:860,demand:5,chase:5,note:"Éclipse Cosmique : cartes illustrées recherchées"},
   "swsh3":{level:1,price:150,demand:2,chase:2,note:"Ténèbres Embrasées : découverte moderne"},
   "swsh4.5":{level:1,price:390,demand:4,chase:3,note:"Destinées Radieuses : nombreuses Shiny"},
-  "swsh7":{level:3,price:1390,demand:5,chase:5,note:"Évolution Céleste : Noctali VMAX alternative"},
+  "swsh7":{level:4,price:1590,demand:5,chase:5,note:"Évolution Céleste : Noctali VMAX alternative"},
   "swsh8":{level:3,price:830,demand:5,chase:5,note:"Poing de Fusion : Ectoplasma VMAX et Mew"},
   "swsh9":{level:1,price:435,demand:4,chase:4,note:"Stars Étincelantes : Dracaufeu alternative"},
-  "swsh10.5":{level:1,price:520,demand:4,chase:4,note:"Pokémon GO : collection spéciale"},
-  "swsh11":{level:3,price:875,demand:5,chase:5,note:"Origine Perdue : Giratina V alternative"},
+  "swsh10.5":{level:2,price:520,demand:4,chase:4,note:"Pokémon GO : collection spéciale"},
+  "swsh11":{level:4,price:990,demand:5,chase:5,note:"Origine Perdue : Giratina V alternative"},
   "swsh12":{level:2,price:485,demand:4,chase:4,note:"Tempête Argentée : Lugia V alternative"},
   "swsh12.5":{level:3,price:810,demand:5,chase:5,note:"Zénith Suprême : galerie de Galar et Gold"},
   "sv01":{level:0,price:160,demand:2,chase:2,note:"Écarlate et Violet : base de génération"},
   "sv02":{level:1,price:415,demand:4,chase:4,note:"Évolutions à Paldea : Magicarpe AR recherché"},
   "sv03":{level:1,price:260,demand:3,chase:3,note:"Flammes Obsidiennes : Dracaufeu ex"},
-  "sv03.5":{level:3,price:1010,demand:5,chase:5,note:"151 : forte nostalgie et Dracaufeu SAR"},
+  "sv03.5":{level:4,price:1130,demand:5,chase:5,note:"151 : forte nostalgie et Dracaufeu SAR"},
   "sv04":{level:0,price:155,demand:2,chase:2,note:"Faille Paradoxe : accessible avec plusieurs illustrations"},
   "sv04.5":{level:2,price:480,demand:4,chase:4,note:"Destinées de Paldea : Shiny et Dracaufeu"},
   "sv05":{level:0,price:170,demand:2,chase:2,note:"Forces Temporelles : extension accessible"},
   "sv06":{level:3,price:900,demand:5,chase:5,note:"Mascarade Crépusculaire : Amphinobi SAR"},
   "sv07":{level:0,price:175,demand:2,chase:2,note:"Couronne Stellaire : collection d’entrée"},
-  "sv08":{level:2,price:550,demand:4,chase:5,note:"Étincelles Déferlantes : Pikachu ex SAR"},
-  "sv08.5":{level:3,price:1320,demand:5,chase:5,note:"Évolutions Prismatiques : Noctali ex SAR"},
+  "sv08":{level:3,price:680,demand:4,chase:5,note:"Étincelles Déferlantes : Pikachu ex SAR"},
+  "sv08.5":{level:4,price:1490,demand:5,chase:5,note:"Évolutions Prismatiques : Noctali ex SAR"},
   "sv09":{level:0,price:180,demand:2,chase:2,note:"Aventures Ensemble : découverte récente"},
   "sv10":{level:3,price:790,demand:5,chase:4,note:"Rivalités Destinées : Team Rocket et Dracaufeu"},
   "sv10.5b":{level:2,price:495,demand:4,chase:4,note:"Foudre Noire : cartes d’Unys recherchées"},
@@ -694,35 +704,35 @@ const PM_MARKET_DATA={
   "bw5":{level:2,price:510,demand:4,chase:4,note:"Explorateurs Obscurs : Dracaufeu et EX"},
   "bw6":{level:2,price:590,demand:4,chase:4,note:"Dragons Exaltés : dragons et secrets"},
   "bw7":{level:1,price:440,demand:3,chase:3,note:"Frontières Franchies : EX et illustration vintage"},
-  "bw8":{level:3,price:1090,demand:5,chase:5,note:"Tempête Plasma : Dracaufeu secrète"},
+  "bw8":{level:4,price:1190,demand:5,chase:5,note:"Tempête Plasma : Dracaufeu secrète"},
   "bw9":{level:3,price:890,demand:5,chase:4,note:"Glaciation Plasma : grandes cartes secrètes"},
   "bw10":{level:2,price:570,demand:4,chase:4,note:"Explosion Plasma : Full Art Plasma"},
   "bw11":{level:3,price:810,demand:5,chase:4,note:"Trésors Légendaires : collection Radieuse"},
   "hgss1":{level:2,price:610,demand:4,chase:4,note:"HeartGold SoulSilver : LEGEND"},
   "hgss2":{level:2,price:600,demand:4,chase:4,note:"Déchaînement : Pokémon LEGEND"},
-  "hgss3":{level:2,price:620,demand:4,chase:4,note:"Indomptable : cartes LEGEND"},
+  "hgss3":{level:3,price:700,demand:4,chase:4,note:"Indomptable : cartes LEGEND"},
   "hgss4":{level:2,price:650,demand:4,chase:4,note:"Triomphe : cartes LEGEND et primes"},
   "pl1":{level:2,price:670,demand:4,chase:4,note:"Platine : Pokémon Niv. X"},
   "pl2":{level:2,price:720,demand:4,chase:4,note:"Rivaux Émergents : Pokémon Niv. X"},
-  "pl3":{level:2,price:735,demand:4,chase:4,note:"Vainqueurs Suprêmes : Dracaufeu Niv. X"},
+  "pl3":{level:3,price:780,demand:4,chase:4,note:"Vainqueurs Suprêmes : Dracaufeu Niv. X"},
   "pl4":{level:2,price:760,demand:4,chase:4,note:"Arceus : collection particulière"},
   "dp1":{level:1,price:480,demand:3,chase:3,note:"Diamant & Perle : anciens Niv. X"},
   "dp2":{level:1,price:450,demand:3,chase:3,note:"Trésors Mystérieux : début DP"},
   "dp4":{level:1,price:490,demand:3,chase:3,note:"Duels au Sommet : DP rétro"},
-  "dp5":{level:1,price:515,demand:3,chase:3,note:"Aube Majestueuse : Eeveelutions et Niv. X"},
-  "dp6":{level:1,price:545,demand:4,chase:3,note:"Éveil des Légendes : Niv. X"},
+  "dp5":{level:2,price:515,demand:3,chase:3,note:"Aube Majestueuse : Eeveelutions et Niv. X"},
+  "dp6":{level:2,price:545,demand:4,chase:3,note:"Éveil des Légendes : Niv. X"},
   "dp7":{level:2,price:580,demand:4,chase:3,note:"Tempête : collection DP vintage"},
   "ex1":{level:3,price:900,demand:4,chase:4,note:"Rubis & Saphir : premières ex"},
   "ex2":{level:3,price:850,demand:4,chase:4,note:"Tempête de Sable : ex vintage"},
   "ex3":{level:3,price:920,demand:4,chase:4,note:"Dragon : ex et types Dragon"},
   "ex5":{level:3,price:920,demand:4,chase:4,note:"Légendes Oubliées : ex du milieu des années 2000"},
   "ex6":{level:3,price:1100,demand:5,chase:4,note:"Rouge Feu & Vert Feuille : starters ex"},
-  "ex7":{level:3,price:1530,demand:5,chase:5,note:"Team Rocket Returns : Gold Stars et Team Rocket"},
-  "ex8":{level:3,price:1190,demand:5,chase:5,note:"Deoxys : Gold Stars et Pokémon ex"},
+  "ex7":{level:4,price:1790,demand:5,chase:5,note:"Team Rocket Returns : Gold Stars et Team Rocket"},
+  "ex8":{level:4,price:1390,demand:5,chase:5,note:"Deoxys : Gold Stars et Pokémon ex"},
   "ex9":{level:3,price:850,demand:4,chase:4,note:"Émeraude : cartes ex anciennes"},
   "ex12":{level:3,price:1020,demand:4,chase:4,note:"Créateurs de Légendes : Gold Star"},
-  "ex14":{level:3,price:1130,demand:5,chase:5,note:"Gardiens de Cristal : Gold Stars"},
-  "ex15":{level:3,price:1370,demand:5,chase:5,note:"Île des Dragons : Gold Stars et Delta"},
+  "ex14":{level:4,price:1290,demand:5,chase:5,note:"Gardiens de Cristal : Gold Stars"},
+  "ex15":{level:4,price:1540,demand:5,chase:5,note:"Île des Dragons : Gold Stars et Delta"},
   "ex16":{level:3,price:880,demand:4,chase:4,note:"Gardiens du Pouvoir : ex vintage"},
 };
 const pmMarketInfo=(id)=>{
@@ -924,14 +934,36 @@ for(const [id,m] of Object.entries(S.meta)){if(m?.s==='30th'&&m.i?.startsWith('d
 const PM30_SET={id:'30th',name:'30ᵉ Anniversaire',cardCount:{total:191},releaseDate:'2026-09-16'};
 const BASE={id:'ALL',name:'Booster gratuit · Série à la une'},BASE_30_SET='30th',RAND=25;
 function refresh(){if(vw!='home'&&vw!='shop')return;const r=$('.rail'),x=r?r.scrollLeft:0;show(vw);const r2=$('.rail');if(r2)r2.scrollLeft=x}
-const LEVELS=[{name:'Niveau 1 · Découverte',need:0},{name:'Niveau 2 · Confirmé',need:2},{name:'Niveau 3 · Expert',need:4},{name:'Niveau 4 · Légendaire',need:5}];
+const LEVELS=[
+ {name:'Niveau 1 · Découverte',need:0,missions:0},
+ {name:'Niveau 2 · Confirmé',need:2,missions:Infinity},
+ {name:'Niveau 3 · Expert',need:4,missions:Infinity},
+ {name:'Niveau 4 · Prestige',need:6,missions:Infinity},
+ {name:'Niveau 5 · Légendaire',need:7,missions:Infinity}
+];
 function levelOf(s){return pmBaseLevel(s.id)}
 function pmOwnedCount(setId){
  const raw=Object.keys(S.owned||{}).filter(id=>S.owned[id]>0&&id.startsWith(setId+'-')).length;
  return setId==='30th'&&Object.keys(S.owned||{}).some(id=>S.owned[id]>0&&/^30th-[RGB]-RGB$/i.test(id))?raw+2:raw;
 }
 function completedMasters(){return SETS.filter(s=>{const n=s.cardCount?.total||0;return n>0&&pmOwnedCount(s.id)>=n}).length}
-function unlockedLevel(){const n=completedMasters();return n>=5?3:n>=4?2:n>=2?1:0}
+function pmCompletedSetMissions(){
+ // Only rewards actually claimed for a set are counted, never currency or notifications.
+ return Object.entries(S.cl||{}).filter(([id,claim])=>id.startsWith('set:')&&Boolean(claim)).length;
+}
+function pmLevelUnlocked(index){
+ const p=LEVELS[index];
+ return !!p&&completedMasters()>=p.need;
+}
+function pmLevelUnlockText(index){
+ const p=LEVELS[index];if(!p)return '';
+ if(index===0)return 'Accessible dès le départ';
+ return `${completedMasters()}/${p.need} Master Sets terminés`;
+}
+function unlockedLevel(){
+ for(let i=LEVELS.length-1;i>=0;i--)if(pmLevelUnlocked(i))return i;
+ return 0;
+}
 function locked(s){return s.id!=='ALL'&&levelOf(s)>unlockedLevel()}
 function packVisual(s){
  if(s.id==='ALL')return packVisual(SETS.find(x=>x.id===window.PM_FEATURED_ID)||{id:'me05',name:'Série à la une'});
@@ -980,18 +1012,18 @@ function pm30ChaseCard(id){return [...PM30_USER_CARDS,...pm30RGB(),...PM30_CLASS
 function pm30ImageUrl(c){if(!c)return '';const img=c.image||c.i||'';if(img.startsWith('data:')||img.startsWith('https://')||img.startsWith('http://'))return img;return img?img+'/high.webp':''}
 function chaseSection(){const ids=Object.keys(S.chase||{});return `<section class="chase-panel"><h2>Mes chase cards <small>(${ids.length})</small></h2><p>Les cartes que tu recherches en priorité. Ajoute-les depuis « Voir toutes les cartes ».</p><div class="chase-grid">${ids.length?ids.map(id=>{const m=S.meta[id],c=pm30ChaseCard(id)||Object.values(cache).flatMap(d=>d.cards||[]).find(x=>x.id===id);const img=pm30ImageUrl(c)||pm30ImageUrl({image:m?.i});return `<div class="chase-item">${img?`<img loading="lazy" src="${img}" alt="${esc(c?.name||m?.n||id)}" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">`:''}<span class="chase-fallback" style="display:${img?'none':'block'}">Image indisponible</span><small>${esc(c?.name||m?.n||id)}</small><button class="g" data-chase="${id}" onclick="chaseToggle('${id}')">Retirer</button></div>`}).join(''):'<p>Aucune chase card sélectionnée.</p>'}</div></section>`}
 
-function setCard(s){const id=s.id,st=S.stock[id]||0,lk=locked(s),lv=levelOf(s),need=LEVELS[lv].need;return `<article class="set simple-set ky-set ${lk?'locked-pack':''}"><div class="booster-choice" role="button" tabindex="0" onclick="selectPack('${id}')" onkeydown="if(event.key==='Enter')this.click()"><span class="pack-edition">${s.id==='ALL'?'BASE':`NIVEAU ${lv+1}`}</span>${packVisual(s)}${featuredThree(s)}<strong>${esc(s.name)}</strong></div><h3>${esc(s.name)}</h3><div class="pack-meta">${price(id)} PC · ${st} en stock${id===BASE_30_SET?` · ${Math.max(0,left(id))}/10 achats restants`:''}</div>${lk?`<div class="lock-explain">Débloqué après ${need} Master Set${need>1?'s':''} (${completedMasters()}/${need})</div>`:''}<button class="g" onclick="${id==='ALL'?'drops(window.PM_FEATURED_ID)':`drops('${id}')`}">Voir les cartes</button>${lk?'<button disabled>Verrouillé</button>':`<button onclick="${st?`openBooster('${id}')`:`buy('${id}',1)`}">${st?'Ouvrir':'Acheter'}</button>`}</article>`}
+function setCard(s){const id=s.id,st=S.stock[id]||0,lk=locked(s),lv=levelOf(s),need=LEVELS[lv].need;return `<article class="set simple-set ky-set ${lk?'locked-pack':''}"><div class="booster-choice" role="button" tabindex="0" onclick="selectPack('${id}')" onkeydown="if(event.key==='Enter')this.click()"><span class="pack-edition">${s.id==='ALL'?'BASE':`NIVEAU ${lv+1}`}</span>${packVisual(s)}${featuredThree(s)}<strong>${esc(s.name)}</strong></div><h3>${esc(s.name)}</h3><div class="pack-meta">${price(id)} PC · ${st} en stock</div>${lk?`<div class="lock-explain">Débloqué avec ${pmLevelUnlockText(lv)}</div>`:''}<button class="g" onclick="${id==='ALL'?'drops(window.PM_FEATURED_ID)':`drops('${id}')`}">Voir les cartes</button>${lk?'<button disabled>Verrouillé</button>':`<button onclick="${st?`openBooster('${id}')`:`buy('${id}',1)`}">${st?'Ouvrir':'Acheter'}</button>`}</article>`}
 const qtyBuy={},qtyOpen={};
 function qtyControl(id,mode){const st=S.stock[id]||0,max=mode==='buy'?Math.min(99,Math.max(0,left(id))):Math.min(100,st),defaultQty=mode==='buy'?1:Math.min(st,1);const obj=mode==='buy'?qtyBuy:qtyOpen;const n=Math.max(1,Math.min(max||1,obj[id]||defaultQty));obj[id]=n;return `<div class="qty-line"><button class="g" onclick="adjustQty('${id}','${mode}',-1)">−</button><strong id="qty-${mode}-${id}">${n}</strong><button class="g" onclick="adjustQty('${id}','${mode}',1)">+</button><button onclick="${mode==='buy'?`buy('${id}',qtyBuy['${id}'])`:`openMany('${id}',qtyOpen['${id}'])`}" ${max<1?'disabled':''}>${mode==='buy'?'Acheter':'Ouvrir'} × <span id="qty-btn-${mode}-${id}">${n}</span></button></div>`}
 function adjustQty(id,mode,delta){const o=mode==='buy'?qtyBuy:qtyOpen,max=mode==='buy'?Math.min(99,Math.max(0,left(id))):Math.min(100,(S.stock[id]||0));o[id]=Math.max(1,Math.min(max||1,(o[id]||1)+delta));const a=document.getElementById(`qty-${mode}-${id}`),b=document.getElementById(`qty-btn-${mode}-${id}`);if(a)a.textContent=o[id];if(b)b.textContent=o[id]}
-function packShowcase(s){const id=s.id,st=S.stock[id]||0,lv=levelOf(s),lk=locked(s),need=LEVELS[lv].need;return `<section class="ky-showcase"><div class="ky-kicker">EXTENSION SÉLECTIONNÉE · NIVEAU ${lv+1}</div><h2>${esc(s.name)}</h2><p>${lk?`Termine ${need} Master Set${need>1?'s':''} pour débloquer cette extension. Progression : ${completedMasters()}/${need}.`:'Choisis ton booster, découvre les cartes possibles et ouvre tes paquets.'}</p>${id===BASE_30_SET?`<p class="note"><b>Stock boutique limité : ${Math.max(0,left(id))}/10 booster(s) encore achetables aujourd’hui.</b> Réinitialisation chaque jour. Les boosters gratuits restent séparés.</p>`:''}<div class="ky-stats"><div><b>${s.cardCount?.total||'—'}</b><small>cartes du set</small></div><div><b>${price(id)} PC</b><small>prix du booster</small></div><div><b>${st}</b><small>en stock</small></div><div><b>${lk?'Verrouillé':'Disponible'}</b><small>niveau ${lv+1}</small></div></div><div class="ky-actions"><button class="g" onclick="drops('${id}')">Voir toutes les cartes</button>${lk?'<button disabled>Extension verrouillée</button>':`<button onclick="${st?`openBooster('${id}')`:`buy('${id}',1)`}">${st?'Ouvrir le booster':'Acheter un booster'}</button>`}</div>${!lk?`<div class="ky-extra"><small>Quantité à acheter</small>${qtyControl(id,'buy')}<small>Quantité à ouvrir</small>${qtyControl(id,'open')}</div>`:''}</section>`}
+function packShowcase(s){const id=s.id,st=S.stock[id]||0,lv=levelOf(s),lk=locked(s),need=LEVELS[lv].need;return `<section class="ky-showcase"><div class="ky-kicker">EXTENSION SÉLECTIONNÉE · NIVEAU ${lv+1}</div><h2>${esc(s.name)}</h2><p>${lk?`Débloque ce niveau : ${pmLevelUnlockText(lv)}.`:'Choisis ton booster, découvre les cartes possibles et ouvre tes paquets.'}</p><div class="ky-stats"><div><b>${s.cardCount?.total||'—'}</b><small>cartes du set</small></div><div><b>${price(id)} PC</b><small>prix du booster</small></div><div><b>${st}</b><small>en stock</small></div><div><b>${lk?'Verrouillé':'Disponible'}</b><small>niveau ${lv+1}</small></div></div><div class="ky-actions"><button class="g" onclick="drops('${id}')">Voir toutes les cartes</button>${lk?'<button disabled>Extension verrouillée</button>':`<button onclick="${st?`openBooster('${id}')`:`buy('${id}',1)`}">${st?'Ouvrir le booster':'Acheter un booster'}</button>`}</div>${!lk?`<div class="ky-extra"><small>Quantité à acheter</small>${qtyControl(id,'buy')}<small>Quantité à ouvrir</small>${qtyControl(id,'open')}</div>`:''}</section>`}
 let selectedPack=0;
 function selectPack(id){const idx=showcaseSets.findIndex(s=>s.id===id);if(idx<0)return;selectedPack=idx;renderShowcase()}
 let showcaseSets=[];
 function renderShowcase(){const rail=$('#ky-carousel'),details=$('#ky-selected');if(!rail||!details||!showcaseSets.length)return;rail.innerHTML=showcaseSets.map((s,i)=>`<button class="ky-slide ${i===selectedPack?'active':''}" onclick="selectPack('${s.id}')" aria-label="Sélectionner ${esc(s.name)}"><span class="ky-pack"><span class="ky-crimp"></span><span class="ky-pack-head">POKÉMON TCG</span>${packVisual(s)}${featuredThree(s)}<span class="ky-pack-name">${esc(s.name)}</span><span class="ky-pack-bottom">${locked(s)?'VERROUILLÉ':`${price(s.id)} PC`}</span></span></button>`).join('');details.innerHTML=packShowcase(showcaseSets[selectedPack]);rail.children[selectedPack]?.scrollIntoView({behavior:'smooth',inline:'center',block:'nearest'});$('#ky-prev').disabled=selectedPack===0;$('#ky-next').disabled=selectedPack===showcaseSets.length-1;$('#ky-position').textContent=`${selectedPack+1} / ${showcaseSets.length}`;hydrateFeatured()}
 function movePack(delta){selectedPack=Math.max(0,Math.min(showcaseSets.length-1,selectedPack+delta));renderShowcase()}
 function kyGallery(items){showcaseSets=items;selectedPack=Math.min(selectedPack,Math.max(0,items.length-1));return `<div class="ky-gallery"><div class="ky-gallery-head"><h2>Choisir un booster</h2><span id="ky-position"></span></div><div class="ky-carousel-row"><button class="ky-arrow" id="ky-prev" onclick="movePack(-1)" aria-label="Booster précédent">‹</button><div id="ky-carousel" class="ky-carousel"></div><button class="ky-arrow" id="ky-next" onclick="movePack(1)" aria-label="Booster suivant">›</button></div><div id="ky-selected"></div></div>`}
-function levelShow(items){return LEVELS.map((l,i)=>{const arr=items.filter(s=>levelOf(s)===i);return arr.length?`<section class="level-section"><div class="level-heading"><h2>${l.name}</h2><span>${i<=unlockedLevel()?'Débloqué':`${completedMasters()}/${l.need} Master Sets`}</span></div><div class="rail">${arr.map(setCard).join('')}</div></section>`:''}).join('')}
+function levelShow(items){return LEVELS.map((l,i)=>{const arr=items.filter(s=>levelOf(s)===i);return arr.length?`<section class="level-section"><div class="level-heading"><h2>${l.name}</h2><span>${i<=unlockedLevel()?'Débloqué':pmLevelUnlockText(i)}</span></div><div class="rail">${arr.map(setCard).join('')}</div></section>`:''}).join('')}
 
 function pm30HeroCard(kind){
  const pool=[...PM30_COMMON_CARDS,...PM30_USER_CARDS,...PM30_CLASSIC_CARDS.map((x,i)=>({name:x.name,image:x.image,id:`30th-c-${i+1}`})),...pm30RGB()];
@@ -1002,7 +1034,7 @@ function pm30HeroCard(kind){
 function pm30HeroImages(){return ['lugia','rgb','mewtwo'].map((kind,i)=>{const c=pm30HeroCard(kind);return c?`<img class="pm30-hero-card pm30-hero-${i}" src="${c.image}" alt="${esc(c.name)}" loading="lazy">`:''}).join('')}
 function pmQuickActions(){return `<section class="pm-quick" aria-label="Raccourcis"><button onclick="show('shop')"><span>✦</span><b>Boosters</b><small>Choisir une extension</small></button><button onclick="show('coll')"><span>▣</span><b>Collection</b><small>Voir mes cartes</small></button><button onclick="show('ach')"><span>★</span><b>Missions</b><small>Récupérer mes PC</small></button></section>`}
 function pmMissionPreview(){const list=ACH().filter(a=>!S.cl[a.id]).slice(0,3);return `<section class="pm-mission-preview"><div class="pm-section-heading"><div><span class="ky-kicker">OBJECTIFS</span><h2>Missions et récompenses</h2></div><button class="g" onclick="show('ach')">Toutes les missions →</button></div><div class="pm-mission-grid">${list.map(a=>`<article><div class="pm-mission-name">${esc(a.n)}</div><div class="pm-mission-progress">${Math.min(a.cur,a.goal)} / ${a.goal} · <b>+${a.rw} PC</b></div><div class="pm-progress"><i style="width:${Math.min(100,a.cur/a.goal*100)}%"></i></div></article>`).join('')}</div></section>`}
-function home(){const vit=[...SETS].filter(x=>!x.pmPending||x.id===window.PM_FEATURED_ID).sort((a,b)=>a.id===window.PM_FEATURED_ID?-1:b.id===window.PM_FEATURED_ID?1:levelOf(a)-levelOf(b)||price(a.id)-price(b.id)).slice(0,22);$('#app').innerHTML=`<section class="ky-welcome"><div class="ky-kicker">POKÉMASTER SET</div><h2>Ouvre. Collectionne. Complète.</h2><p>Un booster gratuit toutes les 10 minutes. Complète des Master Sets pour débloquer de nouvelles extensions.</p></section>${pmQuickActions()}${pmFeaturedBanner()}<section class="ky-free pm30-free-hero"><div class="pm30-free-info"><span class="ky-kicker">BOOSTER GRATUIT</span><h2>Série à la une · ${esc(window.PM_FEATURED_NAME||'Chargement')}</h2><p>Ta réserve se remplit toutes les 10 minutes, jusqu'à 10 boosters.</p><h2 id="free-count">${Math.min(10,S.stock.ALL||0)}/10 boosters</h2><p id="free-timer">Accumulation automatique</p><div class="pm30-free-actions"><button class="g" onclick="freeBoost()">Récupérer un booster</button><button class="g" id="free-open" onclick="openFreeOwned()">Ouvrir un booster</button></div></div><div class="pm30-hero-art"><div class="pm30-hero-pack"><b>POKÉMASTER SET</b><div class="pm30-hero-stack">${featuredMarkup(window.PM_FEATURED_ID||'me05')}</div><span>SÉRIE À LA UNE</span><small>6 CARTES</small></div></div></section><div class="ky-progress"><b>Progression Master Sets</b><span>${completedMasters()} terminé(s) · Niveau ${unlockedLevel()+1}/4</span></div>${kyGallery(vit)}${pmMissionPreview()}${chaseSection()}<section class="ky-bonus"><button class="g" onclick="daily()">Récompense du jour · 1 000 PC</button></section>`;renderShowcase();fbUpdate();hydrateFeatured()}
+function home(){const vit=[...SETS].filter(x=>!x.pmPending||x.id===window.PM_FEATURED_ID).sort((a,b)=>a.id===window.PM_FEATURED_ID?-1:b.id===window.PM_FEATURED_ID?1:levelOf(a)-levelOf(b)||price(a.id)-price(b.id)).slice(0,22);$('#app').innerHTML=`<section class="ky-welcome"><div class="ky-kicker">POKÉMASTER SET</div><h2>Ouvre. Collectionne. Complète.</h2><p>Un booster gratuit toutes les 10 minutes. Complète des Master Sets pour débloquer de nouvelles extensions.</p></section>${pmQuickActions()}${pmFeaturedBanner()}<section class="ky-free pm30-free-hero"><div class="pm30-free-info"><span class="ky-kicker">BOOSTER GRATUIT</span><h2>Série à la une · ${esc(window.PM_FEATURED_NAME||'Chargement')}</h2><p>Ta réserve se remplit toutes les 10 minutes, jusqu'à 10 boosters.</p><h2 id="free-count">${Math.min(10,S.stock.ALL||0)}/10 boosters</h2><p id="free-timer">Accumulation automatique</p><div class="pm30-free-actions"><button class="g" onclick="freeBoost()">Récupérer un booster</button><button class="g" id="free-open" onclick="openFreeOwned()">Ouvrir un booster</button></div></div><div class="pm30-hero-art"><div class="pm30-hero-pack"><b>POKÉMASTER SET</b><div class="pm30-hero-stack">${featuredMarkup(window.PM_FEATURED_ID||'me05')}</div><span>SÉRIE À LA UNE</span><small>6 CARTES</small></div></div></section><div class="ky-progress"><b>Progression Master Sets</b><span>${completedMasters()} terminé(s) · Niveau ${unlockedLevel()+1}/${LEVELS.length}</span></div>${kyGallery(vit)}${pmMissionPreview()}${chaseSection()}<section class="ky-bonus"><button class="g" onclick="daily()">Récompense du jour · 1 000 PC</button></section>`;renderShowcase();fbUpdate();hydrateFeatured()}
 
 function openFreeOwned(){
 if(SETS.find(s=>s.id===window.PM_FEATURED_ID)?.pmPending)return toast('M6 japonais : catalogue indisponible pour le moment. Tes boosters sont conservés.');
@@ -1014,8 +1046,8 @@ function fbUpdate(){const b=$('#fb');if(!b)return;const count=Math.min(10,S.stoc
 function freeBoost(){
 if(Date.now()-S.free<6e5)return;if((S.stock.ALL||0)>=10)return toast('Ta réserve de boosters est pleine (10/10).');S.free=Date.now();S.fn=0;S.stock.ALL=(S.stock.ALL||0)+1;save();toast('Booster de base récupéré !');fbUpdate()}
 function randBoost(){if(S.coins<RAND)return toast(`Il te manque ${RAND-S.coins} PokéCoins.`);const available=SETS.filter(x=>!locked(x));if(!available.length)return toast('Aucune extension débloquée.');const w=available.map(x=>1/price(x.id)),T=w.reduce((a,b)=>a+b,0);let r=Math.random()*T,t=available[0];for(let i=0;i<available.length;i++){r-=w[i];if(r<=0){t=available[i];break}}S.coins-=RAND;S.stock[t.id]=(S.stock[t.id]||0)+1;save();openBooster(t.id)}
-function shop(){$('#app').innerHTML=`<section class="ky-welcome"><div class="ky-kicker">BOUTIQUE</div><h2>Les extensions</h2><p>Série à la une : ${esc(window.PM_FEATURED_NAME||'sélection automatique')}. 4 niveaux de valeur. Termine des Master Sets pour débloquer les niveaux suivants.</p></section><div class="bar"><input type="text" placeholder="Rechercher une extension…" oninput="shopList(this.value)"></div><div id="grid"></div>`;shopList('')}
-function shopList(q){q=(q||'').toLowerCase();const g=$('#grid');if(!g)return;const items=SETS.filter(x=>!x.pmPending||x.id===window.PM_FEATURED_ID).filter(x=>x.name.toLowerCase().includes(q)||x.id.toLowerCase().includes(q)).sort((a,b)=>(a.id===window.PM_FEATURED_ID?-1:b.id===window.PM_FEATURED_ID?1:0));g.innerHTML=items.length?`${kyGallery(items)}<h2 class="ky-section-title">Toutes les extensions · 4 niveaux</h2>${levelShow(items)}`:'<p class="note">Aucune extension.</p>';if(items.length){renderShowcase();hydrateFeatured()}}
+function shop(){$('#app').innerHTML=`<section class="ky-welcome"><div class="ky-kicker">BOUTIQUE</div><h2>Les extensions</h2><p>Série à la une : ${esc(window.PM_FEATURED_NAME||'sélection automatique')}. 5 niveaux de valeur. Termine des Master Sets pour débloquer les niveaux suivants.</p></section><div class="bar"><input type="text" placeholder="Rechercher une extension…" oninput="shopList(this.value)"></div><div id="grid"></div>`;shopList('')}
+function shopList(q){q=(q||'').toLowerCase();const g=$('#grid');if(!g)return;const items=SETS.filter(x=>!x.pmPending||x.id===window.PM_FEATURED_ID).filter(x=>x.name.toLowerCase().includes(q)||x.id.toLowerCase().includes(q)).sort((a,b)=>(a.id===window.PM_FEATURED_ID?-1:b.id===window.PM_FEATURED_ID?1:0));g.innerHTML=items.length?`${kyGallery(items)}<h2 class="ky-section-title">Toutes les extensions · 5 niveaux</h2>${levelShow(items)}`:'<p class="note">Aucune extension.</p>';if(items.length){renderShowcase();hydrateFeatured()}}
 async function poolFor(id,p,k=3){
  if(id==='ALL'){const featured=window.PM_FEATURED_ID;if(!featured)throw Error('Aucune série à la une disponible');const d=await loadSet(featured);return {s:{...d.s,id:featured},cards:d.cards};}
  if(id!=='ALL')return loadSet(id,p);
@@ -1028,7 +1060,7 @@ async function poolFor(id,p,k=3){
 let batchState=null;
 async function openMany(id,n){
  n=Math.max(1,Math.floor(Number(n)||1));if(n===1){batchState=null;return openBooster(id)}
- if(locked(SETS.find(s=>s.id===id)||BASE))return toast('Extension verrouillée.');
+ if(locked(SETS.find(s=>s.id===id)||BASE)&&!(S.stock[id]||0))return toast('Extension verrouillée.');
  if((S.stock[id]||0)<n)return toast(`Il te faut ${n} boosters en stock.`);
  const st=$('#stage');st.className='';st.innerHTML=loader;
  try{const d=await poolFor(id,prog,n>5?5:3);batchState={id,total:n,done:0,results:[],pool:d,skip:false};cur=d;packView();batchStatus()}catch(e){batchState=null;st.className='hidden';toast('Chargement des cartes impossible. Réessaie.')}
@@ -1059,12 +1091,12 @@ async function gsearch(q){q=q.trim();if(!q)return;vw='search';['home','shop','co
 /* ===== BOOSTER ===== */
 let cur=null,rv=null;
 const boxPrice=(id,n)=>Number.isInteger(n)&&n>=1&&n<=99?Math.round(price(id)*n):NaN;
-const limitOf=id=>{if(id===BASE_30_SET||id==='ALL')return 15;const p=price(id);return p>=400?2:p>=200?3:p>=90?5:Infinity};
+const limitOf=id=>Infinity; // Achats illimités sur les cinq niveaux actuels
 function sold(id){const d=new Date().toDateString();if(!S.day||S.day.d!=d)S.day={d,b:{}};return S.day.b[id]||0}
 const left=id=>limitOf(id)-sold(id);
 function buy(id,n){if(locked(SETS.find(s=>s.id===id)||BASE))return toast('Extension verrouillée : termine des Master Sets.');const p=boxPrice(id,n);if(!Number.isFinite(p)||p<=0)return toast('Quantité ou prix invalide.');if(!Number.isFinite(S.coins)||S.coins<0)return toast('Solde invalide : recharge ton profil.');if(n>left(id))return toast(`Stock limité : il reste ${left(id)} booster(s) aujourd’hui pour cette extension.`);if(S.coins<p)return toast(`Il te manque ${p-S.coins} PokéCoins.`);S.coins-=p;S.day.b[id]=sold(id)+n;S.stock[id]=(S.stock[id]||0)+n;save();refresh();toast(`+${n} booster(s) ajouté(s) à ton stock`)}
 async function openBooster(id){
- if(locked(SETS.find(s=>s.id===id)||BASE))return toast('Extension verrouillée : termine des Master Sets.');
+ if(locked(SETS.find(s=>s.id===id)||BASE)&&!(S.stock[id]||0))return toast('Extension verrouillée : tu peux ouvrir les boosters déjà achetés.');
  if(!S.stock[id])return toast('Aucun booster en stock : achète un booster, un ETB ou un display.');
  const st=$('#stage');st.className='';st.innerHTML=loader;
  try{cur=await poolFor(id,prog)}catch(e){st.className='hidden';return toast('Connexion impossible : réessaie dans un instant.')}
@@ -2063,7 +2095,7 @@ flipIt=function(){if(!rv||rv.busy)return;if(rv.cinemaPending){pmCinemaComplete()
   const prevPackShowcase=packShowcase;
   packShowcase=function(s){
     const id=s.id,st=S.stock[id]||0,lv=levelOf(s),lk=locked(s),need=LEVELS[lv].need,pity=pmPityMarkup(id);
-    return `<section class="ky-showcase"><div class="ky-kicker">EXTENSION SÉLECTIONNÉE · NIVEAU ${lv+1}</div><h2>${esc(s.name)}</h2><p>${lk?`Termine ${need} Master Set${need>1?'s':''} pour débloquer cette extension. Progression : ${completedMasters()}/${need}.`:'Choisis ton booster, découvre les cartes possibles et ouvre tes paquets.'}</p>${id===BASE_30_SET?`<p class="note"><b>Stock boutique limité : ${Math.max(0,left(id))}/10 booster(s) encore achetables aujourd’hui.</b> Réinitialisation chaque jour. Les boosters gratuits restent séparés.</p>`:''}<div class="ky-stats"><div><b>${s.cardCount?.total||'—'}</b><small>cartes du set</small></div><div><b>${price(id)} PC</b><small>prix du booster</small></div><div><b>${st}</b><small>en stock</small></div><div><b>${lk?'Verrouillé':'Disponible'}</b><small>niveau ${lv+1}</small></div></div>${!lk?pity:''}<div class="ky-actions"><button class="g" onclick="drops('${id}')">Voir toutes les cartes</button>${lk?'<button disabled>Extension verrouillée</button>':`<button onclick="${st?`openBooster('${id}')`:`buy('${id}',1)`}">${st?'Ouvrir le booster':'Acheter un booster'}</button>`}</div>${!lk?`<div class="ky-extra"><small>Quantité à acheter</small>${qtyControl(id,'buy')}<small>Quantité à ouvrir</small>${qtyControl(id,'open')}</div>`:''}</section>`;
+    return `<section class="ky-showcase"><div class="ky-kicker">EXTENSION SÉLECTIONNÉE · NIVEAU ${lv+1}</div><h2>${esc(s.name)}</h2><p>${lk?`Débloque ce niveau : ${pmLevelUnlockText(lv)}.`:'Choisis ton booster, découvre les cartes possibles et ouvre tes paquets.'}</p><div class="ky-stats"><div><b>${s.cardCount?.total||'—'}</b><small>cartes du set</small></div><div><b>${price(id)} PC</b><small>prix du booster</small></div><div><b>${st}</b><small>en stock</small></div><div><b>${lk?'Verrouillé':'Disponible'}</b><small>niveau ${lv+1}</small></div></div>${!lk?pity:''}<div class="ky-actions"><button class="g" onclick="drops('${id}')">Voir toutes les cartes</button>${lk?'<button disabled>Extension verrouillée</button>':`<button onclick="${st?`openBooster('${id}')`:`buy('${id}',1)`}">${st?'Ouvrir le booster':'Acheter un booster'}</button>`}</div>${!lk?`<div class="ky-extra"><small>Quantité à acheter</small>${qtyControl(id,'buy')}<small>Quantité à ouvrir</small>${qtyControl(id,'open')}</div>`:''}</section>`;
   };
   renderShowcase=function(){
     const rail=$('#ky-carousel'),details=$('#ky-selected');if(!rail||!details||!showcaseSets.length)return;
@@ -3028,10 +3060,10 @@ function pmOwnedUnique(){return Object.entries(S.owned||{}).filter(([id,n])=>n>0
 function pmHomeActions(){return `<div class="pm-home-actions"><button class="pm-home-action" onclick="pmNavigate('shop')"><span>▣</span><div><strong>Ouvrir</strong><small>Choisir un booster</small></div></button><button class="pm-home-action" onclick="pmNavigate('coll')"><span>▦</span><div><strong>Mes albums</strong><small>Compléter mes séries</small></div></button><button class="pm-home-action" onclick="pmNavigate('ach')"><span>✦</span><div><strong>Missions</strong><small>Gagner des PokéCoins</small></div></button></div>`}
 function pmPackCard(s){
  const id=s.id,lk=locked(s),st=S.stock[id]||0,lv=levelOf(s),pct=pmMasterPercent(s.id),cnt=s.cardCount?.total||0;
- return `<article class="pm-pack-card${lk?' is-locked':''}${pmNewShopSelected===id?' is-selected':''}" data-pm-pack="${esc(id)}">
+ return `<article class="pm-pack-card${lk&&!st?' is-locked':''}${pmNewShopSelected===id?' is-selected':''}" data-pm-pack="${esc(id)}">
  <button class="pm-pack-cover" aria-label="Détails de ${esc(s.name)}" onclick="pmSelectShop('${esc(id)}')"><span class="pm-pack-level">${id===window.PM_FEATURED_ID?'À LA UNE':`NIV. ${lv+1}`}</span>${pmBooster(s)}</button>
  <div class="pm-pack-title">${esc(s.name)}</div><div class="pm-pack-sub"><span>${cnt} cartes · ${pct}%</span><span class="pm-pack-price">${price(id)} PC</span></div>
- <div class="pm-pack-foot"><button class="pm-primary pm-pack-main" onclick="${lk?`pmSelectShop('${esc(id)}')`:st?`openBooster('${esc(id)}')`:`pmUIBuy('${esc(id)}',1)`}">${lk?'Verrouillé':st?`Ouvrir · ${st} en stock`:'Acheter'}</button><button class="pm-pack-more" title="Détails du booster" aria-label="Plus de détails de ${esc(s.name)}" onclick="pmSelectShop('${esc(id)}')">→</button></div>
+ <div class="pm-pack-foot"><button class="pm-primary pm-pack-main" onclick="${st?`openBooster('${esc(id)}')`:lk?`pmSelectShop('${esc(id)}')`:`pmUIBuy('${esc(id)}',1)`}">${lk&&!st?'Verrouillé':st?`Ouvrir · ${st} en stock`:'Acheter'}</button><button class="pm-pack-more" title="Détails du booster" aria-label="Plus de détails de ${esc(s.name)}" onclick="pmSelectShop('${esc(id)}')">→</button></div>
  </article>`;
 }
 function pmHome(){
@@ -3043,7 +3075,7 @@ function pmHome(){
  <section class="pm-intro"><div><span class="pm-kicker">BIENVENUE DANS TON ESPACE</span><h2>Prêt pour une nouvelle découverte ?</h2><p>Choisis une extension, ouvre tes boosters et construis ta collection Pokémon.</p></div></section>
  <section class="pm-feature-hero"><div class="pm-feature-copy"><span class="pm-kicker">✦ LA SÉRIE DU MOMENT</span><h2>${esc(s.name)}</h2><p>Une extension à explorer, des cartes à découvrir et de nouveaux objectifs de collection.</p><div class="pm-feature-chips"><span>${s.cardCount?.total||'—'} cartes à collectionner</span><span>Niveau ${levelOf(s)+1}</span><span>${price(s.id)} PC / booster</span></div><div class="pm-feature-buttons"><button class="pm-primary" onclick="pmNavigate('shop');pmSelectShop('${esc(s.id)}')">Découvrir la série →</button><button class="pm-outline" onclick="drops('${esc(s.id)}')">Voir les cartes</button></div></div><div class="pm-feature-visual">${pmHeroLoose(s,0)}${pmHeroLoose(s,1)}<div class="pm-hero-pack">${pmBooster(s)}</div></div><span class="pm-feature-index">POKÉMASTER // FEATURED SET</span></section>
  ${pmHomeActions()}
- <div class="pm-dashboard-stats"><div class="pm-stat"><b>${pmOwnedUnique()}</b><span>Cartes différentes</span></div><div class="pm-stat"><b>${completedMasters()}</b><span>Master Sets</span></div><div class="pm-stat"><b>${stock}</b><span>Boosters en réserve</span></div><div class="pm-stat"><b>${unlockedLevel()+1}/4</b><span>Niveau débloqué</span></div></div>
+ <div class="pm-dashboard-stats"><div class="pm-stat"><b>${pmOwnedUnique()}</b><span>Cartes différentes</span></div><div class="pm-stat"><b>${completedMasters()}</b><span>Master Sets</span></div><div class="pm-stat"><b>${stock}</b><span>Boosters en réserve</span></div><div class="pm-stat"><b>${unlockedLevel()+1}/${LEVELS.length}</b><span>Niveau débloqué</span></div></div>
  <div class="pm-home-row"><article class="pm-free-card"><div><span class="pm-kicker">CADEAU RÉGULIER</span><h3>Ton booster gratuit</h3><p>Un nouveau booster toutes les 10 minutes. Garde jusqu'à 10 boosters en réserve.</p><div class="pm-free-count"><strong id="free-count">${free}/10</strong> disponibles</div><div class="pm-free-clock" id="free-timer">Prochain booster…</div><div class="pm-free-actions"><button id="fb" class="pm-primary" onclick="freeBoost();pmUpdateHomeFree()">Récupérer</button><button id="free-open" class="pm-outline" onclick="openFreeOwned()">Ouvrir</button></div></div><div class="pm-pack-spot">${pmBooster(s)}</div></article>
  <article class="pm-daily-card"><div><span class="pm-daily-icon">✦</span><h3>Un coup de pouce pour ta collection</h3><p>Récupère ta récompense quotidienne et profite de nouvelles ouvertures.</p></div><div><button class="pm-primary" onclick="daily()">Cadeau du jour →</button></div></article></div>
  <div class="pm-section-title"><div><span class="pm-kicker">DÉCOUVRIR</span><h2>Les boosters à explorer</h2><p>Une sélection d'extensions accessibles pour commencer.</p></div><button class="pm-link" onclick="pmNavigate('shop')">Toute la boutique →</button></div>
@@ -3052,18 +3084,22 @@ function pmHome(){
  fbUpdate();pmHydrateSet(s);
 }
 function pmUpdateHomeFree(){if(vw==='home'){const label=document.getElementById('free-count');if(label)label.textContent=`${S.stock.ALL||0}/10`;fbUpdate()}}
-function pmShopOverview(){const m=completedMasters();return `<div class="pm-shop-topnote"><div><b>✦ Des extensions pour chaque niveau</b><span>Complète des Master Sets pour débloquer les niveaux suivants. Progression : ${m} Master Set${m>1?'s':''}.</span></div><button class="pm-outline" onclick="pmNavigate('coll')">Mes classeurs →</button></div>`}
+function pmShopOverview(){const m=completedMasters();return `<div class="pm-shop-topnote"><div><b>✦ Des extensions pour chaque niveau</b><span>Termine des Master Sets pour débloquer les niveaux suivants. Progression : ${m} Master Set${m>1?'s':''} · ${pmCompletedSetMissions()} missions récompensées.</span></div><button class="pm-outline" onclick="pmNavigate('coll')">Mes classeurs →</button></div>`}
 function pmShop(){
  const sets=pmSetList();if(!sets.length)return;
  if(!sets.some(s=>levelOf(s)===pmNewShopLevel))pmNewShopLevel=0;
- $('#app').innerHTML=`<section class="pm-intro"><div><span class="pm-kicker">BOUTIQUE / BOOSTERS</span><h2>Choisis ton prochain booster.</h2><p>Quatre niveaux d'extensions, des pochettes illustrées et toutes les informations avant d'ouvrir.</p></div></section>${pmShopOverview()}<div id="pm-shop-tabs" class="pm-shop-tabs" aria-label="Niveaux de boosters"></div><div class="pm-shop-layout"><div class="pm-shop-main"><div class="pm-shop-toolbar"><input id="pm-shop-input" type="search" placeholder="Rechercher une extension…" value="${esc(pmNewShopQuery)}" oninput="pmShopSearch(this.value)"><span class="pm-results" id="pm-shop-count"></span></div><div id="pm-shop-packs" class="pm-pack-grid"></div></div><div class="pm-shop-aside"><div class="pm-detail-shade" id="pm-detail-shade" onclick="pmCloseDetails()"></div><section id="pm-shop-detail" class="pm-detail" aria-label="Détails du booster"></section></div></div>`;
+ $('#app').innerHTML=`<section class="pm-intro"><div><span class="pm-kicker">BOUTIQUE / BOOSTERS</span><h2>Choisis ton prochain booster.</h2><p>Cinq niveaux d'extensions, des pochettes illustrées et toutes les informations avant d'ouvrir.</p></div></section>${pmShopOverview()}<div id="pm-shop-tabs" class="pm-shop-tabs" aria-label="Niveaux de boosters"></div><div class="pm-shop-layout"><div class="pm-shop-main"><div class="pm-shop-toolbar"><input id="pm-shop-input" type="search" placeholder="Rechercher une extension…" value="${esc(pmNewShopQuery)}" oninput="pmShopSearch(this.value)"><span class="pm-results" id="pm-shop-count"></span></div><div id="pm-shop-packs" class="pm-pack-grid"></div></div><div class="pm-shop-aside"><div class="pm-detail-shade" id="pm-detail-shade" onclick="pmCloseDetails()"></div><section id="pm-shop-detail" class="pm-detail" aria-label="Détails du booster"></section></div></div>`;
  pmShopTabs();pmShopList();
 }
 function pmShopTabs(){
  const parent=document.getElementById('pm-shop-tabs');if(!parent)return;
  parent.innerHTML=LEVELS.map((l,i)=>{const count=pmSetList().filter(s=>levelOf(s)===i).length,done=i<=unlockedLevel();return `<button type="button" class="${pmNewShopLevel===i?'is-active':''}" onclick="pmShopLevel(${i})" aria-pressed="${pmNewShopLevel===i}">Niveau ${i+1}<span>${esc(l.name.split('·').pop().trim())} · ${count}${done?'':' 🔒'}</span></button>`}).join('');
 }
-function pmShopLevel(level){pmNewShopLevel=level;pmNewShopSelected='';pmShopTabs();pmShopList();pmCloseDetails();}
+function pmShopLevel(level){
+ pmNewShopLevel=Math.max(0,Math.min(LEVELS.length-1,Number(level)||0));
+ pmNewShopSelected='';pmShopTabs();pmShopList();pmCloseDetails();
+ document.querySelector('#pm-shop-tabs button.is-active')?.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});
+}
 function pmShopSearch(value){pmNewShopQuery=value;pmShopList();}
 function pmShopList(){
  const parent=document.getElementById('pm-shop-packs');if(!parent)return;
@@ -3098,7 +3134,7 @@ function pmShopDetail(){
  if(!s){aside.innerHTML='<div class="pm-empty">Sélectionne une extension pour afficher les informations.</div>';return}
  const id=s.id,lv=levelOf(s),lk=locked(s),st=S.stock[id]||0,owned=pmOwnedCount(id),total=s.cardCount?.total||0,pct=total?Math.min(100,Math.round(100*owned/total)):0;
  const need=LEVELS[lv].need;
- aside.innerHTML=`<button class="pm-detail-close" onclick="pmCloseDetails()" aria-label="Fermer les détails">✕</button><div class="pm-detail-top"><div><span class="pm-detail-tag">EXTENSION ${esc(id.toUpperCase())} · NIVEAU ${lv+1}</span><h2>${esc(s.name)}</h2></div></div><div class="pm-detail-cover">${pmBooster(s)}</div><p>${lk?`Verrouillé : complète ${need} Master Sets pour ouvrir cette extension (${completedMasters()}/${need}).`:`Découvre cette extension et avance vers le Master Set en réunissant toutes ses cartes.`}</p><div class="pm-detail-stats"><div><b>${total||'—'}</b><small>Cartes du set</small></div><div><b>${price(id)} PC</b><small>Prix unitaire</small></div><div><b>${st}</b><small>Booster(s) en stock</small></div><div><b>${owned}/${total||'—'}</b><small>Collection · ${pct}%</small></div></div><div class="pm-detail-progress"><i style="width:${pct}%"></i></div><div class="pm-detail-actions"><button class="pm-outline pm-full" onclick="drops('${esc(id)}')">Voir toutes les cartes de la série ↗</button>${lk?'<button class="pm-primary pm-full" disabled>Extension verrouillée</button>':`<button class="pm-primary" onclick="pmUIBuy('${esc(id)}',1)">Acheter · ${price(id)} PC</button><button class="pm-outline" onclick="openBooster('${esc(id)}')" ${st?'':'disabled'}>Ouvrir · ${st} en stock</button>`}</div>${!lk?`<div class="pm-qty-area"><small>Plusieurs boosters à acheter</small>${qtyControl(id,'buy')}<small>Ouvrir un lot de boosters</small>${qtyControl(id,'open')}</div>`:''}${id==='30th'?`<p>Achats restants aujourd'hui : ${left(id)}/10.</p>`:''}<div class="pm-chase-preview"><h3>✦ Cartes à découvrir</h3><p>Aperçu de trois cartes parmi les raretés de cette extension.</p><div class="pm-hit-cards" id="pm-new-hit-cards"><div class="pm-hit-placeholder">Chargement…</div><div class="pm-hit-placeholder">Chargement…</div><div class="pm-hit-placeholder">Chargement…</div></div></div>`;
+ aside.innerHTML=`<button class="pm-detail-close" onclick="pmCloseDetails()" aria-label="Fermer les détails">✕</button><div class="pm-detail-top"><div><span class="pm-detail-tag">EXTENSION ${esc(id.toUpperCase())} · NIVEAU ${lv+1}</span><h2>${esc(s.name)}</h2></div></div><div class="pm-detail-cover">${pmBooster(s)}</div><p>${lk?`Verrouillé : ${pmLevelUnlockText(lv)}.`:`Découvre cette extension et avance vers le Master Set en réunissant toutes ses cartes.`}</p><div class="pm-detail-stats"><div><b>${total||'—'}</b><small>Cartes du set</small></div><div><b>${price(id)} PC</b><small>Prix unitaire</small></div><div><b>${st}</b><small>Booster(s) en stock</small></div><div><b>${owned}/${total||'—'}</b><small>Collection · ${pct}%</small></div></div><div class="pm-detail-progress"><i style="width:${pct}%"></i></div><div class="pm-detail-actions"><button class="pm-outline pm-full" onclick="drops('${esc(id)}')">Voir toutes les cartes de la série ↗</button>${lk?`<button class="pm-primary pm-full" disabled>Achat verrouillé</button>${st?`<button class="pm-outline pm-full" onclick="openBooster('${esc(id)}')">Ouvrir les ${st} booster(s) déjà possédés</button>`:''}`:`<button class="pm-primary" onclick="pmUIBuy('${esc(id)}',1)">Acheter · ${price(id)} PC</button><button class="pm-outline" onclick="openBooster('${esc(id)}')" ${st?'':'disabled'}>Ouvrir · ${st} en stock</button>`}</div>${!lk?`<div class="pm-qty-area"><small>Plusieurs boosters à acheter</small>${qtyControl(id,'buy')}<small>Ouvrir un lot de boosters</small>${qtyControl(id,'open')}</div>`:st>1?`<div class="pm-qty-area"><small>Ouvrir tes boosters déjà achetés</small>${qtyControl(id,'open')}</div>`:''}<div class="pm-chase-preview"><h3>✦ Cartes à découvrir</h3><p>Aperçu de trois cartes parmi les raretés de cette extension.</p><div class="pm-hit-cards" id="pm-new-hit-cards"><div class="pm-hit-placeholder">Chargement…</div><div class="pm-hit-placeholder">Chargement…</div><div class="pm-hit-placeholder">Chargement…</div></div></div>`;
  aside.querySelectorAll('.qty-wrap').forEach(w=>{const presets=w.querySelector('.qty-presets'),sub=w.querySelector('.qty-subline');if(presets){const d=document.createElement('details');d.className='pm-batch-more';d.innerHTML='<summary>Options de lots rapides</summary>';d.appendChild(presets);if(sub)d.appendChild(sub);w.appendChild(d)}});
  if(pmNewShopOpen)aside.classList.add('is-open');
  pmHydrateSet(s);
@@ -3262,7 +3298,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'){pmToggleDrawer(fals
    :data;
  openBooster=async function(id){
    if(batchState)return toast('Un lot est déjà en cours. Termine-le avant de changer de booster.');
-   if(locked(SETS.find(s=>s.id===id)||BASE))return toast('Extension verrouillée.');
+   if(locked(SETS.find(s=>s.id===id)||BASE)&&!(S.stock[id]||0))return toast('Extension verrouillée.');
    if((S.stock[id]||0)<1)return toast('Aucun booster en stock.');
    const token=++session,view=stage();view.className='';view.innerHTML=loader;
    try{
@@ -3277,7 +3313,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'){pmToggleDrawer(fals
    if(n>100)return toast('Un lot est limité à 100 boosters pour préserver la fluidité.');
    if(n===1)return openBooster(id);
    if(batchState)return toast('Termine le lot en cours avant d’en ouvrir un autre.');
-   if(locked(SETS.find(s=>s.id===id)||BASE))return toast('Extension verrouillée.');
+   if(locked(SETS.find(s=>s.id===id)||BASE)&&!(S.stock[id]||0))return toast('Extension verrouillée.');
    if((S.stock[id]||0)<n)return toast(`Il te faut ${n} boosters en stock.`);
    const token=++session,view=stage();view.className='';view.innerHTML=loader;
    try{
@@ -4197,6 +4233,39 @@ window.pmVitrineDiagnostics={artCache:pmArtCache,load:enqueueArt,refresh:hydrate
      if(sum){save();if(vw==='ach')ach();toast('Récompenses globales et missions du set : +'+(S.coins-before)+' PC');}
    };
  }
+})();
+</script>
+
+<script id="pm-reset-unlimited-2026-10-21">
+(function(){
+  'use strict';
+  const KEY='pm_currency_reset_5000_2026_10_21_v5_unique';
+  function resetCoins(){
+    try {
+      const all=accounts(); let dirty=false;
+      for(const entry of Object.values(all)){
+        if(!entry || !entry.game || typeof entry.game!=='object' || entry.game[KEY]) continue;
+        entry.game.coins=5000;entry.game[KEY]=true;dirty=true;
+      }
+      if(dirty)writeAccounts(all);
+      if(typeof S==='object' && S && !S[KEY]){ S.coins=5000; S[KEY]=true; }
+      const active=localStorage.getItem(SESSION_KEY);
+      if(active && all[active]?.game && all[active].game[KEY]){
+        S.coins=all[active].game.coins; S[KEY]=true;
+      }
+      if(typeof S==='object' && S)localStorage.setItem('wmp',JSON.stringify(S));
+      if(typeof head==='function' && document.getElementById('coins'))head();
+    }catch(e){console.error('Réinitialisation monétaire',e)}
+  }
+  resetCoins();
+  const prevLogin=accountSubmit;
+  accountSubmit=async function(){
+    const result=await prevLogin.apply(this,arguments);
+    if(currentUser)resetCoins();
+    return result;
+  };
+  // Aucun plafond de stock pour les boosters payants NV1 à NV5.
+  // Les achats multiples restent limités à 99 par opération et les ouvertures à 100 par lot.
 })();
 </script>
 </body></html>
