@@ -3525,4 +3525,49 @@ window.pmVitrineDiagnostics={artCache:pmArtCache,load:enqueueArt,refresh:hydrate
 })();
 
 </script>
+<style id="pm-god-surprise-style">
+#stage .pm-god-reveal{width:min(94vw,520px);min-height:360px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;text-align:center;padding:28px 18px;background:radial-gradient(circle at 50% 45%,#4d1927 0%,#161117 55%,#090909 100%);border:1px solid #61323f;border-radius:20px;box-shadow:0 15px 70px #000a}
+.pm-god-reveal .pm-god-title{font-size:clamp(36px,8vw,66px);font-weight:1000;letter-spacing:2px;color:#fff;text-shadow:0 0 18px #e10600,0 0 45px #f18c33;animation:pm-god-pop .6s ease-out both}
+.pm-god-reveal .pm-god-sub{color:#eacbd1;font-size:16px}
+.pm-god-reveal button{min-height:48px;padding:12px 25px}
+@keyframes pm-god-pop{from{transform:scale(.8);opacity:0}to{transform:scale(1);opacity:1}}
+@media(prefers-reduced-motion:reduce){.pm-god-reveal .pm-god-title{animation:none}}
+</style>
+<script id="pm-god-surprise-fix">
+/* The original card draw and stock/pity bookkeeping stay untouched.
+   God Pack becomes visible only after the player has seen card #1. */
+(function(){
+  const priorNext=next;
+  let introOwner=null;
+  godIntro=function(){
+    if(!rv?.cards?.length)return;
+    if(batchState?.skip)batchState.skip=false; // a God Pack must not skip its first card
+    rv.pmGodSurpriseShown=false;
+    rv.pmGodIntroPending=false;
+    // Render first card exactly like an ordinary booster, with no God Pack label.
+    reveal();
+  };
+  next=function(){
+    if(rv?.god && rv.i===0 && !rv.pmGodSurpriseShown){
+      rv.pmGodSurpriseShown=true;
+      rv.pmGodIntroPending=true;
+      const owner=rv;
+      introOwner=owner;
+      if(typeof pmCinemaSequence!=='undefined')pmCinemaSequence++;
+      const container=document.getElementById('stage');
+      if(!container)return priorNext();
+      container.className='';
+      container.innerHTML='<div class="pm-god-reveal"><div class="pm-god-title">GOD PACK !</div><p class="pm-god-sub">La première carte cachait un booster exceptionnel.</p><button type="button" onclick="pmContinueGodSurprise()">Découvrir la suite →</button></div>';
+      return;
+    }
+    return priorNext();
+  };
+  window.pmContinueGodSurprise=function(){
+    if(!rv||rv!==introOwner||!rv.pmGodIntroPending)return;
+    rv.pmGodIntroPending=false;
+    introOwner=null;
+    priorNext();
+  };
+})();
+</script>
 </body></html>
