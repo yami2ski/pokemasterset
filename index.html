@@ -1187,7 +1187,7 @@ profile=function(){oldProfile();const total=Object.entries(S.owned).reduce((sum,
 // La navigation solo remplace les liens du marché et de la communauté.
 const nav=$('#main-nav');nav.insertAdjacentHTML('beforeend',`<button class="g" id="n-solo" onclick="show('solo')">Revente</button><button class="g" id="n-wheel" onclick="show('wheel')">Roulette</button>`);
 soloInit();
-window.addEventListener('error',e=>{const stage=$('#stage');if(stage&&!stage.classList.contains('hidden')){stage.className='hidden';toast('Une erreur est survenue. Ta progression est conservée.')}console.error(e.message)});
+window.addEventListener('error',e=>{console.error('[PokéMaster] Erreur JavaScript :',e.message);const stage=$('#stage');if(stage&&!stage.classList.contains('hidden'))toast('Une erreur visuelle est survenue. Ton booster reste ouvert.');});
 
 /* ===== EXTENSION SOLO : PROGRESSION, CHARMS ET DÉFIS ===== */
 SOLO_DAILY.push(['pack12','Ouvrir 25 boosters','open',25,75],['new5','Découvrir 12 cartes inédites','new',12,55],['sell8','Vendre 18 doublons','sold',18,42],['rare5','Obtenir 12 cartes rares ou mieux','rare',12,65]);
@@ -1889,6 +1889,7 @@ flipIt=function(){if(!rv||rv.busy)return;if(rv.cinemaPending){pmCinemaComplete()
     const series=(cur?.s?.name)||'';
     return `<aside class="pm-hit-odds${rank?'':' is-hidden'}" id="pm-hit-odds"><b>Chance estimée</b><strong>${pmFormatPct(chance)}</strong><small>Probabilité approximative d’obtenir <strong>${esc(card.name)}</strong> dans <strong>${esc(series)}</strong>, selon la rareté et le pool de cartes du set.</small><span class="pm-hit-odds-tier">${esc(rank?.name||TIERS[card.tier]||'Hit')} · ${esc(card.rar||'')}</span></aside>`;
   }
+  window.pmHitOddsMarkup=pmHitOddsMarkup;
   const prevPackShowcase=packShowcase;
   packShowcase=function(s){
     const id=s.id,st=S.stock[id]||0,lv=levelOf(s),lk=locked(s),need=LEVELS[lv].need,pity=pmPityMarkup(id);
@@ -1937,7 +1938,7 @@ flipIt=function(){if(!rv||rv.busy)return;if(rv.cinemaPending){pmCinemaComplete()
     const prefix=last?'DERNIÈRE CARTE':`CARTE ${rv.i+1} / ${rv.cards.length}`;
     const ownedNew=typeof pmNewCards==='function'&&!!pmNewCards()[c.id];
     const back=last?`<div class="pm-cinema-curtain"><span class="pm-cinema-ball"></span><b>DERNIÈRE CARTE</b></div>`:'';
-    const odds = rank ? pmHitOddsMarkup(c, cur?.s?.id, rank).replace('pm-hit-odds"','pm-hit-odds'+(last?' is-hidden':'')+'"') : '';
+    const odds = rank ? window.pmHitOddsMarkup(c, cur?.s?.id, rank).replace('pm-hit-odds"','pm-hit-odds'+(last?' is-hidden':'')+'"') : '';
     $('#stage').className='pm-cinema-stage';
     $('#stage').innerHTML=`<button class="g x" onclick="summary()">Passer</button><div class="sbox"><div class="setname"><b>${esc(cur.s.name)}</b></div><div class="pm-open-counter"><span>BOOSTER OUVERT</span><strong>${prefix}</strong><div class="pm-open-track"><i style="width:${(rv.i+1)/rv.cards.length*100}%"></i></div></div><div class="real-stack ${last?'pm-cinema-pending':''}" style="--hit-glow:${rank?.color||'#f04a59'}" onclick="flipIt()" role="button" tabindex="0" aria-label="${last?'Révéler la dernière carte':'Carte suivante'}" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();flipIt()}"><div class="stack-back"></div><div class="stack-front fx-${c.tier}">${cimg(c,'high')}${ownedNew&&!last?'<span class="pm-cinema-new">NOUVEAU</span>':''}</div>${back}</div>${odds}<div class="info pm-cinema-info" aria-hidden="${last?'true':'false'}"><b>${esc(c.name)}</b> · ${esc(TIERS[c.tier]||'Carte')} · ${value(c)} PC${ownedNew&&last?' · NOUVELLE CARTE':''}</div><div class="real-controls pm-cinema-controls">${last?'<button type="button" class="pm-main-reveal" onclick="event.stopPropagation();flipIt()">Révéler la dernière carte</button>':`<button type="button" onclick="flipIt()">Carte suivante →</button>`}<button class="g" type="button" onclick="pmEmptyPack()">Vider le paquet</button>${batchState&&batchState.total>=5?`<button class="g" type="button" onclick="toggleBatchSkip();reveal()">Dernière carte uniquement : ${batchState.skip?'ON':'OFF'}</button>`:''}</div></div>`;
     if(rank&&!last){
@@ -1965,36 +1966,27 @@ flipIt=function(){if(!rv||rv.busy)return;if(rv.cinemaPending){pmCinemaComplete()
 .qty-line .qty-primary{min-width:150px}
 .qty-subline{font-size:12px;color:#bdb5c0}
 
-#stage.pm-cinema-stage.pm-ultra-mode::before{content:"";position:fixed;inset:0;z-index:0;background:radial-gradient(circle at center,#0e0f16 0%,#05060b 46%,#000 100%);animation:pmUltraBackdrop .65s ease both}
-#stage.pm-cinema-stage.pm-ultra-mode::after{content:"";position:fixed;inset:0;z-index:1;pointer-events:none;background:
- radial-gradient(circle at center,#ffffff18 0,#ffffff05 14%,#0000 35%),
- linear-gradient(180deg,#000000ea 0%,#05050aed 100%);
-animation:pmUltraVignette 1.2s ease both}
+/* Ultra Reveal léger : 1) suspense sombre, 2) apparition + flash bref. */
+#stage.pm-cinema-stage.pm-ultra-mode::before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(circle at 50% 42%,#14131c 0%,#07070b 53%,#000 100%);animation:pmUltraBackdrop .45s ease both}
+#stage.pm-cinema-stage.pm-ultra-mode::after{content:none!important}
 #stage.pm-cinema-stage.pm-ultra-mode .sbox{position:relative;z-index:3}
-#stage.pm-cinema-stage.pm-ultra-mode .real-stack{transform:translateY(12px) scale(.88);opacity:0;filter:brightness(.75) saturate(1.15);transition:transform .9s cubic-bezier(.18,.86,.2,1), opacity .55s ease, filter .85s ease;box-shadow:0 0 0 1px #ffffff16,0 30px 90px #000}
-#stage.pm-cinema-stage.pm-ultra-mode .real-stack.pm-ultra-enter{transform:translateY(-4px) scale(1);opacity:1;filter:brightness(1.05) saturate(1.35)}
-#stage.pm-cinema-stage.pm-ultra-mode .real-stack.pm-ultra-enter .stack-front{animation:pmUltraCardFloat 2.6s ease-in-out infinite 1s}
-#stage.pm-cinema-stage.pm-ultra-mode .real-stack.pm-ultra-enter::before{content:"";position:absolute;inset:-18%;border-radius:32px;background:radial-gradient(circle at center,var(--hit-glow,#f5cf76) 0,#0000 58%);opacity:.6;filter:blur(24px);animation:pmUltraHalo 1.6s ease both}
-#stage.pm-cinema-stage.pm-ultra-mode .real-stack.pm-ultra-enter::after{content:"";position:absolute;inset:-30%;border-radius:40px;background:conic-gradient(from 0deg,#0000 0 20%,#ffffff30 24%,#0000 28% 45%,#ffffff1f 50%,#0000 54% 72%,#ffffff29 76%,#0000 80% 100%);mix-blend-mode:screen;animation:pmUltraRings 3s linear infinite;pointer-events:none}
-#stage.pm-cinema-stage.pm-ultra-mode .pm-ultra-flash{position:absolute;left:50%;top:50%;width:26px;height:26px;border-radius:50%;background:#fff;box-shadow:0 0 40px #fff,0 0 100px var(--hit-glow,#fff);transform:translate(-50%,-50%) scale(.2);opacity:0;pointer-events:none;animation:pmUltraFlash 1.1s ease .16s both;z-index:4}
-#stage.pm-cinema-stage.pm-ultra-mode .pm-ultra-beams{position:absolute;inset:-24%;pointer-events:none;z-index:2;opacity:.9;background:
- linear-gradient(90deg,#0000 46%,#ffffff16 49%,#ffffff4a 50%,#ffffff16 51%,#0000 54%),
- linear-gradient(0deg,#0000 46%,#ffffff16 49%,#ffffff4a 50%,#ffffff16 51%,#0000 54%);
- filter:drop-shadow(0 0 14px var(--hit-glow,#fff));mix-blend-mode:screen;animation:pmUltraBeams 1.4s ease both}
-#stage.pm-cinema-stage.pm-ultra-mode .pm-cinema-info,#stage.pm-cinema-stage.pm-ultra-mode .pm-cinema-controls{transition:opacity .35s ease,transform .35s ease}
-#stage.pm-cinema-stage.pm-ultra-mode .pm-cinema-info[aria-hidden="true"],#stage.pm-cinema-stage.pm-ultra-mode .pm-cinema-controls.pm-ultra-hidden{opacity:0;transform:translateY(8px);pointer-events:none}
-#stage.pm-cinema-stage.pm-ultra-mode .pm-hit-odds{z-index:5}
-#stage.pm-cinema-stage.pm-ultra-mode .pm-ultra-title{position:absolute;left:50%;top:24px;transform:translateX(-50%);z-index:5;display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;pointer-events:none;animation:pmUltraTitle 1.2s ease both}
+#stage.pm-cinema-stage.pm-ultra-mode .real-stack{opacity:1;transform:translateY(0) scale(1);transition:transform .72s cubic-bezier(.18,.86,.2,1),opacity .55s ease;box-shadow:0 22px 60px #0009}
+#stage.pm-cinema-stage.pm-ultra-mode .real-stack.pm-ultra-revealing{opacity:.3;transform:translateY(9px) scale(.9)}
+#stage.pm-cinema-stage.pm-ultra-mode .real-stack.pm-ultra-revealing.pm-ultra-enter{opacity:1;transform:translateY(0) scale(1)}
+#stage.pm-cinema-stage.pm-ultra-mode .pm-ultra-flash{position:absolute;inset:-20%;z-index:22;border-radius:50%;pointer-events:none;background:radial-gradient(circle,#ffffffef 0,#ffffff8c 11%,#ffffff00 52%);opacity:0;animation:pmUltraFlashOnce .72s ease-out forwards}
+#stage.pm-cinema-stage.pm-ultra-mode .pm-ultra-title{position:relative;margin:0 auto 14px;z-index:5;display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;pointer-events:none}
 #stage.pm-cinema-stage.pm-ultra-mode .pm-ultra-title b{font-size:12px;letter-spacing:4px;color:#ffd8de;text-transform:uppercase}
-#stage.pm-cinema-stage.pm-ultra-mode .pm-ultra-title strong{font-size:26px;letter-spacing:1px;color:#fff;text-shadow:0 2px 18px #000}
+#stage.pm-cinema-stage.pm-ultra-mode .pm-ultra-title strong{font-size:clamp(15px,4.8vw,23px);line-height:1.15;letter-spacing:1px;color:#fff;text-shadow:0 2px 18px #000}
+#stage.pm-cinema-stage.pm-ultra-mode .pm-cinema-info,#stage.pm-cinema-stage.pm-ultra-mode .pm-cinema-controls{transition:opacity .2s ease}
+#stage.pm-cinema-stage.pm-ultra-mode .pm-cinema-info[aria-hidden="true"],#stage.pm-cinema-stage.pm-ultra-mode .pm-cinema-controls.pm-ultra-hidden{opacity:0;pointer-events:none}
+#stage.pm-cinema-stage.pm-ultra-mode .pm-hit-odds{z-index:5}
+/* Supprimer les phases 3 et 4 : ni particules, ni anneaux, ni flottement ni halo en boucle. */
+#stage.pm-cinema-stage.pm-ultra-mode .real-stack.pm-cinema-hit::after,#stage.pm-cinema-stage.pm-ultra-mode .real-stack.pm-cinema-hit .stack-front::after{content:none!important;animation:none!important}
+#stage.pm-cinema-stage.pm-ultra-mode .real-stack.pm-cinema-hit .stack-front{animation:none!important}
+#stage.pm-cinema-stage.pm-ultra-mode .pm-cinema-curtain::before{animation:none!important}
+#stage.pm-cinema-stage.pm-ultra-mode .pm-main-reveal{animation:none!important}
 @keyframes pmUltraBackdrop{from{opacity:0}to{opacity:1}}
-@keyframes pmUltraVignette{0%{opacity:0}100%{opacity:1}}
-@keyframes pmUltraHalo{0%{transform:scale(.35);opacity:0}55%{opacity:.75}100%{transform:scale(1);opacity:.42}}
-@keyframes pmUltraRings{from{transform:rotate(0)}to{transform:rotate(360deg)}}
-@keyframes pmUltraFlash{0%{opacity:0;transform:translate(-50%,-50%) scale(.2)}18%{opacity:1}100%{opacity:0;transform:translate(-50%,-50%) scale(18)}}
-@keyframes pmUltraBeams{0%{opacity:0;transform:scale(.45) rotate(-12deg)}45%{opacity:1}100%{opacity:.25;transform:scale(1.18) rotate(0deg)}}
-@keyframes pmUltraTitle{0%{opacity:0;transform:translateX(-50%) translateY(-12px)}100%{opacity:1;transform:translateX(-50%) translateY(0)}}
-@keyframes pmUltraCardFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+@keyframes pmUltraFlashOnce{0%,10%{opacity:0;transform:scale(.42)}32%{opacity:.86;transform:scale(.82)}100%{opacity:0;transform:scale(1.25)}}
 @media(max-width:700px){.qty-presets button{min-width:60px;padding:9px 10px}}
 </style>
 <script>
@@ -2024,37 +2016,43 @@ animation:pmUltraVignette 1.2s ease both}
     return `<div class="pm-ultra-title"><b>Révélation spéciale</b><strong>${esc(label)}</strong></div>`;
   }
   function pmUltraFxStart(){
-    const stage=document.getElementById('stage'); if(!stage) return;
-    const stack=stage.querySelector('.real-stack'); if(!stack) return;
-    const controls=stage.querySelector('.pm-cinema-controls'); if(controls) controls.classList.add('pm-ultra-hidden');
-    stage.classList.add('pm-ultra-mode');
-    if(!stack.querySelector('.pm-ultra-flash')) stack.insertAdjacentHTML('beforeend','<span class="pm-ultra-flash"></span><span class="pm-ultra-beams"></span>');
-    requestAnimationFrame(()=>stack.classList.add('pm-ultra-enter'));
+    const stage=document.getElementById('stage'),stack=stage?.querySelector('.real-stack');
+    if(!stage||!stack)return;
+    stage.querySelector('.pm-cinema-controls')?.classList.add('pm-ultra-hidden');
+    stack.classList.add('pm-ultra-revealing');
+    if(!stack.querySelector('.pm-ultra-flash'))stack.insertAdjacentHTML('beforeend','<span class="pm-ultra-flash" aria-hidden="true"></span>');
+    requestAnimationFrame(()=>{if(stage.isConnected&&stack.isConnected&&stage.contains(stack))stack.classList.add('pm-ultra-enter')});
   }
   function pmUltraFxCleanup(){
-    const stage=document.getElementById('stage'); if(!stage) return;
-    const controls=stage.querySelector('.pm-cinema-controls'); if(controls) controls.classList.remove('pm-ultra-hidden');
+    const stage=document.getElementById('stage');if(!stage)return;
+    stage.querySelector('.pm-cinema-controls')?.classList.remove('pm-ultra-hidden');
+    const stack=stage.querySelector('.real-stack');
+    if(stack){stack.querySelector('.pm-ultra-flash')?.remove();stack.classList.remove('pm-ultra-revealing','pm-ultra-enter');}
   }
-  const _pmCinemaComplete = pmCinemaComplete;
   pmCinemaComplete=function(){
     if(!rv||!rv.cinemaPending||rv.busy)return;
     const card=rv.cards[rv.i],rank=rv.cinemaRank,isUltra=pmUltraEligible(card,rank);
-    if(isUltra) pmUltraFxStart();
     const serial=++pmCinemaSequence,stack=document.querySelector('#stage .real-stack');
     if(!stack)return;
     rv.cinemaPending=false;rv.busy=true;
-    const curtain=stack.querySelector('.pm-cinema-curtain');if(curtain)curtain.classList.add('pm-cinema-leave');
+    const curtain=stack.querySelector('.pm-cinema-curtain');
+    if(isUltra)pmUltraFxStart();
+    if(curtain)curtain.classList.add('pm-cinema-leave');
     const info=document.querySelector('#stage .pm-cinema-info'),controls=document.querySelector('#stage .pm-cinema-controls'),odds=document.querySelector('#pm-hit-odds');
     const finish=()=>{
       if(serial!==pmCinemaSequence||!rv||!stack.isConnected)return;
       stack.classList.remove('pm-cinema-pending');curtain?.remove();
-      if(rank){stack.style.setProperty('--hit-glow',rank.color);stack.classList.add('pm-cinema-hit');pmCinemaConfetti(stack,rank);pmCinemaSetLabel(info,rank,card,cur?.s?.id);odds&&odds.classList.remove('is-hidden')}
-      if(info)info.setAttribute('aria-hidden','false');
-      if(controls)controls.innerHTML=`<button type="button" onclick="flipIt()">Voir le résumé →</button><button class="g" type="button" onclick="summary()">Terminer</button>`;
-      pmUltraFxCleanup();
-      setTimeout(()=>{if(serial===pmCinemaSequence&&rv)rv.busy=false},isUltra?1450:(rank?850:240));
+      if(rank){
+        stack.style.setProperty('--hit-glow',rank.color);stack.classList.add('pm-cinema-hit');
+        if(!isUltra)pmCinemaConfetti(stack,rank);
+        pmCinemaSetLabel(info,rank,card,cur?.s?.id);odds?.classList.remove('is-hidden');
+      }
+      info?.setAttribute('aria-hidden','false');
+      if(controls)controls.innerHTML='<button type="button" onclick="flipIt()">Voir le résumé →</button><button class="g" type="button" onclick="summary()">Terminer</button>';
+      if(isUltra){document.querySelector('#stage .pm-ultra-title')?.remove();pmUltraFxCleanup();}
+      setTimeout(()=>{if(serial===pmCinemaSequence&&rv)rv.busy=false},isUltra?180:(rank?850:240));
     };
-    setTimeout(finish,isUltra?1050:(curtain?320:0));
+    setTimeout(finish,isUltra?700:(curtain?320:0));
   };
   reveal=function(){
     ++pmCinemaSequence;
@@ -2066,19 +2064,19 @@ animation:pmUltraVignette 1.2s ease both}
     const prefix=last?'DERNIÈRE CARTE':`CARTE ${rv.i+1} / ${rv.cards.length}`;
     const ownedNew=typeof pmNewCards==='function'&&!!pmNewCards()[c.id];
     const back=last?`<div class="pm-cinema-curtain"><span class="pm-cinema-ball"></span><b>${ultra?'RÉVÉLATION SPÉCIALE':'DERNIÈRE CARTE'}</b></div>`:'';
-    const odds = rank ? pmHitOddsMarkup(c, cur?.s?.id, rank).replace('pm-hit-odds"','pm-hit-odds'+(last?' is-hidden':'')+'"') : '';
+    const odds = rank ? window.pmHitOddsMarkup(c, cur?.s?.id, rank).replace('pm-hit-odds"','pm-hit-odds'+(last?' is-hidden':'')+'"') : '';
     $('#stage').className='pm-cinema-stage'+(ultra?' pm-ultra-mode':'');
-    $('#stage').innerHTML=`<button class="g x" onclick="summary()">Passer</button><div class="sbox">${ultra?pmUltraTitle(rank,c):''}<div class="setname"><b>${esc(cur.s.name)}</b></div><div class="pm-open-counter"><span>BOOSTER OUVERT</span><strong>${prefix}</strong><div class="pm-open-track"><i style="width:${(rv.i+1)/rv.cards.length*100}%"></i></div></div><div class="real-stack ${last?'pm-cinema-pending':''}" style="--hit-glow:${rank?.color||'#f04a59'}" onclick="flipIt()" role="button" tabindex="0" aria-label="${last?'Révéler la dernière carte':'Carte suivante'}" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();flipIt()}"><div class="stack-back"></div><div class="stack-front fx-${c.tier}">${cimg(c,'high')}</div>${back}</div>${odds}<div class="info pm-cinema-info" aria-hidden="${last?'true':'false'}"><b>${esc(c.name)}</b> · ${esc(TIERS[c.tier]||'Carte')} · ${value(c)} PC${ownedNew&&last?' · NOUVELLE CARTE':''}</div><div class="real-controls pm-cinema-controls ${ultra?'pm-ultra-hidden':''}">${last?`<button type="button" class="pm-main-reveal" onclick="event.stopPropagation();flipIt()">${ultra?'Lancer la révélation':'Révéler la dernière carte'}</button>`:'<button type="button" onclick="flipIt()">Carte suivante →</button>'}<button class="g" type="button" onclick="pmEmptyPack()">Vider le paquet</button>${batchState&&batchState.total>=5?`<button class="g" type="button" onclick="toggleBatchSkip();reveal()">Dernière carte uniquement : ${batchState.skip?'ON':'OFF'}</button>`:''}</div></div>`;
+    $('#stage').innerHTML=`<button class="g x" onclick="summary()">Passer</button><div class="sbox">${ultra?pmUltraTitle(rank,c):''}<div class="setname"><b>${esc(cur.s.name)}</b></div><div class="pm-open-counter"><span>BOOSTER OUVERT</span><strong>${prefix}</strong><div class="pm-open-track"><i style="width:${(rv.i+1)/rv.cards.length*100}%"></i></div></div><div class="real-stack ${last?'pm-cinema-pending':''}" style="--hit-glow:${rank?.color||'#f04a59'}" onclick="flipIt()" role="button" tabindex="0" aria-label="${last?'Révéler la dernière carte':'Carte suivante'}" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();flipIt()}"><div class="stack-back"></div><div class="stack-front fx-${c.tier}">${cimg(c,'high')}</div>${back}</div>${odds}<div class="info pm-cinema-info" aria-hidden="${last?'true':'false'}"><b>${esc(c.name)}</b> · ${esc(TIERS[c.tier]||'Carte')} · ${value(c)} PC${ownedNew&&last?' · NOUVELLE CARTE':''}</div><div class="real-controls pm-cinema-controls">${last?`<button type="button" class="pm-main-reveal" onclick="event.stopPropagation();flipIt()">${ultra?'Lancer la révélation':'Révéler la dernière carte'}</button>`:'<button type="button" onclick="flipIt()">Carte suivante →</button>'}<button class="g" type="button" onclick="pmEmptyPack()">Vider le paquet</button>${batchState&&batchState.total>=5?`<button class="g" type="button" onclick="toggleBatchSkip();reveal()">Dernière carte uniquement : ${batchState.skip?'ON':'OFF'}</button>`:''}</div></div>`;
     if(ultra && !last){ pmUltraFxStart(); }
     if(rank&&!last){
       const serial=pmCinemaSequence,stack=document.querySelector('#stage .real-stack');rv.busy=true;
       setTimeout(()=>{
         if(serial!==pmCinemaSequence||!rv||!stack?.isConnected)return;
-        stack.classList.add('pm-cinema-hit');pmCinemaConfetti(stack,rank);pmCinemaSetLabel(document.querySelector('#stage .pm-cinema-info'),rank,c,cur?.s?.id);
+        stack.classList.add('pm-cinema-hit');if(!ultra)pmCinemaConfetti(stack,rank);pmCinemaSetLabel(document.querySelector('#stage .pm-cinema-info'),rank,c,cur?.s?.id);
         const oddsBox=document.querySelector('#pm-hit-odds'); if(oddsBox) oddsBox.classList.remove('is-hidden');
         pmUltraFxCleanup();
-        setTimeout(()=>{if(serial===pmCinemaSequence&&rv)rv.busy=false},ultra?1350:650);
-      },ultra?900:130);
+        setTimeout(()=>{if(serial===pmCinemaSequence&&rv)rv.busy=false},ultra?300:650);
+      },ultra?550:130);
     }
   };
 })();
@@ -2959,5 +2957,559 @@ ach=function(){pmOriginalAchPage();const app=document.getElementById('app');if(a
 const pmOriginalProfilePage=profile;
 profile=function(){pmOriginalProfilePage();const app=document.getElementById('app');if(app)app.insertAdjacentHTML('beforeend',`<div class="pm-page-context"><b>Outils de collectionneur</b><nav><button onclick="pmNavigate('solo')">Vendre mes doublons</button><button onclick="pmNavigate('wheel')">Roulette</button><button onclick="pmNavigate('ach')">Mes missions</button></nav></div>`)};
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){pmToggleDrawer(false);pmCloseDetails()}});
+</script>
+<style id="pm-reliability-fix-css">
+.pm-live-pity{margin:14px auto;padding:13px 14px;border-radius:13px;border:1px solid #4a3a48;background:#201921;display:grid;grid-template-columns:1fr auto;align-items:center;gap:8px 14px;text-align:left;max-width:480px;color:white}
+.pm-live-pity>div:first-child b{display:block;font-size:14px}.pm-live-pity small{display:block;color:#bfb3bd;font-size:11px;line-height:1.4}.pm-live-pity strong{font-size:18px;color:#ffa6b5;font-variant-numeric:tabular-nums}.pm-live-track{grid-column:1/-1;background:#44333f;height:7px;border-radius:99px;overflow:hidden}.pm-live-track i{display:block;height:100%;background:linear-gradient(90deg,#ed567a,#ffc1b7);border-radius:99px;transition:width .2s}.pm-live-pity>small{grid-column:1/-1}.pm-detail .pm-live-pity{margin:12px 0}#stage .pm-live-pity{margin-top:20px;max-width:360px}
+</style>
+<script id="pm-reliability-fix-js">
+/* PokéMaster Set — fiabilité des ouvertures, pity et taux de drop (21 octobre 2026).
+   Une seule validation par booster déchiré, aucune validation à l'achat. */
+(() => {
+ 'use strict';
+ const RATES = Object.freeze({double:.08,AR:.02,SAR:.006,secret:.001});
+ const HIT_TIERS = ['double','AR','SAR','secret'];
+ let session = 0;
+ const choose = a => a[Math.floor(Math.random()*a.length)];
+ const setKey = () => cur?.s?.pmSourceId || cur?.s?.id;
+ const stage = () => document.getElementById('stage');
+ const poolHits = cards => {
+   const c = cards.filter(x=>x&&x.tier!=='unknown'&&!x.pmEnergy);
+   const premium=c.filter(x=>pmIsPityHit(x));
+   if(premium.length) return {items:premium,kind:'premium'};
+   const holos=c.filter(x=>x.tier==='holo');
+   if(holos.length)return {items:holos,kind:'holo'};
+   const rare=c.filter(x=>x.tier==='rare');
+   return {items:rare,kind:'rare'};
+ };
+ const isHit = (c,cards) => {
+   if(pmIsPityHit(c))return true;
+   const h=poolHits(cards);
+   return h.kind!=='premium'&&h.items.some(x=>x.id===c?.id);
+ };
+ const pityRecord = id => {
+   const b=pmBalanceState();
+   b.pityBySet??={};b.noNew??={};
+   b.pityBySet[id]=Math.max(0,Math.min(PM_PITY_LIMIT-1,Math.floor(Number(b.pityBySet[id])||0)));
+   return b;
+ };
+ const setPity = (id, cards, drawn, prevOwned) => {
+   const b=pityRecord(id);
+   b.pityBySet[id]=drawn.some(c=>isHit(c,cards))?0:Math.min(PM_PITY_LIMIT-1,b.pityBySet[id]+1);
+   b.noNew[id]=drawn.some(c=>!c.pmEnergy&&!prevOwned.has(c.id))?0:(b.noNew[id]||0)+1;
+   S.pmPity=b.pityBySet[id]; // Compatibilité des anciens profils.
+ };
+ const weightedPick = (arr,used) => {
+   if(!arr.length)return null;
+   const fresh=arr.filter(c=>!used.has(c.id));const a=fresh.length?fresh:arr;
+   const weights=a.map(c=>S.chase?.[c.id]?1.5:1);
+   let r=Math.random()*weights.reduce((s,n)=>s+n,0);
+   for(let i=0;i<a.length;i++)if((r-=weights[i])<=0)return a[i];
+   return a[a.length-1];
+ };
+ const take = (out,types,eligible) => {
+   const used=new Set(out.map(x=>x.id));
+   const a=eligible.filter(c=>types.includes(c.tier));
+   const c=weightedPick(a.length?a:eligible,used);
+   if(c)out.push(c);
+ };
+ const rateFor = (tier) => {
+   let r=RATES[tier]||0;
+   const ch=(typeof pmsProgress==='function')?pmsProgress():null;
+   if(ch?.charmRemaining && r){
+     // Bonus du charme sur la probabilité de hit (plafond raisonnable).
+     const boost=ch.activeCharm===15?2.5:ch.activeCharm===10?2:1.75;
+     r=Math.min(.5,r*boost);
+   }
+   return r;
+ };
+ const standardDraw = (cards,god=false) => {
+   const eligible=cards.filter(c=>c.tier!=='unknown'&&!c.pmEnergy);
+   if(!eligible.length)throw Error('Aucune carte avec une rareté connue dans cette série.');
+   const h=poolHits(eligible);
+   if(god){
+     const distinct=[...new Map(h.items.map(c=>[c.id,c])).values()];
+     if(h.kind==='premium'&&distinct.length>=6){
+       const out=[],used=new Set();
+       for(let i=0;i<6;i++){
+         const remaining=distinct.filter(c=>!used.has(c.id));
+         const tiers=HIT_TIERS.filter(t=>remaining.some(c=>c.tier===t));
+         const sum=tiers.reduce((n,t)=>n+(CONFIG.godSlot[t]||1),0);
+         let r=Math.random()*sum,tier=tiers[0];
+         for(const t of tiers){r-=CONFIG.godSlot[t]||1;if(r<=0){tier=t;break}}
+         const c=weightedPick(remaining.filter(c=>c.tier===tier),used);
+         if(!c)throw Error('God Pack incomplet');out.push(c);used.add(c.id);
+       }
+       return out;
+     }
+     god=false;
+   }
+   const normals=eligible.filter(c=>['common','uncommon','rare','holo'].includes(c.tier) && (h.kind==='premium'||!h.items.some(x=>x.id===c.id)));
+   const base=normals.length?normals:eligible;
+   const out=[];
+   for(const types of [['common'],['common'],['common','uncommon'],['uncommon','common'],['uncommon','rare','holo']])take(out,types,base);
+   while(out.length<5)take(out,['common','uncommon','rare','holo'],base);
+   const r=Math.random();let cumulative=0, special=null;
+   for(const tier of ['secret','SAR','AR','double']){
+     cumulative+=eligible.some(c=>c.tier===tier)?rateFor(tier):0;
+     if(r<cumulative){special=weightedPick(eligible.filter(c=>c.tier===tier),new Set(out.map(x=>x.id)));break}
+   }
+   // Si aucun hit moderne n'existe, les holos (ou, à défaut, les rares)
+   // servent de hits vintage avec la fréquence de base de 8 %.
+   if(!special && h.kind!=='premium' && h.items.length && r<rateFor('double')){
+     special=weightedPick(h.items,new Set(out.map(x=>x.id)));
+   }
+   if(special)out.push(special);else take(out,['rare','holo','uncommon','common'],base);
+   while(out.length<6)take(out,['common','uncommon','rare','holo'],base);
+   return out;
+ };
+ const finalDraw = (cards,god=false) => {
+   const id=setKey(),h=poolHits(cards);
+   let out=id==='30th'?pm30Draw(cards):standardDraw(cards,god);
+   const pityBefore=pityRecord(id).pityBySet[id];
+   if(pityBefore>=PM_PITY_LIMIT-1 && !out.some(c=>isHit(c,cards)) && h.items.length){
+     // Le 20e booster OUVERT garantit une carte du meilleur groupe disponible.
+     const used=new Set(out.map(c=>c.id));
+     const hit=weightedPick(h.items,used);
+     if(hit){const slot=id==='30th'?3:out.length-1;out[slot]=hit;}
+   }
+   // La garantie de nouvelle carte n'ajoute pas de hits hors taux de drop.
+   const bb=pityRecord(id),safeSlot=out.findIndex(c=>!isHit(c,cards));
+   if(safeSlot>=0&&(bb.noNew[id]||0)>=9&&!out.some(c=>!c.pmEnergy&&!S.owned[c.id])){
+     const newNormals=cards.filter(c=>!c.pmEnergy&&!S.owned[c.id]&&!out.some(x=>x.id===c.id)&&!isHit(c,cards));
+     if(newNormals.length)out[safeSlot]=choose(newNormals);
+   }
+   return out;
+ };
+ const pityHtml = id => {
+   const b=pityRecord(id),n=b.pityBySet[id],left=PM_PITY_LIMIT-n;
+   return `<div class="pm-live-pity"><div><b>Pity de cette extension</b><small>Progression à chaque booster ouvert, jamais à l'achat.</small></div><strong>${n} / ${PM_PITY_LIMIT}</strong><div class="pm-live-track"><i style="width:${n/PM_PITY_LIMIT*100}%"></i></div><small>${left===1?'Prochaine ouverture : hit garanti':`Hit garanti au plus tard dans ${left} ouverture${left>1?'s':''}`}</small></div>`;
+ };
+ const originalDetail = pmShopDetail;
+ pmShopDetail=function(){
+   originalDetail();
+   const aside=document.getElementById('pm-shop-detail');
+   if(!aside||!pmNewShopSelected)return;
+   const actions=aside.querySelector('.pm-detail-actions');
+   if(actions){const block=document.createElement('div');block.innerHTML=pityHtml(pmNewShopSelected);actions.before(block.firstElementChild);}
+ };
+ // Le chargement en cours ne peut plus rouvrir/fermer un autre lot.
+ const normalizeLoaded = (data,id) => id==='ALL'
+   ? {s:{...data.s,id:'ALL',pmSourceId:data.s.id,name:'Booster gratuit · '+data.s.name},cards:data.cards}
+   :data;
+ openBooster=async function(id){
+   if(batchState)return toast('Un lot est déjà en cours. Termine-le avant de changer de booster.');
+   if(locked(SETS.find(s=>s.id===id)||BASE))return toast('Extension verrouillée.');
+   if((S.stock[id]||0)<1)return toast('Aucun booster en stock.');
+   const token=++session,view=stage();view.className='';view.innerHTML=loader;
+   try{
+     const d=normalizeLoaded(await poolFor(id,prog),id);
+     if(token!==session)return;
+     if((S.stock[id]||0)<1){view.className='hidden';return toast('Stock épuisé.');}
+     cur=d;rv=null;tearing=false;packView();
+   }catch(e){if(token!==session)return;view.className='hidden';toast('Impossible de charger le booster. Vérifie ta connexion.');}
+ };
+ openMany=async function(id,n){
+   n=Math.max(1,Math.floor(Number(n)||1));
+   if(n===1)return openBooster(id);
+   if(batchState)return toast('Termine le lot en cours avant d’en ouvrir un autre.');
+   if(locked(SETS.find(s=>s.id===id)||BASE))return toast('Extension verrouillée.');
+   if((S.stock[id]||0)<n)return toast(`Il te faut ${n} boosters en stock.`);
+   const token=++session,view=stage();view.className='';view.innerHTML=loader;
+   try{
+     const d=normalizeLoaded(await poolFor(id,prog),id);
+     if(token!==session)return;
+     if((S.stock[id]||0)<n){view.className='hidden';return toast('Stock insuffisant.');}
+     if(!d?.cards?.some(c=>c && c.tier && c.tier!=='unknown' && !c.pmEnergy)) throw Error('Raretés de cartes indisponibles');
+     batchState={id,total:n,done:0,results:[],pool:d,skip:false};cur=d;rv=null;tearing=false;packView();
+   }catch(e){
+     if(token!==session)return;
+     batchState=null;tearing=false;view.className='';
+     console.warn('[PokéMaster lots] Chargement interrompu sans consommation de booster',e);
+     view.innerHTML=`<div class="sbox pm-lot-error"><h2>Catalogue indisponible</h2><p>Les cartes de cette extension n'ont pas pu être chargées. Aucun booster n'a été utilisé.</p><div class="pm-safe-next"><button type="button" onclick="openMany('${id}',${n})">Réessayer le lot</button><button class="g" type="button" onclick="closeStage()">Retour à la boutique</button></div></div>`;
+   }
+ };
+ tear=function(){
+   if(tearing||!cur?.cards||!document.getElementById('pack')||stage().classList.contains('hidden'))return;
+   const id=setKey(),stockId=cur.s.id,b=batchState;
+   if(b && (b.id!==stockId||b.done>=b.total))return;
+   if((S.stock[stockId]||0)<1)return toast('Aucun booster restant en stock.');
+   tearing=true;let drawn,god=false;
+   try{
+     const h=poolHits(cur.cards);
+     god=id!=='30th'&&h.kind==='premium'&&new Set(h.items.map(c=>c.id)).size>=6&&Math.random()<CONFIG.godPack;
+     drawn=finalDraw(cur.cards,god);
+     if(god && (new Set(drawn.map(c=>c.id)).size!==drawn.length||!drawn.every(c=>pmIsPityHit(c))))god=false;
+     if(drawn.length!==6||drawn.some(c=>!c?.id))throw Error('Tirage incomplet');
+   }catch(e){tearing=false;return toast('Tirage impossible : '+e.message);}
+   // Transaction unique : stock, collection, XP, pity et résultats du lot.
+   const existing=new Set(Object.keys(S.owned||{}).filter(k=>S.owned[k]>0));
+   S.stock[stockId]--;S.st.open=(S.st.open||0)+1;
+   if(id==='30th')S.st.pm30open=(S.st.pm30open||0)+1;
+   if(god)S.st.godp=(S.st.godp||0)+1;
+   for(const c of drawn){if(c.pmEnergy)continue;S.owned[c.id]=(S.owned[c.id]||0)+1;S.meta[c.id]=mc(c)}
+   setPity(id,cur.cards,drawn,existing);
+   // Conserver les missions, les nouveautés et l'historique de collection existants.
+   const newIds=drawn.filter(c=>!c.pmEnergy&&!existing.has(c.id));
+   if(typeof pmNewCards==='function')for(const c of newIds)pmNewCards()[c.id]=true;
+   if(typeof soloStat==='function'){
+     soloStat('open',1);soloStat('new',new Set(newIds.map(c=>c.id)).size);
+     soloStat('rare',drawn.filter(c=>['rare','holo','double','AR','SAR','secret'].includes(c.tier)).length);
+   }
+   if(typeof soloInit==='function'){
+     const x=soloInit();
+     x.history.unshift(...drawn.filter(c=>['AR','SAR','secret'].includes(c.tier)).map(c=>({id:c.id,name:c.name,tier:c.tier,at:Date.now()})));
+     x.history=x.history.slice(0,50);
+   }
+   if(typeof pmsConsumeCharm==='function')pmsConsumeCharm(1);
+   if(b){b.results.push({cards:drawn,god});b.done++;}
+   rv={cards:drawn,i:0,flipped:false,busy:false,god};
+   save();
+   const elem=document.getElementById('pack'),startSession=session,serial=window.pmActivePackSerial;
+   elem?.classList.add('tear');
+   setTimeout(()=>{
+     if(startSession!==session||serial!==window.pmActivePackSerial||stage().classList.contains('hidden'))return;
+     tearing=false;god?godIntro():reveal();
+   },350);
+ };
+ // La fin de chaque booster attend un clic explicite, jamais un minuteur.
+ batchNext=function(){
+   const b=batchState;if(!b||tearing)return;
+   if(b.done>=b.total){
+     const all=b.results.flatMap(x=>x.cards),hits=all.filter(c=>isHit(c,b.pool.cards));
+     const gods=b.results.filter(x=>x.god).length;
+     batchState=null;rv=null;
+     stage().className='';
+     stage().innerHTML=`<div class="sbox pm-batch-recap"><h2>${b.total} boosters ouverts${gods?' · GOD PACK !':''}</h2><p>${all.length} cartes obtenues · ${hits.length} hit(s) · ${gods} God Pack(s)</p><div class="sum">${(hits.length?hits.slice(0,40):all.slice(-12)).map(c=>`<div class="tc">${cimg(c)}<small>${esc(c.name)}</small></div>`).join('')}</div>${hits.length>40?`<p>+${hits.length-40} autres hits dans ta collection.</p>`:''}<p><button type="button" onclick="closeStage()">Retour à la boutique</button></p></div>`;
+     return;
+   }
+   if((S.stock[b.id]||0)<1){toast('Stock épuisé. Fin du lot.');b.total=b.done;return batchNext()}
+   cur=b.pool;rv=null;packView();
+ };
+ summary=function(){
+   if(tearing)return;
+   if(batchState){if(!rv||rv.pmHandled)return;rv.pmHandled=true;pmCinemaSequence++;batchNext();return;}
+   if(!rv?.cards?.length)return;
+   const cards=rv.cards,stockId=cur.s.id;
+   stage().className='';
+   stage().innerHTML=`<div class="sbox"><h2>${rv.god?'GOD PACK !':'Ton ouverture'}</h2><div class="sum">${cards.map(c=>`<div class="tc">${cimg(c,'high')}<div><b>${esc(c.name)}</b><br><span class="tag t-${c.tier}">${TIERS[c.tier]||'Carte'}</span><br>${value(c)} PC</div></div>`).join('')}</div>${pityHtml(setKey())}<p><button type="button" onclick="openBooster('${stockId}')" ${(S.stock[stockId]||0)>0?'':'disabled'}>Ouvrir un autre booster (${S.stock[stockId]||0} en stock)</button> <button class="g" type="button" onclick="closeStage()">Retour à la boutique</button></p></div>`;
+ };
+ const oldPackView=packView;
+ packView=function(){
+   oldPackView();
+   const b=batchState,el=stage().querySelector('.sbox');
+   if(el){
+     el.insertAdjacentHTML('beforeend',pityHtml(setKey()));
+     const hint=el.querySelector('p');if(hint)hint.textContent=b?`Lot ${b.done+1}/${b.total} · touche le booster pour l’ouvrir · ${S.stock[b.id]} en stock`:`Touche le booster pour l’ouvrir · ${S.stock[cur.s.id]} en stock`;
+   }
+ };
+ closeStage=function(){
+   if(batchState && batchState.done<batchState.total){
+     if(!confirm(`Arrêter le lot ? ${batchState.done} booster(s) ouvert(s), les autres restent dans ton stock.`))return;
+   }
+   session++;window.pmActivePackSerial++;
+   if(typeof pmCinemaSequence!=='undefined')pmCinemaSequence++;
+   if(typeof pmSuspenseTimer!=='undefined')clearTimeout(pmSuspenseTimer);
+   if(typeof pmFxTimer!=='undefined')clearTimeout(pmFxTimer);
+   batchState=null;rv=null;tearing=false;document.body.style.overflow='';stage().className='hidden';
+   if(vw==='shop'&&typeof pmShopDetail==='function')pmShopDetail();
+ };
+ const oldRank=pmCinemaRank;
+ pmCinemaRank=function(c){
+   const rank=oldRank(c);if(rank||!cur?.cards)return rank;
+   const h=poolHits(cur.cards);
+   if(h.kind!=='premium'&&h.items.some(x=>x.id===c.id))return {name:h.kind==='holo'?'HIT VINTAGE • HOLO':'RARETÉ VINTAGE',css:'',color:'#78c8ff',power:1};
+   return null;
+ };
+ const chanceFor = (c) => {
+   const h=poolHits(cur?.cards||[]);
+   const tier=c?.tier;
+   if(h.kind!=='premium'&&h.items.some(x=>x.id===c.id))return .08/Math.max(1,h.items.length);
+   const available=(cur?.cards||[]).filter(x=>x.tier===tier);
+   return (RATES[tier]||0)/Math.max(1,available.length);
+ };
+ const showChance = c => {
+   const pct=chanceFor(c)*100;
+   return pct<.01?pct.toFixed(4).replace('.',',')+' %':pct.toFixed(2).replace('.',',')+' %';
+ };
+ const oldLabel=pmCinemaSetLabel;
+ pmCinemaSetLabel=function(el,rank,card,series){
+   oldLabel(el,rank,card,series);
+   const c=card||rv?.cards?.[rv.i];if(!el||!c)return;
+   const chip=el.querySelector('.pm-drop-chip');
+   if(chip)chip.textContent='Chance de base de cette carte : '+showChance(c);
+   const odds=stage().querySelector('#pm-hit-odds');
+   if(odds){const strong=odds.querySelector('strong'),small=odds.querySelector('small');if(strong)strong.textContent=showChance(c);if(small)small.textContent='Estimation hors pity, Luck Charm et God Pack · taux internes du jeu, non officiels.';}
+ };
+ // Table des probabilités exactes du tirage de base, jamais celles de CONFIG.slots obsolètes.
+ pmDropRates=function(){probas(setKey())};
+ probas=async function(id){
+   const modal=document.getElementById('modal');id=id||(SETS[0]?.id);
+   modal.className='';modal.innerHTML=`<div class="mb" style="display:block"><button class="g x" onclick="pmCloseRates()">Fermer</button><h2>Taux de drop des boosters</h2><select id="pm-rates-set"></select><div id="pm-rates-body">Chargement…</div></div>`;
+   const sel=modal.querySelector('#pm-rates-set');
+   sel.innerHTML=SETS.map(s=>`<option value="${esc(s.id)}" ${id===s.id?'selected':''}>${esc(s.name)}</option>`).join('');
+   sel.onchange=()=>probas(sel.value);
+   try{
+     const d=await loadSet(id);if(!modal.isConnected||modal.classList.contains('hidden'))return;
+     const h=poolHits(d.cards),out=modal.querySelector('#pm-rates-body');if(!out)return;
+     const tiers=['double','AR','SAR','secret'].map(t=>({tier:t,c:d.cards.filter(c=>c.tier===t).length,r:RATES[t]}));
+     const vintage=h.kind!=='premium'&&h.items.length;
+     const rows=tiers.filter(x=>x.c).map(x=>`<tr><td>${esc(TIERS[x.tier])}</td><td>${x.c}</td><td>${(x.r*100).toFixed(2).replace('.',',')} %</td></tr>`);
+     if(vintage)rows.push(`<tr><td>${h.kind==='holo'?'Holo vintage':'Rare vintage'}</td><td>${h.items.length}</td><td>8,00 %</td></tr>`);
+     const total=tiers.reduce((a,x)=>a+(x.c?x.r:0),0)+(vintage?.08:0);
+     out.innerHTML=`<p>Probabilités de <b>jeu, non officielles</b>, par booster. Tirage de 6 cartes : une place spéciale, cinq cartes ordinaires.</p><table><tr><th>Type de hit</th><th>Cartes</th><th>Chance / booster</th></tr>${rows.join('')||'<tr><td colspan="3">Aucun hit classé disponible</td></tr>'}</table><p><b>Chance totale d’un hit naturel : ${(total*100).toFixed(2).replace('.',',')} %</b>${total?` · en moyenne 1 sur ${(1/total).toFixed(1).replace('.',',')} boosters`:''}.</p><p><b>Pity de cette extension :</b> ${pityRecord(id).pityBySet[id]}/${PM_PITY_LIMIT} sans hit. Le 20e booster <u>ouvert</u> sans hit garantit une rareté disponible, et le compteur revient à zéro après un hit. Aucun effet à l’achat.</p><p>God Pack : ${(CONFIG.godPack*100).toFixed(1).replace('.',',')} % si au moins six hits premium différents sont disponibles. Un Luck Charm actif modifie les taux de base affichés.</p>`;
+   }catch(e){const out=modal.querySelector('#pm-rates-body');if(out)out.textContent='Taux indisponibles : données des cartes non chargées.';}
+ };
+ window.pmReliabilityTest={rates:RATES,poolHits,standardDraw,finalDraw,isHit,session:()=>session};
+})();
+
+</script><style id="pm-vitrine-lot-style">
+.pm-booster-cards.pm-art-awaiting .pm-art-slot{width:42%;height:85%;display:grid;place-items:center;border:1px solid #ffffff55;border-radius:4px;background:linear-gradient(145deg,#c6ced91c,#fff4);color:#ffdd76;font-size:17px;box-shadow:0 4px 14px #0005}
+.pm-art-awaiting .pm-art-slot:nth-child(1){transform:rotate(-12deg) translateX(5px)}
+.pm-art-awaiting .pm-art-slot:nth-child(2){transform:translateY(-5px);z-index:1}
+.pm-art-awaiting .pm-art-slot:nth-child(3){transform:rotate(12deg) translateX(-5px)}
+.pm-batch-protect{display:flex;justify-content:space-between;align-items:center;gap:12px;width:min(350px,95vw);margin:0 auto 12px;padding:9px 12px;border-radius:10px;background:#1f2235;border:1px solid #555c7d;color:#fff;font-size:12px;font-weight:700}
+.pm-batch-protect strong{font-size:17px;color:#ffcb05}
+.pm-lot-error{width:min(450px,95vw);margin:0 auto}.pm-lot-error p{line-height:1.5}.pm-lot-error .pm-safe-next{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+</style>
+<script id="pm-vitrine-lots-fix">
+/* POKÉMASTER SET — correctif vitrines toujours visibles + lots robustes, 21/10/2026 */
+(function(){
+'use strict';
+// Les trois illustrations sont mémorisées pour être visibles dès les visites suivantes.
+const STORE='pm_pokemon_vitrines_v2';
+const artPromises=new Map(),queue=[];
+let active=0,lotAction=false, visualEpoch=0;
+const MAX_ACTIVE=3;
+const pokemonCategory=c=>/^(pokemon|pokémon)$/i.test(String(c?.category||'').trim());
+const nonPokemon=c=>/trainer|dresseur|supporter|item|objet|tool|outil|stadium|stade|energy|énergie|fossil|fossile/i.test(String(c?.category||''));
+const artHref=c=>pmFullImage(c);
+const imageFallback=(img)=>{
+  if(img.dataset.low!=='1' && /\/high\.webp(?:\?|$)/.test(img.src)){
+    img.dataset.low='1';img.src=img.src.replace('/high.webp','/low.webp');return;
+  }
+  img.style.opacity='.18'; img.setAttribute('title','Illustration temporairement indisponible');
+};
+window.pmArtFallback=imageFallback;
+function readArt(){try{const raw=JSON.parse(localStorage.getItem(STORE)||'{}');if(raw&&typeof raw==='object')for(const [id,arr] of Object.entries(raw))if(Array.isArray(arr)&&arr.length>=3)pmArtCache.set(id,arr.filter(x=>x?.image));}catch(e){}}
+function saveArt(){try{const data={};for(const [id,arr] of pmArtCache)if(arr.length>=3)data[id]=arr.slice(0,3).map(c=>({id:c.id,name:c.name,image:c.image,category:c.category||'Pokemon',tier:c.tier||''}));localStorage.setItem(STORE,JSON.stringify(data));}catch(e){/* cache facultatif */}}
+readArt();
+// Ne jamais afficher des numéros de cartes inventés, pouvant pointer vers des Objets.
+const previousBooster=pmBooster;
+pmBooster=function(s,extra=''){
+  let html=previousBooster(s,extra);
+  const id=s?.id==='ALL'?(pmFeaturedSet()?.id||''):s?.id;
+  if(!id||pmArtCache.get(id)?.length>=3)return html;
+  return html.replace(/<span class="pm-booster-cards">[\s\S]*?<\/span><span class="pm-booster-glare">/,
+    '<span class="pm-booster-cards pm-art-awaiting"><span class="pm-art-slot">✦</span><span class="pm-art-slot">✦</span><span class="pm-art-slot">✦</span></span><span class="pm-booster-glare">');
+};
+// Un appel léger au catalogue, puis vérification des catégories sur un petit groupe
+// de cartes; pas de chargement de centaines de raretés pour chaque booster affiché.
+async function catalog(id){
+  if(cache[id]?.cards?.length)return cache[id].cards;
+  const r=await fetch(`${API}/sets/${encodeURIComponent(id)}`);
+  if(!r.ok)throw Error('Catalogue HTTP '+r.status);
+  const d=await r.json();return d.cards||[];
+}
+const rarityScore=c=>({secret:100,SAR:90,AR:80,double:70,holo:60,rare:45,uncommon:15,common:5})[c?.tier]||0;
+const sortId=c=>{const str=String(c?.localId||c?.id?.split('-').pop()||'');return Number(str.replace(/[^\d]/g,''))||0};
+async function pickIllustrations(s){
+  const id=s.id;
+  const entries=(await catalog(id)).filter(c=>c&&c.image&&!nonPokemon(c));
+  if(!entries.length)throw Error('Aucune carte illustrée dans le catalogue');
+  let rm={};try{rm=JSON.parse(localStorage.getItem('wmr-'+id)||'{}')}catch(e){}
+  const prepared=entries.map(c=>({ ...c,
+    tier:c.tier||(c.rarity?tierOf(c.rarity):rm[c.id]?tierOf(rm[c.id]):''),
+    category:c.category||''}));
+  const verified=prepared.filter(pokemonCategory).sort((a,b)=>rarityScore(b)-rarityScore(a)||sortId(b)-sortId(a));
+  const candidates=prepared.filter(c=>!nonPokemon(c));
+  // Favoriser le haut du set (raretés illustrées) sans présumer que toutes
+  // les cartes de fin d'extension sont des Pokémon.
+  const high=[...candidates].sort((a,b)=>rarityScore(b)-rarityScore(a)||sortId(b)-sortId(a));
+  const sample=[...new Map([
+    ...verified,
+    ...high.slice(0,14),
+    ...candidates.slice(Math.floor(candidates.length*.40),Math.floor(candidates.length*.80)).slice(0,10)
+  ].map(c=>[c.id,c])).values()].slice(0,24);
+  const checked=[];
+  // 3 requêtes simultanées au maximum pour éviter de saturer l'API.
+  let index=0;
+  await Promise.all(Array.from({length:Math.min(3,sample.length)},async()=>{
+    while(index<sample.length){
+      const c=sample[index++];
+      if(pokemonCategory(c)||c.hp||c.types){checked.push(c);continue}
+      try{
+        const response=await fetch(`${API}/cards/${encodeURIComponent(c.id)}`);
+        if(!response.ok)continue;
+        const detail=await response.json();
+        if(pokemonCategory(detail)&&!nonPokemon(detail)){
+          checked.push({...c,...detail, image:detail.image||c.image, tier:detail.rarity?tierOf(detail.rarity):c.tier,category:'Pokemon'});
+        }
+      }catch(e){}
+      if(checked.length>=6)break;
+    }
+  }));
+  // Les cartes Objet et Dresseur ne sont JAMAIS utilisées en remplacement.
+  const unique=[...new Map(checked.filter(c=>c.image&&(!c.category||pokemonCategory(c))).map(c=>[c.id,c])).values()];
+  unique.sort((a,b)=>rarityScore(b)-rarityScore(a)||sortId(b)-sortId(a));
+  if(unique.length<3){
+    // Si l'API ne répond pas aux détails, reprendre uniquement les Pokémon
+    // explicitement marqués dans la liste, jamais les cartes d'objets.
+    for(const c of verified)if(!unique.some(x=>x.id===c.id)&&c.image)unique.push(c);
+  }
+  return unique.slice(0,3);
+}
+function repaint(id){
+  const picks=pmArtCache.get(id)||[];if(picks.length<3)return;
+  const visuals=document.querySelectorAll('[data-pm-art]');
+  visuals.forEach(node=>{
+    if(node.dataset.pmArt!==id)return;
+    const holder=node.querySelector('.pm-booster-cards');if(!holder)return;
+    if(holder.querySelectorAll('[data-pm-image]').length!==3){
+      holder.classList.remove('pm-art-awaiting');
+      holder.innerHTML=picks.map((c,i)=>`<img loading="eager" decoding="async" src="${esc(artHref(c))}" data-pm-image="${i}" alt="${esc(c.name)}" onerror="pmArtFallback(this)">`).join('');
+    } else holder.querySelectorAll('[data-pm-image]').forEach((img,i)=>{
+      const u=artHref(picks[i]);if(!u)return;
+      if(img.getAttribute('src')!==u){img.src=u;img.dataset.low='';}
+      img.alt=picks[i].name;
+    });
+  });
+  document.querySelectorAll('[data-pm-hero]').forEach((img,i)=>{
+    if(img.dataset.pmHero!==id)return;
+    const index=[...document.querySelectorAll(`[data-pm-hero="${CSS.escape(id)}"]`)].indexOf(img);
+    const c=picks[index%3];if(c){img.src=artHref(c);img.alt=c.name;}
+  });
+  if(pmNewShopSelected===id){
+    const target=document.getElementById('pm-new-hit-cards');
+    if(target)target.innerHTML=picks.map(c=>`<img loading="eager" src="${esc(artHref(c))}" alt="${esc(c.name)}" title="${esc(c.name)}" onerror="pmArtFallback(this)">`).join('');
+  }
+}
+function enqueueArt(s){
+  if(!s?.id||s.id==='ALL')return Promise.resolve([]);
+  const old=pmArtCache.get(s.id);
+  if(old?.length>=3 && old.slice(0,3).every(c=>pokemonCategory(c)||c.hp||c.types)){
+    repaint(s.id);return Promise.resolve(old);
+  }
+  if(old)pmArtCache.delete(s.id);
+  if(artPromises.has(s.id))return artPromises.get(s.id);
+  const p=new Promise(resolve=>{queue.push({s,resolve});drain()});artPromises.set(s.id,p);return p;
+}
+function drain(){
+  while(active<MAX_ACTIVE&&queue.length){
+    const {s,resolve}=queue.shift();active++;
+    pickIllustrations(s).then(cards=>{
+      if(cards.length===3){pmArtCache.set(s.id,cards);saveArt();repaint(s.id);}
+      resolve(cards);
+    }).catch(e=>{console.warn('[PokéMaster vitrines]',s.id,e);resolve([])}).finally(()=>{active--;artPromises.delete(s.id);drain()});
+  }
+}
+let observer;
+function hydrateVisible(){
+  if(typeof IntersectionObserver==='undefined'){
+    document.querySelectorAll('[data-pm-art]').forEach(node=>enqueueArt(SETS.find(s=>s.id===node.dataset.pmArt)));
+    return;
+  }
+  observer?.disconnect();observer=new IntersectionObserver(entries=>{
+    for(const e of entries){if(!e.isIntersecting)continue;
+      observer.unobserve(e.target);
+      const id=e.target.dataset.pmArt;if(id)enqueueArt(SETS.find(s=>s.id===id));
+    }
+  },{rootMargin:'420px 0px'});
+  document.querySelectorAll('[data-pm-art]').forEach(node=>{
+    if(pmArtCache.get(node.dataset.pmArt)?.length>=3)repaint(node.dataset.pmArt);
+    else observer.observe(node);
+  });
+}
+// Désactive aussi les anciennes fonctions asynchrones qui pouvaient peindre
+// des cartes Objet après notre sélection de Pokémon.
+pmLoadIllustrations=function(s){return enqueueArt(s)};
+pmPaintArt=function(id,picks){
+  if(picks?.length>=3&&picks.slice(0,3).every(c=>pokemonCategory(c)||c.hp||c.types)){
+    if(!pmArtCache.has(id))pmArtCache.set(id,picks.slice(0,3));
+    repaint(id);
+  }
+};
+// Plus besoin de toucher un booster pour initialiser ses trois images.
+const oldHome=pmHome;
+pmHome=function(){oldHome();hydrateVisible()};
+const oldShopList=pmShopList;
+pmShopList=function(){oldShopList();hydrateVisible()};
+pmHydrateSet=async function(s){
+  const id=s?.id; if(!id)return;
+  if(pmArtCache.get(id)?.length>=3){repaint(id);return;}
+  await enqueueArt(s);repaint(id);
+};
+// Sécurisation des cycles de lot: toute ancienne cinématique est invalidée
+// AVANT que le prochain paquet soit affiché.
+const previousPackView=packView;
+packView=function(){
+  if(typeof pmCinemaSequence!=='undefined')pmCinemaSequence++;
+  if(typeof pmSuspenseTimer!=='undefined')clearTimeout(pmSuspenseTimer);
+  if(typeof pmFxTimer!=='undefined')clearTimeout(pmFxTimer);
+  try{previousPackView();paintLotProgress();}
+  catch(e){lotFailure(e,'préparation du booster');}
+};
+function paintLotProgress(){
+  const el=document.querySelector('#stage .sbox');
+  if(!batchState||!el)return;
+  const b=batchState;
+  el.querySelector('.pm-batch-protect')?.remove();
+  el.insertAdjacentHTML('afterbegin',`<div class="pm-batch-protect" role="status"><span>OUVERTURE EN LOT</span><strong>${Math.min(b.done+1,b.total)} / ${b.total}</strong></div>`);
+}
+function lotFailure(e,context){
+  console.error('[PokéMaster lots] '+context,e);
+  tearing=false;lotAction=false;
+  const el=document.getElementById('stage');if(!el)return;
+  el.className='';
+  const b=batchState;
+  el.innerHTML=`<div class="sbox pm-lot-error"><h2>Ouverture interrompue</h2><p>Une erreur a été rencontrée pendant ${esc(context)}. Ton lot reste accessible et les boosters non ouverts restent en stock.</p><div class="pm-safe-next"><button type="button" onclick="pmResumeLot()">Reprendre le lot</button><button type="button" class="g" onclick="closeStage()">Arrêter le lot</button></div>${b?`<small>${b.done} / ${b.total} boosters déjà ouverts.</small>`:''}</div>`;
+}
+window.pmResumeLot=function(){
+  if(!batchState)return closeStage();
+  const b=batchState;
+  if(rv?.cards && !rv.pmHandled){try{return reveal()}catch(e){return lotFailure(e,'révélation')}}
+  if(b.done>=b.total)return batchNext();
+  cur=b.pool;tearing=false;packView();
+};
+const previousTear=tear;
+tear=function(){
+  if(lotAction)return;
+  const b=batchState;
+  if(!b)return previousTear();
+  const before=b.done;
+  try{
+    lotAction=true;
+    previousTear();
+    // L'animation est asynchrone : ne verrouiller que l'appel synchrone,
+    // tearing et les identifiants de session assurent la suite.
+  }catch(e){return lotFailure(e,'le tirage du booster '+(before+1));}
+  finally{lotAction=false;}
+};
+const previousReveal=reveal;
+reveal=function(){
+  try{previousReveal();paintLotProgress();}
+  catch(e){if(batchState)return lotFailure(e,'la révélation');throw e;}
+};
+const previousSummary=summary;
+summary=function(){
+  try{previousSummary();paintLotProgress();}
+  catch(e){if(batchState)return lotFailure(e,'le passage au booster suivant');throw e;}
+};
+const previousBatchNext=batchNext;
+batchNext=function(){
+  try{previousBatchNext();paintLotProgress();}
+  catch(e){if(batchState){if(rv)rv.pmHandled=false;return lotFailure(e,'le changement de booster');}throw e;}
+};
+const previousOpenMany=openMany;
+openMany=async function(id,n){
+  const value=Math.max(1,Math.floor(Number(n)||1));
+  try{await previousOpenMany(id,value)}
+  catch(e){if(value>1)return lotFailure(e,'le chargement du lot');throw e}
+};
+// Les images en cache sont reprises avant même le premier clic.
+try{hydrateVisible();}catch(e){}
+window.pmVitrineDiagnostics={artCache:pmArtCache,load:enqueueArt,refresh:hydrateVisible};
+})();
+
 </script>
 </body></html>
